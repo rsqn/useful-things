@@ -1,10 +1,12 @@
-package tech.rsqn.useful.things.interchange;
+package tech.rsqn.useful.things.interchange.reactivex;
 
 import tech.rsqn.useful.things.identifiers.UIDHelper;
+import tech.rsqn.useful.things.interchange.Subscription;
 
 public class ReactiveXSubscription extends Subscription {
     private String id;
     private long startTs;
+    private rx.Subscription rxSubscription;
 
     public ReactiveXSubscription() {
         startTs = System.currentTimeMillis();
@@ -25,5 +27,13 @@ public class ReactiveXSubscription extends Subscription {
 
     public void setStartTs(long startTs) {
         this.startTs = startTs;
+    }
+
+    public rx.Subscription getRxSubscription() {
+        return rxSubscription;
+    }
+
+    public void setRxSubscription(rx.Subscription rxSubscription) {
+        this.rxSubscription = rxSubscription;
     }
 }
