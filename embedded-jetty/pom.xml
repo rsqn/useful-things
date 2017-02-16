@@ -8,7 +8,7 @@
         <version>1.0.9-SNAPSHOT</version>
     </parent>
 
-    <groupId>tech.rsqn</groupId>
+    <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>embedded-jetty</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
