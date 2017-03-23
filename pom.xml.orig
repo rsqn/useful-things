@@ -10,8 +10,13 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.10-SNAPSHOT</version>
+<<<<<<< HEAD
+    <version>1.0.9-SNAPSHOT</version>
     <packaging>pom</packaging>
+=======
+    <version>1.0.10-SNAPSHOT</version>
+    <packaging>jar</packaging>
+>>>>>>> 59ccd8f6e8588062ffeda2457bbe91885c759bf4
 
     <name>useful-things</name>
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
