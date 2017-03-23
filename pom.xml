@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,7 +11,7 @@
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
     <version>1.0.9-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>useful-things</name>
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
@@ -36,40 +37,21 @@
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
         <url>https://github.com/mandrewes/useful-things</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
-    <dependencies>
-        <!--Project Dependencies-->
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>1.1.6</version>
-        </dependency>
+    <properties>
+        <spring.version>4.3.2.RELEASE</spring.version>
+        <slf4j.version>1.7.21</slf4j.version>
+        <!-- Build  and test -->
+        <testng.version>6.9.10</testng.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.version>9.3.0.M1</jetty.version>
+    </properties>
 
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-
-        <!--Compile Dependencies-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.21</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!--Test Dependencies-->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.9.10</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
+    <modules>
+        <module>simple-utilities</module>
+        <module>embedded-jetty</module>
+    </modules>
 
 </project>
