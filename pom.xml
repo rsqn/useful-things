@@ -51,6 +51,8 @@
     <modules>
         <module>simple-utilities</module>
         <module>embedded-jetty</module>
+        <module>web-utilities</module>
+
     </modules>
 
 </project>
