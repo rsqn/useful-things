@@ -1,6 +1,6 @@
 package tech.rsqn.server;
 
-import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
@@ -73,6 +73,8 @@ public class EmbeddedJetty {
                 return;
             }
 
+            //http://stackoverflow.com/questions/26333846/configuring-embedded-jetty-9-for-x-forwarded-proto-with-spring-boot
+
             context.setDescriptor(webXml.getPath());
             context.setResourceBase(webDirectory.getPath());
             context.setContextPath(contextPath);
@@ -80,6 +82,16 @@ public class EmbeddedJetty {
             context.setThrowUnavailableOnStartupException(true);
             server.setHandler(context);
             WebSocketServerContainerInitializer.configureContext(context);
+
+            for (Connector connector : server.getConnectors()) {
+                ConnectionFactory connectionFactory = connector.getDefaultConnectionFactory();
+                if(connectionFactory instanceof HttpConnectionFactory) {
+                    HttpConnectionFactory defaultConnectionFactory = (HttpConnectionFactory) connectionFactory;
+                    HttpConfiguration httpConfiguration = defaultConnectionFactory.getHttpConfiguration();
+                    httpConfiguration.addCustomizer(new ForwardedRequestCustomizer());
+                }
+            }
+
             server.start();
             server.join();
         } catch (Exception e) {
