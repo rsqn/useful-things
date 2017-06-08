@@ -57,8 +57,6 @@ public class SearchResult {
                 return new Double(o2.getScore()).compareTo(o1.getScore());
             }
         });
-
-        System.out.println("yolo");
     }
 
     public void addMatch(SearchResultItem item) {
