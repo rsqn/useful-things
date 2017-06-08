@@ -15,10 +15,17 @@ public class LuceneIndex implements Index {
 
     private List<IndexEntry> data;
 
+    /**
+     *
+     */
     public LuceneIndex() {
         data = new ArrayList<>();
     }
 
+    /**
+     * nada
+     * @param entry
+     */
     @Override
     public void submit(IndexEntry entry) {
         data.add(entry);
