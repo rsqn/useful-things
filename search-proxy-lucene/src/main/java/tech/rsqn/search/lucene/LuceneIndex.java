@@ -1,4 +1,4 @@
-package tech.rsqn.search.reference;
+package tech.rsqn.search.lucene;
 
 import tech.rsqn.search.proxy.*;
 
