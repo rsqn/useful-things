@@ -1,4 +1,4 @@
-package tech.rsqn.search.reference;
+package tech.rsqn.search.lucene;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -11,12 +11,12 @@ import tech.rsqn.search.proxy.SearchResult;
  * Created by mandrewes on 8/6/17.
  */
 public class LuceneIndexTest {
-    tech.rsqn.search.reference.LuceneIndex index;
+    LuceneIndex index;
 
     @BeforeMethod
     public void setUp() throws Exception {
 
-        index = new tech.rsqn.search.reference.LuceneIndex();
+        index = new LuceneIndex();
 
     }
 
