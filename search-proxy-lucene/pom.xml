@@ -34,11 +34,11 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>tech.rsqn.useful-things</groupId>
-            <artifactId>search-proxy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>tech.rsqn.useful-things</groupId>-->
+            <!--<artifactId>search-proxy</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
 
         <!--Project Dependencies-->
         <dependency>
