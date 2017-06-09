@@ -188,10 +188,12 @@ public class LuceneIndex implements Index {
         mayRead();
 
         SearchResult ret = new SearchResult();
+        IndexReader reader = null;
+        IndexSearcher searcher = null;
 
         try {
-            IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
-            IndexSearcher searcher = new IndexSearcher(reader);
+            reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
+            searcher = new IndexSearcher(reader);
 
             Query luceneQuery = null;
 
@@ -218,6 +220,12 @@ public class LuceneIndex implements Index {
 
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                log.warn(e.getMessage(),e);
+            }
         }
 //        ret.normalize();
         return ret;
