@@ -199,14 +199,10 @@ public class LuceneIndex implements Index {
             for (SearchAttribute searchAttribute : query.getAttributes()) {
                 Query _q = new FuzzyQuery(new Term(searchAttribute.getName(), searchAttribute.getPattern()));
                 builder.add(_q, BooleanClause.Occur.SHOULD);
-                luceneQuery = _q;
-                break;
             }
-//            luceneQuery = builder.build();
+            luceneQuery = builder.build();
 
-//            luceneQuery = new FuzzyQuery(new Term("name", "nut butt"));
-
-            TopDocs results = searcher.search(luceneQuery, query.getLimit()*5);
+            TopDocs results = searcher.search(luceneQuery, query.getLimit());
             ScoreDoc[] hits = results.scoreDocs;
             int numTotalHits = results.totalHits;
             log.debug(numTotalHits + " total matching documents");

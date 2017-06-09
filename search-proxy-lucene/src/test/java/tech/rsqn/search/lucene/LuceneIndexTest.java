@@ -54,7 +54,7 @@ public class LuceneIndexTest {
 //                .with("*","dog")
                 .and("name","nut butter")
                 .and("name","dog the bog")
-                .and("ident","1234")
+//                .and("ident","1234")
                 .and("ident","6789");
 
         SearchResult result = index.search(query);
