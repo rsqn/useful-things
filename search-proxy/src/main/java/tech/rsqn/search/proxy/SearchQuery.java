@@ -9,6 +9,8 @@ import java.util.List;
 public class SearchQuery {
     private List<SearchAttribute> attributes;
     private int limit;
+//    private int pageSize;
+//    private String lastKey;
 
     public SearchQuery() {
         attributes = new ArrayList<>();

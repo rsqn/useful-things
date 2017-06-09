@@ -43,9 +43,14 @@
         <!--Project Dependencies-->
         <dependency>
             <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-parent</artifactId>
+            <artifactId>lucene-core</artifactId>
             <version>6.6.0</version>
-            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>6.6.0</version>
         </dependency>
 
         <!--Compile Dependencies-->
@@ -54,6 +59,14 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
             <scope>compile</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.21</version>
+            <scope>test</scope>
         </dependency>
 
         <!--Test Dependencies-->

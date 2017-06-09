@@ -25,17 +25,17 @@ public class InMemoryIndexTest {
         IndexEntry entry = new IndexEntry();
         entry.setReference("1");
         entry.putAttr("name", "bob the dogs");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("2");
         entry.putAttr("name", "dog the bog");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("3");
         entry.putAttr("name", "nut butter");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
         SearchResult result = index.search("dog", 50);
 
@@ -48,19 +48,19 @@ public class InMemoryIndexTest {
         entry.setReference("1");
         entry.putAttr("name", "bob the dogs");
         entry.putAttr("ident", "1234");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("2");
         entry.putAttr("name", "dog the bog");
         entry.putAttr("ident", "6789");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("3");
         entry.putAttr("name", "nut butter");
         entry.putAttr("ident", "1011");
-        index.submit(entry);
+        index.submitSingleEntry(entry);
 
 
         SearchQuery query = new SearchQuery()

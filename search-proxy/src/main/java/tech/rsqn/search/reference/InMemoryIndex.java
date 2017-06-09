@@ -20,8 +20,23 @@ public class InMemoryIndex implements Index {
     }
 
     @Override
-    public void submit(IndexEntry entry) {
+    public void submitSingleEntry(IndexEntry entry) {
         data.add(entry);
+    }
+
+    @Override
+    public void submitBatchEntry(IndexEntry entry) {
+        submitSingleEntry(entry);
+    }
+
+    @Override
+    public void beginBatch() {
+
+    }
+
+    @Override
+    public void endBatch() {
+
     }
 
     @Override
@@ -42,11 +57,6 @@ public class InMemoryIndex implements Index {
         ret.normalize();
 
         return ret;
-    }
-
-    @Override
-    public void optimize() {
-
     }
 
     @Override

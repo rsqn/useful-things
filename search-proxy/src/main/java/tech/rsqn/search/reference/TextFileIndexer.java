@@ -49,10 +49,9 @@ public class TextFileIndexer {
             IndexEntry entry = new IndexEntry();
             entry.setReference("" + 0);
             entry.putAttr("line", lines.get(i));
-            index.submit(entry);
+            index.submitSingleEntry(entry);
         }
 
-        index.optimize();
         return lines.size();
     }
 
@@ -64,11 +63,10 @@ public class TextFileIndexer {
             IndexEntry entry = new IndexEntry();
             entry.setReference("" + 0);
             entry.putAttr("line", lines.get((int)offset));
-            index.submit(entry);
+            index.submitSingleEntry(entry);
             ctr++;
         }
 
-        index.optimize();
         return ctr;
     }
 }
