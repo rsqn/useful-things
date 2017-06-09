@@ -52,7 +52,7 @@ public class LuceneIndexTest {
         SearchQuery query = new SearchQuery()
                 .limit(10)
 //                .with("*","dog")
-                .and("name","nut butter")
+                .and("name","nut butte")
                 .and("name","dog the bog")
 //                .and("ident","1234")
                 .and("ident","6789");
