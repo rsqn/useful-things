@@ -5,9 +5,14 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.*;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.spans.SpanNearQuery;
+import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -16,14 +21,9 @@ import org.slf4j.LoggerFactory;
 import tech.rsqn.search.proxy.*;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,12 +36,15 @@ public class LuceneIndex implements Index {
     public static final String REFERENCE_FIELD = "reference";
     private static Logger log = LoggerFactory.getLogger(LuceneIndex.class);
 
+    private List<String> wildCardFields;
+
     private String indexPath;
     private boolean createOnly;
 
     private AtomicBoolean withinBatch;
     private Directory indexDir;
-    private Analyzer analyzer;
+    private Analyzer indexWriterAnalyzer;
+
     private IndexWriterConfig iwc;
     private IndexWriter writer;
 
@@ -50,6 +53,12 @@ public class LuceneIndex implements Index {
      */
     public LuceneIndex() {
         withinBatch = new AtomicBoolean(false);
+        indexWriterAnalyzer = new StandardAnalyzer();
+        wildCardFields = new ArrayList<>();
+    }
+
+    public void setWildCardFields(List<String> wildCardFields) {
+        this.wildCardFields = wildCardFields;
     }
 
     public void setIndexPath(String indexPath) {
@@ -93,9 +102,16 @@ public class LuceneIndex implements Index {
         f = new StringField(REFERENCE_FIELD, entry.getReference(), Field.Store.YES);
         doc.add(f);
 
+        String[] parts;
+        String v;
         for (String keyField : entry.getAttrs().keySet()) {
-//            f = new StringField(keyField, entry.getAttrs().get(keyField), Field.Store.NO);
-            f = new StringField(keyField, entry.getAttrs().get(keyField), Field.Store.YES);
+            v = entry.getAttrs().get(keyField);
+            parts = v.split(" ");
+            if (parts.length > 1) {
+                f = new TextField(keyField, v, Field.Store.NO);
+            } else {
+                f = new StringField(keyField, v, Field.Store.YES);
+            }
             doc.add(f);
         }
 
@@ -132,8 +148,7 @@ public class LuceneIndex implements Index {
         log.info("beginBatch");
         try {
             indexDir = FSDirectory.open(Paths.get(indexPath));
-            analyzer = new StandardAnalyzer();
-            iwc = new IndexWriterConfig(analyzer);
+            iwc = new IndexWriterConfig(indexWriterAnalyzer);
 
             if (createOnly) {
                 iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -168,7 +183,7 @@ public class LuceneIndex implements Index {
 
     @Override
     public SearchResult search(String s, int max) {
-        SearchQuery q = new SearchQuery().with("*", s).limit(max);
+        SearchQuery q = new SearchQuery().with(SearchAttribute.WILDCARD_FIELD, s).limit(max);
         return search(q);
     }
 
@@ -183,8 +198,60 @@ public class LuceneIndex implements Index {
         return ret;
     }
 
+    private Query searchQueryToLuceneQuery(SearchQuery query) {
+        Query luceneQuery = null;
+        Query _q;
+
+        BooleanQuery.Builder builder = (new BooleanQuery.Builder());
+        for (SearchAttribute searchAttribute : query.getAttributes()) {
+            if (SearchAttribute.WILDCARD_FIELD.equals(searchAttribute.getName())) {
+                for (String wildCardField : wildCardFields) {
+                    _q = searchAttributeToLuceneQuery(new SearchAttribute().with(wildCardField, searchAttribute.getPattern()));
+                    builder.add(_q, BooleanClause.Occur.SHOULD);
+                }
+            } else {
+                _q = searchAttributeToLuceneQuery(searchAttribute);
+                builder.add(_q, BooleanClause.Occur.SHOULD);
+            }
+        }
+        luceneQuery = builder.build();
+
+        return luceneQuery;
+
+    }
+
+    /**
+     * This is just brute force to get the functionality in this iteration.
+     *
+     * @param attr
+     * @return
+     */
+    private Query searchAttributeToLuceneQuery(SearchAttribute attr) {
+        BooleanQuery.Builder builder = (new BooleanQuery.Builder());
+        Query ret;
+        Query _q;
+
+        _q = new FuzzyQuery(new Term(attr.getName(), attr.getPattern()));
+        builder.add(_q, BooleanClause.Occur.SHOULD);
+        String[] parts = attr.getPattern().split(" ");
+
+
+        if (parts.length > 1) {
+            SpanQuery[] spq = new SpanQuery[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                _q = new SpanTermQuery(new Term(attr.getName(), parts[i]));
+                spq[i] = (SpanQuery) _q;
+            }
+            SpanNearQuery spanNear1 = new SpanNearQuery(spq, 10, true);
+            builder.add(spanNear1, BooleanClause.Occur.SHOULD);
+        }
+
+        ret = builder.build();
+        return ret;
+    }
+
     @Override
-    public SearchResult search(SearchQuery query) {
+    public SearchResult search(SearchQuery proxyQuery) {
         mayRead();
 
         SearchResult ret = new SearchResult();
@@ -194,17 +261,9 @@ public class LuceneIndex implements Index {
         try {
             reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
             searcher = new IndexSearcher(reader);
+            Query luceneQuery = searchQueryToLuceneQuery(proxyQuery);
+            TopDocs results = searcher.search(luceneQuery, proxyQuery.getLimit());
 
-            Query luceneQuery = null;
-
-            BooleanQuery.Builder builder = (new BooleanQuery.Builder());
-            for (SearchAttribute searchAttribute : query.getAttributes()) {
-                Query _q = new FuzzyQuery(new Term(searchAttribute.getName(), searchAttribute.getPattern()));
-                builder.add(_q, BooleanClause.Occur.SHOULD);
-            }
-            luceneQuery = builder.build();
-
-            TopDocs results = searcher.search(luceneQuery, query.getLimit());
             ScoreDoc[] hits = results.scoreDocs;
             int numTotalHits = results.totalHits;
             log.debug(numTotalHits + " total matching documents");
@@ -224,7 +283,7 @@ public class LuceneIndex implements Index {
             try {
                 reader.close();
             } catch (IOException e) {
-                log.warn(e.getMessage(),e);
+                log.warn(e.getMessage(), e);
             }
         }
 //        ret.normalize();

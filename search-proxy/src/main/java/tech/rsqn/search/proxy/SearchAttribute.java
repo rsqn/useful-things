@@ -7,6 +7,8 @@ public class SearchAttribute {
     private String name;
     private String pattern;
 
+    public static final String WILDCARD_FIELD = "*";
+
     public SearchAttribute with(String n, String p) {
         this.name = n;
         this.pattern = p;
@@ -28,4 +30,5 @@ public class SearchAttribute {
     public void setPattern(String pattern) {
         this.pattern = pattern;
     }
+
 }
