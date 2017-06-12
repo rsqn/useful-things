@@ -33,4 +33,6 @@ public interface Index {
 
     SearchResult search(SearchQuery query);
 
+    IndexMetrics fetchMetrics();
+
 }

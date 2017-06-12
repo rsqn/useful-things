@@ -23,6 +23,7 @@ import tech.rsqn.search.proxy.*;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,6 +49,10 @@ public class LuceneIndex implements Index {
     private IndexWriterConfig iwc;
     private IndexWriter writer;
 
+    private long lastUpdate = 0;
+    private long lastRead = 0;
+
+
     /**
      *
      */
@@ -55,6 +60,27 @@ public class LuceneIndex implements Index {
         withinBatch = new AtomicBoolean(false);
         indexWriterAnalyzer = new StandardAnalyzer();
         wildCardFields = new ArrayList<>();
+    }
+
+    @Override
+    public IndexMetrics fetchMetrics() {
+        IndexMetrics ret = new IndexMetrics();
+
+        ret.put("withinBatch",withinBatch);
+        ret.put("lastUpdate",new Date(lastUpdate));
+        ret.put("lastRead",new Date(lastRead));
+
+        try {
+            DirectoryReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
+
+            ret.put("size",reader.numDocs());
+
+        } catch (IOException e) {
+            log.warn(e.getMessage(),e);
+            ret.put("size",e.getMessage());
+        }
+
+        return ret;
     }
 
     public void setWildCardFields(List<String> wildCardFields) {
@@ -92,7 +118,7 @@ public class LuceneIndex implements Index {
     public void submitBatchEntry(IndexEntry entry) {
 
         mayWrite();
-
+        lastUpdate = System.currentTimeMillis();
         Document doc = new Document();
         Field f;
 
@@ -253,6 +279,7 @@ public class LuceneIndex implements Index {
     @Override
     public SearchResult search(SearchQuery proxyQuery) {
         mayRead();
+        lastRead = System.currentTimeMillis();
 
         SearchResult ret = new SearchResult();
         IndexReader reader = null;

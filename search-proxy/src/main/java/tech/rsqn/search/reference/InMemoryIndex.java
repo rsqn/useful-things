@@ -30,6 +30,14 @@ public class InMemoryIndex implements Index {
     }
 
     @Override
+    public IndexMetrics fetchMetrics() {
+        IndexMetrics ret = new IndexMetrics();
+
+        ret.put("size",data.size());
+        return ret;
+    }
+
+    @Override
     public void beginBatch() {
 
     }
