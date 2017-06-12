@@ -20,6 +20,11 @@ public class InMemoryIndex implements Index {
     }
 
     @Override
+    public void clearIndex() {
+        data.clear();
+    }
+
+    @Override
     public void submitSingleEntry(IndexEntry entry) {
         data.add(entry);
     }

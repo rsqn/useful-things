@@ -95,6 +95,11 @@ public class LuceneIndex implements Index {
         this.createOnly = createOnly;
     }
 
+    @Override
+    public void clearIndex() {
+        createOnly = true;
+    }
+
     private void mayRead() {
         if (withinBatch.get()) {
             throw new RuntimeException("Index is currently being updated in batch mode");

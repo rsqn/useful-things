@@ -35,4 +35,6 @@ public interface Index {
 
     IndexMetrics fetchMetrics();
 
+    void clearIndex();
+
 }
