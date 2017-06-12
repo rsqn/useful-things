@@ -1,5 +1,6 @@
 package tech.rsqn.search.proxy;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,6 +11,7 @@ public class IndexMetrics {
     private Map<String,String> data;
 
     public IndexMetrics() {
+        data = new HashMap<>();
     }
 
     public void put(String k, Object v) {
