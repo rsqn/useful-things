@@ -30,7 +30,7 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
 
     private AWSSimpleSystemsManagementClient ssmClient;
 
-    private String environmentPrefix;
+    private String parameterPrefix;
 
     private boolean logParameterValues = false;
 
@@ -39,15 +39,15 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
     private List<String> names = new ArrayList<>();
 
     public AWSSystemsManagerPropertiesProvider() {
-        environmentPrefix = "";
+        parameterPrefix = "";
     }
 
     public void setLogParameterValues(boolean logParameterValues) {
         this.logParameterValues = logParameterValues;
     }
 
-    public void setEnvironmentPrefix(String environmentPrefix) {
-        this.environmentPrefix = environmentPrefix;
+    public void setParameterPrefix(String parameterPrefix) {
+        this.parameterPrefix = parameterPrefix;
     }
 
     @Required
@@ -67,8 +67,8 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
 
         for (String name : names) {
             allNames.add(name);
-            if (!StringUtils.isNullOrEmpty(environmentPrefix)) {
-                name = environmentPrefix + name;
+            if (!StringUtils.isNullOrEmpty(parameterPrefix)) {
+                name = parameterPrefix + name;
                 allNames.add(name);
             }
         }
@@ -83,10 +83,10 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
             String n = parameter.getName();
             String v = parameter.getValue();
 
-            if (!StringUtils.isNullOrEmpty(environmentPrefix)) {
-                if (n.startsWith(environmentPrefix)) {
-                    log.info("removing environment prefix " + environmentPrefix + " from parameter name " + n);
-                    n = n.substring(environmentPrefix.length());
+            if (!StringUtils.isNullOrEmpty(parameterPrefix)) {
+                if (n.startsWith(parameterPrefix)) {
+                    log.info("removing environment prefix " + parameterPrefix + " from parameter name " + n);
+                    n = n.substring(parameterPrefix.length());
                 }
             }
 
