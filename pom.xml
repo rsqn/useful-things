@@ -54,6 +54,8 @@
         <module>web-utilities</module>
         <module>search-proxy</module>
         <module>search-proxy-lucene</module>
+        <module>application-utilities</module>
+        <!--<module>encryption-aid</module>-->
     </modules>
 
 </project>

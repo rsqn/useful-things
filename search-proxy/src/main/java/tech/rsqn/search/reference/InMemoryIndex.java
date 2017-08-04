@@ -38,7 +38,7 @@ public class InMemoryIndex implements Index {
     public IndexMetrics fetchMetrics() {
         IndexMetrics ret = new IndexMetrics();
 
-        ret.put("size",data.size());
+        ret.put("size", data.size());
         return ret;
     }
 
@@ -60,9 +60,14 @@ public class InMemoryIndex implements Index {
         s = s.toLowerCase();
         for (IndexEntry indexEntry : data) {
             for (String k : indexEntry.getAttrs().keySet()) {
-                String v = indexEntry.getAttrs().get(k);
-                if (v.toLowerCase().contains(s)) {
-                    ret.addMatch(new SearchResultItem().with(indexEntry, v.length()));
+                IndexAttribute attr = indexEntry.getAttrs().get(k);
+
+                if (Attribute.Type.String == attr.getAttrType()) {
+                    String v = attr.getAttrValueAs(String.class);
+
+                    if (v.toLowerCase().contains(s)) {
+                        ret.addMatch(new SearchResultItem().with(indexEntry, v.length()));
+                    }
                 }
             }
         }
@@ -81,10 +86,14 @@ public class InMemoryIndex implements Index {
             for (SearchAttribute searchAttr : query.getAttributes()) {
                 for (String entryAttrKey : indexEntry.getAttrs().keySet()) {
                     if ("*".equals(searchAttr.getName()) || searchAttr.getName().equals(entryAttrKey)) {
-                        String entryAttrVal = indexEntry.getAttrs().get(entryAttrKey);
-                        if (entryAttrVal.toLowerCase().contains(searchAttr.getPattern())) {
-                            double yoloScore = searchAttr.getPattern().length();
-                            ret.addMatch(new SearchResultItem().with(indexEntry, yoloScore));
+                        IndexAttribute entryAttrVal = indexEntry.getAttrs().get(entryAttrKey);
+                        if (Attribute.Type.String == entryAttrVal.getAttrType() || Attribute.Type.Text == entryAttrVal.getAttrType()) {
+                            String s = entryAttrVal.getAttrValueAs(String.class);
+
+                            if (s.toLowerCase().contains(searchAttr.getPattern())) {
+                                double yoloScore = s.length();
+                                ret.addMatch(new SearchResultItem().with(indexEntry, yoloScore));
+                            }
                         }
                     }
                 }

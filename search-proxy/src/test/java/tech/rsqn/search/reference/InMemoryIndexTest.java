@@ -24,17 +24,17 @@ public class InMemoryIndexTest {
     public void shouldFindSimpleMatchByName() throws Exception {
         IndexEntry entry = new IndexEntry();
         entry.setReference("1");
-        entry.putAttr("name", "bob the dogs");
+        entry.addAttr("name", "bob the dogs");
         index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("2");
-        entry.putAttr("name", "dog the bog");
+        entry.addAttr("name", "dog the bog");
         index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("3");
-        entry.putAttr("name", "nut butter");
+        entry.addAttr("name", "nut butter");
         index.submitSingleEntry(entry);
 
         SearchResult result = index.search("dog", 50);
@@ -46,20 +46,20 @@ public class InMemoryIndexTest {
     public void shouldFindSimpleMatchByNameAndIdent() throws Exception {
         IndexEntry entry = new IndexEntry();
         entry.setReference("1");
-        entry.putAttr("name", "bob the dogs");
-        entry.putAttr("ident", "1234");
+        entry.addAttr("name", "bob the dogs");
+        entry.addAttr("ident", "1234");
         index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("2");
-        entry.putAttr("name", "dog the bog");
-        entry.putAttr("ident", "6789");
+        entry.addAttr("name", "dog the bog");
+        entry.addAttr("ident", "6789");
         index.submitSingleEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("3");
-        entry.putAttr("name", "nut butter");
-        entry.putAttr("ident", "1011");
+        entry.addAttr("name", "nut butter");
+        entry.addAttr("ident", "1011");
         index.submitSingleEntry(entry);
 
 

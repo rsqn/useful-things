@@ -17,13 +17,16 @@ public class SearchQuery {
         limit = 10;
     }
 
-    public SearchQuery with(String n, String v) {
-        attributes.add(new SearchAttribute().with(n,v));
-        return this;
+    public <T> SearchQuery with(String n, T v) {
+        return and(n,v);
     }
 
-    public SearchQuery and(String n, String v) {
-        attributes.add(new SearchAttribute().with(n,v));
+    public <T> SearchQuery and(String n, T v) {
+        if ( v instanceof Long ) {
+            attributes.add(new SearchAttribute().with(n,v).andMatchType(SearchAttribute.Type.EQ));
+        } else {
+            attributes.add(new SearchAttribute().with(n,v.toString()).andMatchType(SearchAttribute.Type.FUZZY));
+        }
         return this;
     }
 

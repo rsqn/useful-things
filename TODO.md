@@ -1,0 +1,1 @@
+- Repair functionality to pass test : shouldFindByLongValue

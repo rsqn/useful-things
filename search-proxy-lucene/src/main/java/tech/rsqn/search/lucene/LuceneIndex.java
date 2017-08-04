@@ -2,20 +2,14 @@ package tech.rsqn.search.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.rsqn.search.proxy.*;
@@ -53,9 +47,6 @@ public class LuceneIndex implements Index {
     private long lastRead = 0;
 
 
-    /**
-     *
-     */
     public LuceneIndex() {
         withinBatch = new AtomicBoolean(false);
         indexWriterAnalyzer = new StandardAnalyzer();
@@ -66,18 +57,16 @@ public class LuceneIndex implements Index {
     public IndexMetrics fetchMetrics() {
         IndexMetrics ret = new IndexMetrics();
 
-        ret.put("withinBatch",withinBatch);
-        ret.put("lastUpdate",new Date(lastUpdate));
-        ret.put("lastRead",new Date(lastRead));
+        ret.put("withinBatch", withinBatch);
+        ret.put("lastUpdate", new Date(lastUpdate));
+        ret.put("lastRead", new Date(lastRead));
 
         try {
             DirectoryReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
-
-            ret.put("size",reader.numDocs());
-
+            ret.put("size", reader.numDocs());
         } catch (IOException e) {
-            log.warn(e.getMessage(),e);
-            ret.put("size",e.getMessage());
+            log.warn(e.getMessage(), e);
+            ret.put("error", e.getMessage());
         }
 
         return ret;
@@ -127,40 +116,36 @@ public class LuceneIndex implements Index {
         Document doc = new Document();
         Field f;
 
-        //todo - support reference and id fields as data in IndexEntry
-        f = new StringField(ID_FIELD, entry.getUid(), Field.Store.YES);
-        doc.add(f);
-        f = new StringField(REFERENCE_FIELD, entry.getReference(), Field.Store.YES);
-        doc.add(f);
-
-        String[] parts;
-        String v;
+        IndexAttribute v;
         for (String keyField : entry.getAttrs().keySet()) {
             v = entry.getAttrs().get(keyField);
-            parts = v.split(" ");
-            if (parts.length > 1) {
-                f = new TextField(keyField, v, Field.Store.NO);
-            } else {
-                f = new StringField(keyField, v, Field.Store.YES);
-            }
-            doc.add(f);
-        }
 
-        // todo - do this when IndexEntr supports numbers
-//        doc.add(new LongPoint("modified", lastModified));
-        // todo - and do this for that path - when IndexEntry supports types
-//        doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
+            if (v == null || v.getAttrValue() == null) {
+                continue;
+            }
+
+            if (Attribute.Type.String == v.getAttrType()) {
+                String s = v.getAttrValueAs(String.class);
+                f = new StringField(keyField, s, Field.Store.YES);
+                doc.add(f);
+            } else if (Attribute.Type.Text == v.getAttrType()) {
+                String s = v.getAttrValueAs(String.class);
+                f = new TextField(keyField, s, Field.Store.NO);
+                doc.add(f);
+            } else if (Attribute.Type.Long == v.getAttrType()) {
+                Long n = v.getAttrValueAs(Long.class);
+                f = new SortedNumericDocValuesField(keyField, n);
+                doc.add(f);
+            } else {
+                log.warn("Unsupported attribute type " + v.getAttrType());
+            }
+        }
 
         try {
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
-                // New index, so we just add the document (no old document can be there):
                 writer.addDocument(doc);
                 log.debug("added " + entry);
-
             } else {
-                // Existing index (an old copy of this document may have been indexed) so
-                // we use updateDocument instead to replace the old one matching the exact
-                // path, if present:
                 writer.updateDocument(new Term("reference", entry.getReference()), doc);
                 log.debug("updated " + entry);
             }
@@ -205,6 +190,7 @@ public class LuceneIndex implements Index {
         }
         try {
             withinBatch.set(false);
+            writer.commit();
             writer.close();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -224,7 +210,7 @@ public class LuceneIndex implements Index {
         ret.setReference(doc.get(REFERENCE_FIELD));
 
         for (IndexableField indexableField : doc.getFields()) {
-            ret.putAttr(indexableField.name(), indexableField.stringValue());
+            ret.addAttr(indexableField.name(), indexableField.stringValue());
         }
         return ret;
     }
@@ -262,19 +248,27 @@ public class LuceneIndex implements Index {
         Query ret;
         Query _q;
 
-        _q = new FuzzyQuery(new Term(attr.getName(), attr.getPattern()));
-        builder.add(_q, BooleanClause.Occur.SHOULD);
-        String[] parts = attr.getPattern().split(" ");
+        //todo - look into phrase query
 
+        if (SearchAttribute.Type.FUZZY == attr.getMatchType()) {
+            _q = new FuzzyQuery(new Term(attr.getName(), attr.getPattern().toString()));
+            builder.add(_q, BooleanClause.Occur.SHOULD);
+            String[] parts = attr.getPattern().toString().split(" ");
 
-        if (parts.length > 1) {
-            SpanQuery[] spq = new SpanQuery[parts.length];
-            for (int i = 0; i < parts.length; i++) {
-                _q = new SpanTermQuery(new Term(attr.getName(), parts[i]));
-                spq[i] = (SpanQuery) _q;
+            if (parts.length > 1) {
+                SpanQuery[] spq = new SpanQuery[parts.length];
+                for (int i = 0; i < parts.length; i++) {
+                    _q = new SpanTermQuery(new Term(attr.getName(), parts[i]));
+                    spq[i] = (SpanQuery) _q;
+                }
+                SpanNearQuery spanNear1 = new SpanNearQuery(spq, 10, true);
+                builder.add(spanNear1, BooleanClause.Occur.SHOULD);
             }
-            SpanNearQuery spanNear1 = new SpanNearQuery(spq, 10, true);
-            builder.add(spanNear1, BooleanClause.Occur.SHOULD);
+        } else if (SearchAttribute.Type.EQ == attr.getMatchType()) {
+            _q = new TermQuery(new Term(attr.getName(), attr.getPattern().toString()));
+            builder.add(_q, BooleanClause.Occur.SHOULD);
+        } else {
+            throw new RuntimeException("Unsupported search attribute type");
         }
 
         ret = builder.build();
@@ -294,7 +288,21 @@ public class LuceneIndex implements Index {
             reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
             searcher = new IndexSearcher(reader);
             Query luceneQuery = searchQueryToLuceneQuery(proxyQuery);
-            TopDocs results = searcher.search(luceneQuery, proxyQuery.getLimit());
+            Sort sort = null;
+
+            for (SearchAttribute searchAttribute : proxyQuery.getAttributes()) {
+                SortField startField = new SortField(searchAttribute.getName(), SortField.Type.DOC);
+                SortField scoreField = SortField.FIELD_SCORE;
+                sort = new Sort(scoreField, startField);
+            }
+
+            TopDocs results;
+
+            if (sort != null) {
+                results = searcher.search(luceneQuery, proxyQuery.getLimit(), sort);
+            } else {
+                results = searcher.search(luceneQuery, proxyQuery.getLimit());
+            }
 
             ScoreDoc[] hits = results.scoreDocs;
             int numTotalHits = results.totalHits;

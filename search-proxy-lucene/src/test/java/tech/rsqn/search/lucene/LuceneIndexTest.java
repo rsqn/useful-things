@@ -1,6 +1,7 @@
 package tech.rsqn.search.lucene;
 
 import com.beust.jcommander.internal.Lists;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,23 +33,28 @@ public class LuceneIndexTest {
 
         IndexEntry entry = new IndexEntry();
         entry.setReference("1");
-        entry.putAttr("name", "bob the dogs");
-        entry.putAttr("desc", "bob is a very big dog that eats food");
-        entry.putAttr("ident", "1234");
+        entry.addTextAttr("name", "bob the dogs");
+        entry.addTextAttr("desc", "bob is a very big dog that eats food");
+        entry.addAttr("ident", "1234");
+        entry.addAttr("somenumber", 56L);
+
         index.submitBatchEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("2");
-        entry.putAttr("name", "dog the bog");
-        entry.putAttr("desc", "this is a place where dogs velocity is reduced via viscosity");
-        entry.putAttr("ident", "6789");
+        entry.addTextAttr("name", "dog the bog");
+        entry.addTextAttr("desc", "this is a place where dogs velocity is reduced via viscosity");
+        entry.addAttr("ident", "6789");
+        entry.addAttr("somenumber", 56L);
         index.submitBatchEntry(entry);
 
         entry = new IndexEntry();
         entry.setReference("3");
-        entry.putAttr("name", "nut butter");
-        entry.putAttr("desc", "a delicious substance, sometimes liked by dogs");
-        entry.putAttr("ident", "1011");
+        entry.addTextAttr("name", "nut butter");
+        entry.addTextAttr("desc", "a delicious substance, sometimes liked by dogs");
+        entry.addAttr("ident", "1011");
+        entry.addAttr("somenumber", 57L);
+
         index.submitBatchEntry(entry);
 
         index.endBatch();
@@ -129,5 +135,18 @@ public class LuceneIndexTest {
         Assert.assertEquals(result.getMatches().size(), 3);
 
     }
+
+//    @Test
+    public void shouldFindByLongValue() throws Exception {
+        populateIndex();
+        SearchQuery query = new SearchQuery()
+                .limit(10)
+                .with("somenumber","57");
+
+        SearchResult result = index.search(query);
+        Assert.assertEquals(result.getMatches().size(), 1);
+
+    }
+
 }
 

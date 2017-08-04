@@ -48,7 +48,7 @@ public class TextFileIndexer {
         for (int i = 0; i < lines.size(); i++) {
             IndexEntry entry = new IndexEntry();
             entry.setReference("" + 0);
-            entry.putAttr("line", lines.get(i));
+            entry.addAttr("line", lines.get(i));
             index.submitSingleEntry(entry);
         }
 
@@ -62,7 +62,7 @@ public class TextFileIndexer {
         for (long i = offset; i < lines.size(); i++) {
             IndexEntry entry = new IndexEntry();
             entry.setReference("" + 0);
-            entry.putAttr("line", lines.get((int)offset));
+            entry.addAttr("line", lines.get((int)offset));
             index.submitSingleEntry(entry);
             ctr++;
         }
