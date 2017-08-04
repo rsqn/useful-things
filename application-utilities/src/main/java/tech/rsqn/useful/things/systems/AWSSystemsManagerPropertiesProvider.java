@@ -75,6 +75,8 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
 
         GetParametersRequest request = new GetParametersRequest();
         request.setNames(allNames);
+        request.setWithDecryption(true);
+
         GetParametersResult result = ssmClient.getParameters(request);
 
         for (Parameter parameter : result.getParameters()) {
