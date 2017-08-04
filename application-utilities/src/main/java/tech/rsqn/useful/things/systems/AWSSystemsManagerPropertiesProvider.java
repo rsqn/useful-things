@@ -5,6 +5,7 @@ import com.amazonaws.services.simplesystemsmanagement.model.GetParametersRequest
 import com.amazonaws.services.simplesystemsmanagement.model.GetParametersResult;
 import com.amazonaws.services.simplesystemsmanagement.model.Parameter;
 import com.amazonaws.util.StringUtils;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -55,7 +56,6 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
         this.ssmClient = ssmClient;
     }
 
-
     @Required
     public void setNames(List<String> names) {
         this.names = names;
@@ -73,35 +73,39 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
             }
         }
 
-        GetParametersRequest request = new GetParametersRequest();
-        request.setNames(allNames);
-        request.setWithDecryption(true);
+        Iterable<List<String>> partitions = Iterables.partition(allNames,10);
 
-        GetParametersResult result = ssmClient.getParameters(request);
+        for (List<String> partition : partitions) {
+            GetParametersRequest request = new GetParametersRequest();
+            request.setNames(partition);
+            request.setWithDecryption(true);
 
-        for (Parameter parameter : result.getParameters()) {
-            String n = parameter.getName();
-            String v = parameter.getValue();
+            GetParametersResult result = ssmClient.getParameters(request);
 
-            if (!StringUtils.isNullOrEmpty(parameterPrefix)) {
-                if (n.startsWith(parameterPrefix)) {
-                    log.info("removing environment prefix " + parameterPrefix + " from parameter name " + n);
-                    n = n.substring(parameterPrefix.length());
+            for (Parameter parameter : result.getParameters()) {
+                String n = parameter.getName();
+                String v = parameter.getValue();
+
+                if (!StringUtils.isNullOrEmpty(parameterPrefix)) {
+                    if (n.startsWith(parameterPrefix)) {
+                        log.info("removing environment prefix " + parameterPrefix + " from parameter name " + n);
+                        n = n.substring(parameterPrefix.length());
+                    }
                 }
+
+                String logValue = "########";
+                if (logParameterValues) {
+                    logValue = v;
+                }
+
+                log.info("Setting parameter (" + n + ") = (" + logValue + ") in spring context ");
+                allProperties.put(n, v);
+
+                /**
+                 * I'm sure this is NOT the way to do it - but it works nicely.
+                 */
+                beanFactory.registerSingleton(n, v);
             }
-
-            String logValue = "########";
-            if (logParameterValues) {
-                logValue = v;
-            }
-
-            log.info("Setting parameter (" + n + ") = (" + logValue + ") in spring context ");
-            allProperties.put(n, v);
-
-            /**
-             * I'm sure this is NOT the way to do it - but it works nicely.
-             */
-            beanFactory.registerSingleton(n, v);
         }
     }
 
