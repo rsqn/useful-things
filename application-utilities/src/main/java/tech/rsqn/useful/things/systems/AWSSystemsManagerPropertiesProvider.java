@@ -110,7 +110,6 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        resolveAllParameters();
     }
 
     @Override
@@ -121,5 +120,7 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
+        resolveAllParameters();
+
     }
 }
