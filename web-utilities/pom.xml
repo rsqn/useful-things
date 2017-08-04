@@ -53,7 +53,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>${servlet.api.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

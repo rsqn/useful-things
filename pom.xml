@@ -46,6 +46,7 @@
         <testng.version>6.9.10</testng.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>9.3.0.M1</jetty.version>
+        <servlet.api.version>4.0.0-b01</servlet.api.version>
     </properties>
 
     <modules>
