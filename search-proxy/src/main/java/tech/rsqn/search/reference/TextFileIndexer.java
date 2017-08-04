@@ -1,6 +1,5 @@
 package tech.rsqn.search.reference;
 
-import sun.misc.IOUtils;
 import tech.rsqn.search.proxy.Index;
 import tech.rsqn.search.proxy.IndexEntry;
 
