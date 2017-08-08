@@ -17,6 +17,7 @@ public class EmbeddedJetty {
     private List<String> appBaseSearchPaths;
     private int port;
     private String contextPath;
+    private boolean enableWebSockets = false;
 
     @Required
     public void setAppBaseSearchPaths(List<String> appBaseSearchPaths) {
@@ -31,6 +32,10 @@ public class EmbeddedJetty {
     @Required
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
+    }
+
+    public void setEnableWebSockets(boolean enableWebSockets) {
+        this.enableWebSockets = enableWebSockets;
     }
 
     public void start() throws Exception {
@@ -73,15 +78,16 @@ public class EmbeddedJetty {
                 return;
             }
 
-            //http://stackoverflow.com/questions/26333846/configuring-embedded-jetty-9-for-x-forwarded-proto-with-spring-boot
-
             context.setDescriptor(webXml.getPath());
             context.setResourceBase(webDirectory.getPath());
             context.setContextPath(contextPath);
             context.setParentLoaderPriority(true);
             context.setThrowUnavailableOnStartupException(true);
             server.setHandler(context);
-            WebSocketServerContainerInitializer.configureContext(context);
+
+            if ( enableWebSockets ) {
+                WebSocketServerContainerInitializer.configureContext(context);
+            }
 
             for (Connector connector : server.getConnectors()) {
                 ConnectionFactory connectionFactory = connector.getDefaultConnectionFactory();

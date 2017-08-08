@@ -95,15 +95,14 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         factory = KeyFactory.getInstance("RSA", "BC");
         _keyDir = new File(keyDir);
 
-        log.info("RSAEncryptionTool - prkf " + privateKeyFile);
-        log.info("RSAEncryptionTool - pbkf " + publicKeyFile);
+        log.info("RSAEncryptionTool - Private Key Path " + privateKeyFile);
+        log.info("RSAEncryptionTool - Private Key Password Present ? " + StringUtils.isNotEmpty(privateKeyPassword) );
+        log.info("RSAEncryptionTool - Public Key Path " + publicKeyFile);
         log.info("RSAEncryptionTool - keyDir " + _keyDir.getAbsolutePath());
 
         if (!_keyDir.exists()) {
             _keyDir.mkdirs();
         }
-
-
 
         if ( ! StringUtils.isEmpty(privateKeyFile)) {
             privateKey = loadPrivateKey(privateKeyFile,privateKeyPassword);

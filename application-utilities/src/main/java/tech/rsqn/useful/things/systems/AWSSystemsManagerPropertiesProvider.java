@@ -8,13 +8,9 @@ import com.amazonaws.util.StringUtils;
 import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,12 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 
-public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAware, InitializingBean, BeanFactoryPostProcessor {
-
+public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
     private Logger log = LoggerFactory.getLogger(AWSSystemsManagerPropertiesProvider.class);
-
-    private ApplicationContext applicationContext;
-    private ConfigurableListableBeanFactory beanFactory;
 
     private AWSSimpleSystemsManagementClient ssmClient;
 
@@ -36,12 +28,18 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
     private boolean logParameterValues = false;
 
     private Map<String, String> allProperties = new HashMap<>();
+    private Map<String, String> defaultProperties = new HashMap<>();
+
+    public void setDefaultProperties(Map<String, String> defaultProperties) {
+        this.defaultProperties = defaultProperties;
+    }
 
     private List<String> names = new ArrayList<>();
 
     public AWSSystemsManagerPropertiesProvider() {
         parameterPrefix = "";
     }
+
 
     public void setLogParameterValues(boolean logParameterValues) {
         this.logParameterValues = logParameterValues;
@@ -73,7 +71,7 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
             }
         }
 
-        Iterable<List<String>> partitions = Iterables.partition(allNames,10);
+        Iterable<List<String>> partitions = Iterables.partition(allNames, 10);
 
         for (List<String> partition : partitions) {
             GetParametersRequest request = new GetParametersRequest();
@@ -98,35 +96,50 @@ public class AWSSystemsManagerPropertiesProvider implements ApplicationContextAw
                     logValue = v;
                 }
 
-                log.info("Setting parameter (" + n + ") = (" + logValue + ") in spring context ");
+                log.info("Parameter (" + n + ") = (" + logValue + ") in spring context ");
                 allProperties.put(n, v);
-
-                /**
-                 * I'm sure this is NOT the way to do it - but it works nicely.
-                 */
-                beanFactory.registerSingleton(n, v);
             }
         }
     }
 
     public String resolve(String key) {
-        return allProperties.get(key);
+        String v = allProperties.get(key);
+
+
+        if (org.apache.commons.lang3.StringUtils.isEmpty(v)) {
+            v = defaultProperties.get(key);
+            if ( org.apache.commons.lang3.StringUtils.isEmpty(v) ) {
+                log.info("Resolving parameter (" + key + ") - no value or default present ");
+            } else {
+                log.info("Resolving parameter (" + key + ") - default used ");
+            }
+
+        } else {
+            log.info("Resolving parameter (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
+        }
+
+        return v;
     }
+
+    public String resolve(String key, String _default) {
+        String v = allProperties.get(key);
+
+        if (org.apache.commons.lang3.StringUtils.isEmpty(v)) {
+            v = _default;
+            log.info("Resolving parameter (" + key + ") - default used ");
+
+        } else {
+            log.info("Resolving parameter (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
+        }
+
+        return v;
+    }
+
 
 
     @Override
     public void afterPropertiesSet() throws Exception {
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
         resolveAllParameters();
-
     }
+
 }
