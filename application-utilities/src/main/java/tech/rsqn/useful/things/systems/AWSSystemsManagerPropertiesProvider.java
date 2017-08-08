@@ -109,17 +109,20 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
         if (org.apache.commons.lang3.StringUtils.isEmpty(v)) {
             v = defaultProperties.get(key);
             if ( org.apache.commons.lang3.StringUtils.isEmpty(v) ) {
-                log.info("Resolving parameter (" + key + ") - no value or default present ");
+                log.info("Parameter resolving (" + key + ") - no value or default present ");
             } else {
-                log.info("Resolving parameter (" + key + ") - default used ");
+                log.info("Parameter (" + key + ") - default used ");
             }
         } else {
-            log.info("Resolving parameter (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
+            log.info("Parameter resolved (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
         }
 
         if ( v.startsWith("${")) {
-            log.info("returning null for (" + key + ") as it appears to be an unresolved placeholder");
+            log.info("Parameter null for (" + key + ") as it appears to be an unresolved placeholder");
             v = null;
+        } else {
+            log.info("Parameter (" + key + ") passed placeholder filter");
+
         }
 
         return v;
