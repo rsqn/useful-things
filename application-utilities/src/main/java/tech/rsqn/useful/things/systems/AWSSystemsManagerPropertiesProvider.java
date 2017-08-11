@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
@@ -29,6 +30,7 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
 
     private Map<String, String> allProperties = new HashMap<>();
     private Map<String, String> defaultProperties = new HashMap<>();
+    private List<String> resolvedProperties = new ArrayList<>();
 
     public void setDefaultProperties(Map<String, String> defaultProperties) {
         this.defaultProperties = defaultProperties;
@@ -75,7 +77,17 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
 
         for (List<String> partition : partitions) {
             GetParametersRequest request = new GetParametersRequest();
-            request.setNames(partition);
+
+            List<String> filtered = partition.stream()
+                    .filter(k -> {
+                        if (k.startsWith("aws.")) {
+                            log.warn("Will not try to resolve unprefixed key (" + k + ") - AWS does not allow this");
+                            return false;
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
+
+            request.setNames(filtered);
             request.setWithDecryption(true);
 
             GetParametersResult result = ssmClient.getParameters(request);
@@ -102,13 +114,44 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
         }
     }
 
+
+    //todo - ensure prefixe parameter takes precedence
+    private String forceResolve(String key) {
+        GetParametersRequest request;
+
+        if (key.startsWith("aws.")) {
+            log.warn("Will not try to resolve unprefixed key (" + key + ") - AWS does not allow this");
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(parameterPrefix)) {
+                request = new GetParametersRequest().withNames(parameterPrefix + key).withWithDecryption(true);
+            } else {
+                return null;
+            }
+        } else {
+            request = new GetParametersRequest().withNames(parameterPrefix + key, key).withWithDecryption(true);
+        }
+
+        GetParametersResult result = ssmClient.getParameters(request);
+
+        for (Parameter parameter : result.getParameters()) {
+            return parameter.getValue();
+        }
+        return null;
+    }
+
     public String resolve(String key) {
         String v = allProperties.get(key);
 
+        if (v == null && !resolvedProperties.contains(key)) {
+            v = forceResolve(key);
+            if (v != null) {
+                allProperties.put(key, v);
+            }
+            resolvedProperties.add(key);
+        }
 
         if (org.apache.commons.lang3.StringUtils.isEmpty(v)) {
             v = defaultProperties.get(key);
-            if ( org.apache.commons.lang3.StringUtils.isEmpty(v) ) {
+            if (org.apache.commons.lang3.StringUtils.isEmpty(v)) {
                 log.info("Parameter resolving (" + key + ") - no value or default present ");
             } else {
                 log.info("Parameter (" + key + ") - default used ");
@@ -117,7 +160,7 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
             log.info("Parameter resolved (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
         }
 
-        if ( v.startsWith("${")) {
+        if (v.startsWith("${")) {
             log.info("Parameter null for (" + key + ") as it appears to be an unresolved placeholder");
             v = null;
         } else {
@@ -141,7 +184,6 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
 
         return v;
     }
-
 
 
     @Override
