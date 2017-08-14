@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.24-SNAPSHOT</version>
+        <version>1.0.24</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>search-proxy</artifactId>
-    <version>1.0.24-SNAPSHOT</version>
+    <version>1.0.24</version>
     <packaging>jar</packaging>
 
     <name>search-proxy</name>
