@@ -160,7 +160,7 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
             log.info("Parameter resolved (" + key + ") present ? " + org.apache.commons.lang3.StringUtils.isNotEmpty(v));
         }
 
-        if (v.startsWith("${")) {
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(v) && v.startsWith("${")) {
             log.info("Parameter null for (" + key + ") as it appears to be an unresolved placeholder");
             v = null;
         } else {
