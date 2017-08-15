@@ -110,11 +110,6 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         publicKey = loadPublicKey(publicKeyFile);
     }
 
-    public KeyPair fetchKeyPair() {
-        KeyPair ret = new KeyPair(publicKey,privateKey);
-        return ret;
-    }
-
     @Override
     public byte[] encrypt(byte[] plainText) {
         try {
@@ -134,7 +129,6 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
 
         try {
             Cipher cipher = Cipher.getInstance(algorithm, provider);
-
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(cryptText);
         } catch (Exception e) {
@@ -170,7 +164,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
 
 
     // review - remove the need for a keys dir - keep keys in memory
-    private String fetchRemoteIfNeccessary(String s) {
+    private String fetchRemoteIfNecessary(String s) {
         if (s.startsWith("s3")) {
             String[] bucketAndKey = parseBucketKeyAndFileName(s);
             String bucket = bucketAndKey[0];
@@ -223,7 +217,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
                 String keyResource = fileName.substring(CLASS_PATH_PREFIX.length());
                 keyReader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(keyResource));
             } else if ( fileName.startsWith(S3_PATH_PREFIX) ) {
-                String fn = fetchRemoteIfNeccessary(fileName);
+                String fn = fetchRemoteIfNecessary(fileName);
                 keyReader = new FileReader(fn);
             } else {
                 keyReader = new FileReader(fileName);
@@ -253,7 +247,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
 
     public PublicKey loadPublicKey(String fileName) {
         try {
-            fileName = fetchRemoteIfNeccessary(fileName);
+            fileName = fetchRemoteIfNecessary(fileName);
 
             PemFile pemFile = new PemFile().with(fileName);
             byte[] content = pemFile.getPemObject().getContent();
@@ -266,9 +260,6 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
 
     private Map<String, String> quickState = new HashMap<>();
 
-    public Map<String, String> getQuickState() {
-        return quickState;
-    }
 
     // rushing this morning - MA
     private String[] parseBucketKeyAndFileName(String s) {
