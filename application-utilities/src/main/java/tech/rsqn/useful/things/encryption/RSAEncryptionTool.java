@@ -162,6 +162,10 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         this.charSet = charSet;
     }
 
+    public KeyPair fetchKeyPair() {
+        KeyPair ret = new KeyPair(publicKey,privateKey);
+        return ret;
+    }
 
     // review - remove the need for a keys dir - keep keys in memory
     private String fetchRemoteIfNecessary(String s) {
