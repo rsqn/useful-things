@@ -316,7 +316,6 @@ public class LuceneIndex implements Index {
                 SearchResultItem item = new SearchResultItem().with(docToIndexEntry(hit, doc), hit.score);
                 ret.addMatch(item);
             }
-
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
@@ -326,7 +325,6 @@ public class LuceneIndex implements Index {
                 log.warn(e.getMessage(), e);
             }
         }
-//        ret.normalize();
         return ret;
     }
 }

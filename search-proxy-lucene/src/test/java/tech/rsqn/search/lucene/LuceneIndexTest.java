@@ -53,7 +53,7 @@ public class LuceneIndexTest {
         entry.addTextAttr("name", "nut butter");
         entry.addTextAttr("desc", "a delicious substance, sometimes liked by dogs");
         entry.addAttr("ident", "1011");
-        entry.addAttr("somenumber", 57L);
+        entry.addAttr("somenumber", "57");
 
         index.submitBatchEntry(entry);
 
@@ -136,12 +136,12 @@ public class LuceneIndexTest {
 
     }
 
-//    @Test
+    @Test
     public void shouldFindByLongValue() throws Exception {
         populateIndex();
         SearchQuery query = new SearchQuery()
                 .limit(10)
-                .with("somenumber","57");
+                .with("somenumber",57);
 
         SearchResult result = index.search(query);
         Assert.assertEquals(result.getMatches().size(), 1);
