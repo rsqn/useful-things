@@ -53,8 +53,6 @@
         <module>simple-utilities</module>
         <module>embedded-jetty</module>
         <module>web-utilities</module>
-        <module>search-proxy</module>
-        <module>search-proxy-lucene</module>
         <module>application-utilities</module>
     </modules>
 
