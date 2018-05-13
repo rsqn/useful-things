@@ -40,14 +40,24 @@
     </scm>
 
     <properties>
-        <spring.version>4.3.2.RELEASE</spring.version>
+        <spring.version>5.0.6.RELEASE</spring.version>
         <slf4j.version>1.7.21</slf4j.version>
-        <!-- Build  and test -->
         <testng.version>6.9.10</testng.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>9.3.0.M1</jetty.version>
         <servlet.api.version>4.0.0-b01</servlet.api.version>
+        <aws.java.sdk.version>1.11.81</aws.java.sdk.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>5.0.6.RELEASE</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <modules>
         <module>simple-utilities</module>
@@ -56,6 +66,9 @@
         <module>application-utilities</module>
         <module>encryption-utilities</module>
         <module>storage-utilities</module>
+        <module>lambda-utilities</module>
+        <module>cdsl-lambda-utilities</module>
+
     </modules>
 
 </project>
