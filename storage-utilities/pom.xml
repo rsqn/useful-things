@@ -8,11 +8,11 @@
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
-    <artifactId>simple-utilities</artifactId>
+    <artifactId>storage-utilities</artifactId>
     <version>1.0.31-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>simple-utilities</name>
+    <name>encryption-utilities</name>
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
     <url>https://github.com/rsqn/useful-things</url>
 
@@ -35,31 +35,13 @@
 
     <dependencies>
         <!--Project Dependencies-->
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>1.1.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.2</version>
-        </dependency>
 
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
             <version>1.11.81</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-
         <!--Compile Dependencies-->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -68,12 +50,24 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
         <!--Test Dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.9.10</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>tech.rsqn.useful-things</groupId>
+            <artifactId>simple-utilities</artifactId>
+            <version>1.0.31-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

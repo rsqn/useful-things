@@ -54,6 +54,8 @@
         <module>embedded-jetty</module>
         <module>web-utilities</module>
         <module>application-utilities</module>
+        <module>encryption-utilities</module>
+        <module>storage-utilities</module>
     </modules>
 
 </project>

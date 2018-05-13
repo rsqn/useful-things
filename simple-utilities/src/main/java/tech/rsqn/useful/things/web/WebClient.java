@@ -1,7 +1,5 @@
-package com.mac.libraries.generic;
+package tech.rsqn.useful.things.web;
 
-import com.mac.libraries.generic.webclient.WebClientResponse;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.http.*;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
@@ -22,7 +20,6 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -38,10 +35,8 @@ import java.util.*;
  */
 public class WebClient {
     static Logger log = LoggerFactory.getLogger(WebClient.class);
-
-    // todo: make this work
-    //private static CloseableHttpClient instance = null;
-    //private static Object lock = new Object();
+    private static CloseableHttpClient instance = null;
+    private static Object lock = new Object();
 
     private List<Header> headers = new ArrayList<>();
     private String url;
@@ -107,9 +102,9 @@ public class WebClient {
 
     public WebClient andUniqueHeader(String name, String value) {
         Iterator<Header> it = headers.iterator();
-        while ( it.hasNext() ) {
+        while (it.hasNext()) {
             Header hdr = it.next();
-            if ( hdr.getName().equals(name)) {
+            if (hdr.getName().equals(name)) {
                 it.remove();
             }
         }
@@ -120,9 +115,9 @@ public class WebClient {
 
     public WebClient andRemoveHeader(String name) {
         Iterator<Header> it = headers.iterator();
-        while ( it.hasNext() ) {
+        while (it.hasNext()) {
             Header hdr = it.next();
-            if ( hdr.getName().equals(name)) {
+            if (hdr.getName().equals(name)) {
                 it.remove();
             }
         }
@@ -187,7 +182,7 @@ public class WebClient {
         return this;
     }
 
-    public WebClient andContentType(String t){
+    public WebClient andContentType(String t) {
         contentType = t;
         return this;
     }
@@ -218,10 +213,11 @@ public class WebClient {
 
     /**
      * Builder method to set the Connection Request Timeout (i.e. time to get connection from connection pool)
+     *
      * @param timeout - timeout in milliseconds
      * @return
      */
-    public WebClient andConnectRequestTimeoutMs(int timeout){
+    public WebClient andConnectRequestTimeoutMs(int timeout) {
         connectRequestTimeoutMs = timeout;
         return this;
     }
@@ -229,30 +225,33 @@ public class WebClient {
 
     /**
      * Builder method to set the Connection Timeout (i.e. time for handshake)
+     *
      * @param timeout - timeout in milliseconds
      * @return
      */
-    public WebClient andConnectTimeoutMs(int timeout){
+    public WebClient andConnectTimeoutMs(int timeout) {
         connectTimeoutMs = timeout;
         return this;
     }
 
     /**
      * Builder method to set the Socket Timeout (i.e. data transfer time)
+     *
      * @param timeout - timeout in milliseconds
      * @return
      */
-    public WebClient andSocketTimeoutMs(int timeout){
+    public WebClient andSocketTimeoutMs(int timeout) {
         socketTimeoutMs = timeout;
         return this;
     }
 
     /**
      * Builder method to set the Connection Request Timeout, Connection Timeout & Socket Timeout
+     *
      * @param timeout - timeout in milliseconds
      * @return
      */
-    public WebClient andTimeoutMs(int timeout){
+    public WebClient andTimeoutMs(int timeout) {
         connectRequestTimeoutMs = timeout;
         connectTimeoutMs = timeout;
         socketTimeoutMs = timeout;
@@ -274,7 +273,7 @@ public class WebClient {
                     return performOptions();
             }
         } catch (Exception e) {
-            throw new RuntimeException("Exception executing request " + ToStringBuilder.reflectionToString(this) + " - " + e, e);
+            throw new RuntimeException("Exception executing request " + this + " - " + e, e);
         }
         return null;
     }
@@ -283,6 +282,7 @@ public class WebClient {
     /**
      * Finalize and execute HTTP request, based on client configuration, retrieve HTTP response details
      * (including deserialized POJO based on configuration) wrapped in a generic client response.
+     *
      * @param <T> The class type the HTTP response body should be mapped to.
      * @return A generic response which includes HTTP response details, including the deserialized response body.
      */
@@ -290,24 +290,20 @@ public class WebClient {
     {
         WebClientResponse res = new WebClientResponse();
 
-        try
-        {
+        try {
             CloseableHttpClient httpClient = getHttpClient();
 
             HttpResponse httpResponse = null;
 
-            switch (httpType)
-            {
-                case "GET":
-                {
+            switch (httpType) {
+                case "GET": {
                     HttpGet httpGet = new HttpGet(url);
                     headers.forEach(httpGet::addHeader);
 
                     httpResponse = httpClient.execute(httpGet);
                 }
-                    break;
-                case "POST":
-                {
+                break;
+                case "POST": {
 
                     HttpPost httpPost = new HttpPost(url);
                     headers.forEach(httpPost::addHeader);
@@ -317,9 +313,8 @@ public class WebClient {
 
                     httpResponse = httpClient.execute(httpPost);
                 }
-                    break;
-                case "PUT":
-                {
+                break;
+                case "PUT": {
                     HttpPut httpPut = new HttpPut(url);
                     headers.forEach(httpPut::addHeader);
                     StringEntity stringEntity = new StringEntity(body, charset);
@@ -327,31 +322,27 @@ public class WebClient {
 
                     httpResponse = httpClient.execute(httpPut);
                 }
-                    break;
-                case "DELETE":
-                {
+                break;
+                case "DELETE": {
                     HttpDelete httpDelete = new HttpDelete(url);
                     headers.forEach(httpDelete::addHeader);
 
                     httpResponse = httpClient.execute(httpDelete);
                 }
-                    break;
-                case "OPTIONS":
-                {
+                break;
+                case "OPTIONS": {
                     HttpOptions httpOptions = new HttpOptions(url);
                     headers.forEach(httpOptions::addHeader);
 
                     httpResponse = httpClient.execute(httpOptions);
                 }
-                    break;
-                default:
-                {
+                break;
+                default: {
                     throw new RuntimeException("HTTP request type '" + httpType + "' not supported.");
                 }
             }
 
-            if (httpResponse == null)
-            {
+            if (httpResponse == null) {
                 throw new RuntimeException("No HTTP response?");
             }
 
@@ -368,7 +359,7 @@ public class WebClient {
             Map<String, String> responseHeaders = new HashMap<>();
             for (Header header : httpResponse.getAllHeaders()) responseHeaders.put(header.getName(), header.getValue());
 
-            T responseBean = (T)responseHandler.handleResponse(stringResponse);
+            T responseBean = (T) responseHandler.handleResponse(stringResponse);
 
             res.setSuccess(true);
             res.setErrorMessage(null);
@@ -382,13 +373,11 @@ public class WebClient {
             res.setContentType(responseContentType);
             res.setHeaders(responseHeaders);
             res.setResponseBean(responseBean);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
 
             res.setSuccess(false);
-            res.setErrorMessage("Exception executing request " + ToStringBuilder.reflectionToString(this) + " - " + ex);
+            res.setErrorMessage("Exception executing request " + this + " - " + ex);
             res.setErrorException(ex);
         }
 
@@ -398,18 +387,18 @@ public class WebClient {
     private CloseableHttpClient _buildHttpClient() {
         HttpClientBuilder builder = HttpClientBuilder.create();
 
-        if(connectRequestTimeoutMs != null || connectTimeoutMs != null || socketTimeoutMs != null){
+        if (connectRequestTimeoutMs != null || connectTimeoutMs != null || socketTimeoutMs != null) {
             RequestConfig.Builder configBuilder = RequestConfig.custom();
 
-            if(connectRequestTimeoutMs != null){
+            if (connectRequestTimeoutMs != null) {
                 configBuilder.setConnectionRequestTimeout(connectRequestTimeoutMs);
             }
 
-            if(connectTimeoutMs != null){
+            if (connectTimeoutMs != null) {
                 configBuilder.setConnectTimeout(connectTimeoutMs);
             }
 
-            if(socketTimeoutMs != null){
+            if (socketTimeoutMs != null) {
                 configBuilder.setSocketTimeout(socketTimeoutMs);
             }
             builder.setDefaultRequestConfig(configBuilder.build());
@@ -418,8 +407,7 @@ public class WebClient {
         if (proxy != null) {
             // set proxy from build pattern
             builder.setProxy(proxy);
-        }
-        else {
+        } else {
             // set proxy from system properties
             addProxyIfApplicable(builder);
         }
@@ -461,13 +449,13 @@ public class WebClient {
         try {
             SSLContextBuilder builder = new SSLContextBuilder();
 
-            builder.loadTrustMaterial(null, new TrustStrategy(){
+            builder.loadTrustMaterial(null, new TrustStrategy() {
                 public boolean isTrusted(X509Certificate[] chain, String authType)
                         throws CertificateException {
                     return true;
                 }
             });
-            alternateSSLSocketFactory = new SSLConnectionSocketFactory(builder.build(),SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            alternateSSLSocketFactory = new SSLConnectionSocketFactory(builder.build(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 
         } catch (Exception e) {
             log.error("Exception creating trust-all socket factory " + e, e);
@@ -480,7 +468,7 @@ public class WebClient {
         if (alternateSSLSocketFactory != null) {
             return _buildHttpClient();
         }
-
+//
         if (instance == null) {
             synchronized (lock) {
                 if (instance == null) {
@@ -489,6 +477,7 @@ public class WebClient {
             }
         }
         return instance;
+
     }
 
 
@@ -552,7 +541,7 @@ public class WebClient {
             be.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, contentType));
             httpPost.setEntity(be);
         } else {
-            StringEntity se = new StringEntity(body,charset);
+            StringEntity se = new StringEntity(body, charset);
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, contentType));
             httpPost.setEntity(se);
         }
@@ -580,7 +569,7 @@ public class WebClient {
             log.debug("adding header " + header);
             httpPut.addHeader(header);
         }
-        StringEntity se = new StringEntity(body,charset);
+        StringEntity se = new StringEntity(body, charset);
         se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, contentType));
         httpPut.setEntity(se);
         ResponseHandler<String> handler = new BasicResponseHandler();
@@ -604,12 +593,9 @@ public class WebClient {
         log.debug("Response: (" + responseBody + ")");
         return (T) responseHandler.handleResponse(responseBody);
     }
-    
 
     private void addProxyIfApplicable(HttpClientBuilder builder) {
-        if (StringUtils.hasLength(System.getProperty("outbound.http.proxy.ip"))
-                && StringUtils.hasLength(System.getProperty("outbound.http.proxy.port"))
-                && StringUtils.hasLength(System.getProperty("outbound.http.proxy.scheme"))) {
+        if (System.getProperty("outbound.http.proxy.ip") != null) {
 
             HttpHost _proxy = new HttpHost(
                     System.getProperty("outbound.http.proxy.ip"), // proxy ip
@@ -621,5 +607,22 @@ public class WebClient {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "WebClient{" +
+                "headers=" + headers +
+                ", url='" + url + '\'' +
+                ", responseHandler=" + responseHandler +
+                ", body='" + body + '\'' +
+                ", httpType='" + httpType + '\'' +
+                ", charset='" + charset + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", connectTimeoutMs=" + connectTimeoutMs +
+                ", connectRequestTimeoutMs=" + connectRequestTimeoutMs +
+                ", socketTimeoutMs=" + socketTimeoutMs +
+                ", alternateSSLSocketFactory=" + alternateSSLSocketFactory +
+                ", proxy=" + proxy +
+                ", directResponseHandler=" + directResponseHandler +
+                '}';
+    }
 }
