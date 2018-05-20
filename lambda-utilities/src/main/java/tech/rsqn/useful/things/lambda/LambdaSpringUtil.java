@@ -8,7 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
 /**
- * Utilitiy to wire in spring when using lambda functions
+ * Utility to wire in spring when using lambda functions
  */
 public class LambdaSpringUtil {
     private static final Logger LOG = Logger.getLogger(LambdaSpringUtil.class);
@@ -17,6 +17,10 @@ public class LambdaSpringUtil {
     private static String globalRootContextPath = "/spring/app-ctx.xml";
     private static ApplicationContext ctx = null;
 
+    /**
+     * Sets application context
+     * @param _ctx
+     */
     @Autowired
     public void setCtx(ApplicationContext _ctx) {
         // in lambda we need to start up the CTX ourselves

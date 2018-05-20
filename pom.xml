@@ -67,7 +67,7 @@
         <module>encryption-utilities</module>
         <module>storage-utilities</module>
         <module>lambda-utilities</module>
-        <module>cdsl-lambda-utilities</module>
+        <!--<module>cdsl-lambda-utilities</module>-->
 
     </modules>
 
