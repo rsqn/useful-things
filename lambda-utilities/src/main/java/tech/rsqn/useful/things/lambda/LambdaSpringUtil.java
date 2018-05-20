@@ -7,6 +7,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
+/**
+ * Utilitiy to wire in spring when using lambda functions
+ */
 public class LambdaSpringUtil {
     private static final Logger LOG = Logger.getLogger(LambdaSpringUtil.class);
     private static Object lck = new Object();
@@ -24,18 +27,35 @@ public class LambdaSpringUtil {
     }
 
 
+    /**
+     * overides loading of xml applciation context
+     * @param s
+     */
     public static void setGlobalRootContextPath(String s) {
         globalRootContextPath = s;
     }
 
+    /**
+     *
+     * @return
+     */
     public static ApplicationContext getCtx() {
         return ctx;
     }
 
+    /**
+     * Wires spring into the bean passed in
+     * @param o
+     */
     public static void wireInSpring(Object o) {
         wireInSpring(o, o.getClass().getSimpleName());
     }
 
+    /**
+     * wires spring into the passed in bean
+     * @param o
+     * @param myBeanName
+     */
     public static void wireInSpring(Object o, String myBeanName) {
         // Lambda does not do this for you - though serverless does have a library to do it
         if (ctx == null) {

@@ -9,7 +9,9 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 
-@Component
+/**
+ * Wires in a simple dynamo backend with mapper
+ */
 public abstract class AbstractDynamoBackedService {
     private static final Logger LOG = Logger.getLogger(AbstractDynamoBackedService.class);
 
@@ -18,6 +20,9 @@ public abstract class AbstractDynamoBackedService {
     private String region = null;
     private String endpoint = null;
 
+    /**
+     * Sets up the client and mapper
+     */
     public AbstractDynamoBackedService() {
 
         region = System.getProperty("dynamo.region");
