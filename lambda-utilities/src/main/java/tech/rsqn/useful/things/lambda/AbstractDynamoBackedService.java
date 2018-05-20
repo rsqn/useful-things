@@ -1,4 +1,4 @@
-package tech.rsqn.cdsl;
+package tech.rsqn.useful.things.lambda;
 
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;

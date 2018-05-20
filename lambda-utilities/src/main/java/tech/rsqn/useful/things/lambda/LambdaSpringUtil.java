@@ -1,4 +1,4 @@
-package tech.rsqn.cdsl;
+package tech.rsqn.useful.things.lambda;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
