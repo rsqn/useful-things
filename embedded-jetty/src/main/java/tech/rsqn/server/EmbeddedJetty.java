@@ -1,6 +1,6 @@
 package tech.rsqn.server;
 
-import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
@@ -17,6 +17,7 @@ public class EmbeddedJetty {
     private List<String> appBaseSearchPaths;
     private int port;
     private String contextPath;
+    private boolean enableWebSockets = false;
 
     @Required
     public void setAppBaseSearchPaths(List<String> appBaseSearchPaths) {
@@ -31,6 +32,10 @@ public class EmbeddedJetty {
     @Required
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
+    }
+
+    public void setEnableWebSockets(boolean enableWebSockets) {
+        this.enableWebSockets = enableWebSockets;
     }
 
     public void start() throws Exception {
@@ -79,7 +84,20 @@ public class EmbeddedJetty {
             context.setParentLoaderPriority(true);
             context.setThrowUnavailableOnStartupException(true);
             server.setHandler(context);
-            WebSocketServerContainerInitializer.configureContext(context);
+
+            if ( enableWebSockets ) {
+                WebSocketServerContainerInitializer.configureContext(context);
+            }
+
+            for (Connector connector : server.getConnectors()) {
+                ConnectionFactory connectionFactory = connector.getDefaultConnectionFactory();
+                if(connectionFactory instanceof HttpConnectionFactory) {
+                    HttpConnectionFactory defaultConnectionFactory = (HttpConnectionFactory) connectionFactory;
+                    HttpConfiguration httpConfiguration = defaultConnectionFactory.getHttpConfiguration();
+                    httpConfiguration.addCustomizer(new ForwardedRequestCustomizer());
+                }
+            }
+
             server.start();
             server.join();
         } catch (Exception e) {
