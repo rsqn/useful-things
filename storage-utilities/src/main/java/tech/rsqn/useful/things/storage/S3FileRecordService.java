@@ -12,10 +12,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tech.rsqn.useful.things.util.UIDUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class S3FileRecordService implements FileRecordService {
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -104,7 +104,7 @@ public class S3FileRecordService implements FileRecordService {
     @Override
     public FileHandle createNew(String name, String mimeType) {
         S3FileHandle handle = new S3FileHandle();
-        handle.setUid(UIDUtil.generateUUID());
+        handle.setUid(UUID.randomUUID().toString());
         handle.setName(name);
         handle.setMimeType(mimeType);
         handle.setBucketName(bucketName);

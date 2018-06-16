@@ -1,10 +1,10 @@
 package tech.rsqn.useful.things.storage;
 
 import org.apache.commons.io.IOUtils;
-import tech.rsqn.useful.things.util.UIDUtil;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.UUID;
 
 public class LocalFileHandle extends FileHandle implements Serializable {
     private static final long serialVersionUID = 8612614067570182761L;
@@ -15,7 +15,7 @@ public class LocalFileHandle extends FileHandle implements Serializable {
 
         ret.setName(f.getName());
         ret.setLength(f.length());
-        ret.setUid(UIDUtil.generateUUID());
+        ret.setUid(UUID.randomUUID().toString());
 
         String ext = f.getName();
         int i = ext.lastIndexOf(".");
