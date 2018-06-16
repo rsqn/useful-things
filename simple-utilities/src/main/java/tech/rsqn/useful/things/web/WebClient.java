@@ -211,46 +211,24 @@ public class WebClient {
         return this;
     }
 
-    /**
-     * Builder method to set the Connection Request Timeout (i.e. time to get connection from connection pool)
-     *
-     * @param timeout - timeout in milliseconds
-     * @return
-     */
+
     public WebClient andConnectRequestTimeoutMs(int timeout) {
         connectRequestTimeoutMs = timeout;
         return this;
     }
 
 
-    /**
-     * Builder method to set the Connection Timeout (i.e. time for handshake)
-     *
-     * @param timeout - timeout in milliseconds
-     * @return
-     */
     public WebClient andConnectTimeoutMs(int timeout) {
         connectTimeoutMs = timeout;
         return this;
     }
 
-    /**
-     * Builder method to set the Socket Timeout (i.e. data transfer time)
-     *
-     * @param timeout - timeout in milliseconds
-     * @return
-     */
+
     public WebClient andSocketTimeoutMs(int timeout) {
         socketTimeoutMs = timeout;
         return this;
     }
 
-    /**
-     * Builder method to set the Connection Request Timeout, Connection Timeout & Socket Timeout
-     *
-     * @param timeout - timeout in milliseconds
-     * @return
-     */
     public WebClient andTimeoutMs(int timeout) {
         connectRequestTimeoutMs = timeout;
         connectTimeoutMs = timeout;
@@ -279,13 +257,6 @@ public class WebClient {
     }
 
 
-    /**
-     * Finalize and execute HTTP request, based on client configuration, retrieve HTTP response details
-     * (including deserialized POJO based on configuration) wrapped in a generic client response.
-     *
-     * @param <T> The class type the HTTP response body should be mapped to.
-     * @return A generic response which includes HTTP response details, including the deserialized response body.
-     */
     public <T> WebClientResponse<T> tryPerform() //todo a more suitable method name?
     {
         WebClientResponse res = new WebClientResponse();

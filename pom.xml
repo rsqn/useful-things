@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.31-SNAPSHOT</version>
+    <version>1.0.34-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -69,7 +69,6 @@
         <module>lambda-utilities</module>
         <module>cdsl-lambda-utilities</module>
         <module>cache-service</module>
-
     </modules>
 
 </project>

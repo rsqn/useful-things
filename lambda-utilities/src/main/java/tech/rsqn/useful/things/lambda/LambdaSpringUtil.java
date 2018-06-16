@@ -1,4 +1,4 @@
-package tech.rsqn.cdsl;
+package tech.rsqn.useful.things.lambda;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +7,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
+/**
+ * Utility to wire in spring when using lambda functions
+ */
 public class LambdaSpringUtil {
     private static final Logger LOG = Logger.getLogger(LambdaSpringUtil.class);
     private static Object lck = new Object();
@@ -14,6 +17,10 @@ public class LambdaSpringUtil {
     private static String globalRootContextPath = "/spring/app-ctx.xml";
     private static ApplicationContext ctx = null;
 
+    /**
+     * Sets application context
+     * @param _ctx
+     */
     @Autowired
     public void setCtx(ApplicationContext _ctx) {
         // in lambda we need to start up the CTX ourselves
@@ -24,18 +31,35 @@ public class LambdaSpringUtil {
     }
 
 
+    /**
+     * overides loading of xml applciation context
+     * @param s
+     */
     public static void setGlobalRootContextPath(String s) {
         globalRootContextPath = s;
     }
 
+    /**
+     *
+     * @return
+     */
     public static ApplicationContext getCtx() {
         return ctx;
     }
 
+    /**
+     * Wires spring into the bean passed in
+     * @param o
+     */
     public static void wireInSpring(Object o) {
         wireInSpring(o, o.getClass().getSimpleName());
     }
 
+    /**
+     * wires spring into the passed in bean
+     * @param o
+     * @param myBeanName
+     */
     public static void wireInSpring(Object o, String myBeanName) {
         // Lambda does not do this for you - though serverless does have a library to do it
         if (ctx == null) {
