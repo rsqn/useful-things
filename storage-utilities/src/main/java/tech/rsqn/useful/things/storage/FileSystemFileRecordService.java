@@ -3,11 +3,11 @@ package tech.rsqn.useful.things.storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import tech.rsqn.useful.things.util.UIDUtil;
 
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,7 +24,7 @@ public class FileSystemFileRecordService implements FileRecordService {
 
     public FileHandle createNew(String name, String mimeType) {
         FileSystemFileHandle handle = new FileSystemFileHandle();
-        handle.setUid(UIDUtil.generateUUID());
+        handle.setUid(UUID.randomUUID().toString());
         handle.setName(name);
         handle.setMimeType(mimeType);
 

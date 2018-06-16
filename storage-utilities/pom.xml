@@ -60,16 +60,10 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.10</version>
+            <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>tech.rsqn.useful-things</groupId>
-            <artifactId>simple-utilities</artifactId>
-            <!--<version>1.0.34-SNAPSHOT</version>-->
-            <scope>compile</scope>
-        </dependency>
 
     </dependencies>
 
