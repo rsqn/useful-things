@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.34-SNAPSHOT</version>
+    <version>1.0.35-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
