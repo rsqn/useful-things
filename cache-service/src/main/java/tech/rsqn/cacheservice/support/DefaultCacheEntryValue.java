@@ -1,17 +1,9 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.support;
 
 import java.io.Serializable;
 
 
-/**
- * @author mandrewes
- */
+
 public class DefaultCacheEntryValue
         implements CacheEntryValue, Serializable {
     private String key;

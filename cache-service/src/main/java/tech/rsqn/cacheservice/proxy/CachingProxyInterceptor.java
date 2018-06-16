@@ -16,11 +16,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Author: mandrewes
  * Date: 12/08/11
- *
- *
- * Interceptor for explicitly configured spring proxies
- *
- * @author mandrewes
  */
 public class CachingProxyInterceptor implements MethodInterceptor {
     private Logger log = LoggerFactory.getLogger(getClass());

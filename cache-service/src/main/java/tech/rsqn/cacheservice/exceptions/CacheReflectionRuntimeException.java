@@ -5,8 +5,6 @@ package tech.rsqn.cacheservice.exceptions;
  * Created by IntelliJ IDEA.
  * User: mandrewes
  * Date: 5/10/11
- *
- *
  */
 public class CacheReflectionRuntimeException extends RuntimeException {
     public CacheReflectionRuntimeException() {

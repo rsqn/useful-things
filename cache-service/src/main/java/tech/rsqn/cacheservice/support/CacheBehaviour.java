@@ -6,7 +6,6 @@ package tech.rsqn.cacheservice.support;
  * User: mandrewes
  * Date: 15/03/12
  *
- * To change this template use File | Settings | File Templates.
  */
 public class CacheBehaviour {
     private boolean _clearCacheAfterRead;

@@ -34,8 +34,6 @@ import java.util.Map;
 /**
  * Author: mandrewes
  * Date: 16/06/11
- *
- * @author mandrewes
  */
 public class DefaultTransparentCacheService implements TransparentCacheService {
     private boolean debugLogging = false;
@@ -123,10 +121,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return ret;
     }
 
-    /**
-     * @return
-     * @inheritDoc
-     */
     public List<Class> getSupportedTypes() {
         List<Class> ret = new ArrayList<Class>();
 
@@ -137,12 +131,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return ret;
     }
 
-    /**
-     * Generates a key for a parameter
-     *
-     * @param parameter
-     * @return
-     */
     public String generateParameterKey(Object parameter) {
         String key = null;
 
@@ -161,17 +149,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return null;
     }
 
-    /**
-     * This implementation is inefficent however allows for flexibility
-     * until the entities are better known
-     * <p/>
-     * It may be preferable to have a key generator that can generate keys for multiple entities
-     *
-     * @param clazz
-     * @param arguments
-     * @return
-     * @inheritDoc
-     */
     public String generateCacheKey(Class clazz, Object... arguments) {
         String key = null;
 
@@ -252,17 +229,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return expression.getValue(context, String.class);
     }
 
-    /**
-     * This implementation is inefficent however allows for flexibility
-     * until the entities are better known
-     * <p/>
-     * It may be preferable to have a key generator that can generate keys for multiple entities
-     *
-     * @param entity
-     * @param <T>
-     * @return
-     * @inheritDoc
-     */
     public <T extends Serializable> String generateCacheKey(T entity) {
         String key = null;
 
@@ -279,11 +245,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return null;
     }
 
-    /**
-     * @param invocation
-     * @return
-     * @throws Throwable
-     */
     public Object aroundWriteMethodInvocation(
         final MethodInvocation invocation, InterceptorMetadata meta)
         throws Throwable {
@@ -362,11 +323,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return returnValue;
     }
 
-    /**
-     * @param invocation
-     * @return
-     * @throws Throwable
-     */
     public Object aroundReadMethodInvocation(MethodInvocation invocation,
         InterceptorMetadata meta) throws Throwable {
         groupTimer.start("aroundReadMethodInvocation-READ");
@@ -599,11 +555,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         return returnValue;
     }
 
-    /**
-     * @param invocation
-     * @return
-     * @throws Throwable
-     */
     public Object aroundInvalidateMethodInvocation(
         MethodInvocation invocation, InterceptorMetadata meta)
         throws Throwable {

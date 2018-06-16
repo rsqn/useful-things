@@ -10,9 +10,6 @@ package tech.rsqn.cacheservice.exceptions;
 /**
  * Author: mandrewes
  * Date: 15/08/11
- *
- *
- * @author mandrewes
  */
 public class CacheConfigurationRuntimeException extends RuntimeException {
     public CacheConfigurationRuntimeException() {

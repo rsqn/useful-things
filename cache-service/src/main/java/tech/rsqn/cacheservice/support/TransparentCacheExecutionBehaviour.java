@@ -3,13 +3,6 @@ package tech.rsqn.cacheservice.support;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by IntelliJ IDEA.
- * User: mandrewes
- * Date: 15/03/12
- * 
- * To change this template use File | Settings | File Templates.
- */
 public class TransparentCacheExecutionBehaviour {
     private static Logger log = LoggerFactory.getLogger(TransparentCacheExecutionBehaviour.class);
     public static final ThreadLocal<CacheBehaviour> threadLocal = new ThreadLocal();

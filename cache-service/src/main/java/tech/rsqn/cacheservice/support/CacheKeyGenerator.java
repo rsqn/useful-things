@@ -14,11 +14,7 @@ import java.util.List;
 /**
  * Author: mandrewes
  * Date: 16/06/11
- *
- * <p/>
- * Used to create cache keys within a transparent cache service
- *
- * @author mandrewes
+
  */
 public abstract class CacheKeyGenerator<T> {
     public boolean supportsEntity(Object entity) {

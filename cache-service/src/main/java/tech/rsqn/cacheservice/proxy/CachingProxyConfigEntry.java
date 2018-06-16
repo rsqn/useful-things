@@ -14,10 +14,6 @@ import java.text.MessageFormat;
 
 /**
  * Author: mandrewes
- * Date: 12/08/11
- *
- *
- * @author mandrewes
  */
 public class CachingProxyConfigEntry {
     private static final String delimiter = ",";

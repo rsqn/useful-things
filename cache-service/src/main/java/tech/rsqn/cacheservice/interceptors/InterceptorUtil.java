@@ -18,22 +18,9 @@ import java.lang.reflect.Method;
 /**
  * Author: mandrewes
  * Date: 21/06/11
- *
- * <p/>
- * <p/>
- * Provides shared functions for interceptors
- *
- * @author mandrewes
  */
 public class InterceptorUtil {
-    /**
-     * Generates a cache key based on method invocation.
-     * <p/>
-     * Only primitive types and supported classes are supported as methods
-     *
-     * @param invocation
-     * @return
-     */
+
     public static String generateCacheKeyBasedOnMethodInvocation(
         TransparentCacheService cache, MethodInvocation invocation) {
         Object[] args = invocation.getArguments();

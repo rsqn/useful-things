@@ -23,11 +23,6 @@ import java.lang.annotation.Annotation;
 /**
  * Author: mandrewes
  * Date: 24/06/11
- *
- * <p/>
- * Utilities and shared code for interceptors
- *
- * @author mandrewes
  */
 public abstract class AbstractInterceptor implements MethodInterceptor {
     protected TransparentCacheService cacheService;
@@ -37,13 +32,6 @@ public abstract class AbstractInterceptor implements MethodInterceptor {
         this.cacheService = cacheService;
     }
 
-    /**
-     * Resolves the annotation and retrieves the target cache name
-     * @param invocation
-     * @param expected
-     * @param <T>
-     * @return
-     */
     protected <T extends Annotation> String resolveTarget(
         MethodInvocation invocation, Class<T> expected) {
         Object found = ReflectionHelper.getAnnotationFromInvocation(invocation,

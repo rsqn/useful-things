@@ -1,9 +1,3 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.hashmapcache;
 
 import tech.rsqn.cacheservice.CacheService;
@@ -74,12 +68,6 @@ public class ReferenceHashMapCacheService implements CacheService {
         return map.containsValue(DefaultCacheEntryValue.with("", value));
     }
 
-    /**
-     * @param key
-     * @param value
-     * @return
-     * @inheritDoc
-     */
     public <V extends Serializable> void put(String key, V value) {
         houseKeep();
         map.put(key, DefaultCacheEntryValue.with(key, value));
@@ -91,11 +79,6 @@ public class ReferenceHashMapCacheService implements CacheService {
         map.put(key, DefaultCacheEntryValue.with(key, value).andTimeToLiveSeconds(timeToLiveSeconds));
     }
 
-    /**
-     * @param key
-     * @return
-     * @inheritDoc
-     */
     public <V extends Serializable> V get(String key) {
         DefaultCacheEntryValue v = map.get(key);
 
@@ -110,11 +93,7 @@ public class ReferenceHashMapCacheService implements CacheService {
         return null;
     }
 
-    /**
-     * @param key
-     * @return
-     * @inheritDoc
-     */
+
     public int remove(String key) {
         if (map.remove(key) != null) {
             return 1;
@@ -123,20 +102,10 @@ public class ReferenceHashMapCacheService implements CacheService {
         return 0;
     }
 
-    /**
-     * @param key
-     * @return
-     * @inheritDoc
-     */
     public boolean containsKey(String key) {
         return map.containsKey(key);
     }
 
-    /**
-     * @param callBack
-     * @return
-     * @inheritDoc
-     */
     public void iterateThroughKeys(CacheIteratorCallBack callBack) {
         List<String> l = new ArrayList<String>();
         l.addAll(map.keySet());
@@ -148,18 +117,10 @@ public class ReferenceHashMapCacheService implements CacheService {
         }
     }
 
-    /**
-     * @return
-     * @inheritDoc
-     */
     public long count() {
         return map.size();
     }
 
-    /**
-     * @return
-     * @inheritDoc
-     */
     public long clear() {
         long v = map.size();
         map.clear();

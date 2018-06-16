@@ -22,11 +22,6 @@ import java.util.List;
 /**
  * Author: mandrewes
  * Date: 17/06/11
- *
- *
- * Simple caching interceptor driven from configuration. Note that overloaded methods are not supported.
- *
- * @author mandrewes
  */
 public class ConfiguredCacheInterceptor extends AbstractInterceptor {
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -46,13 +41,6 @@ public class ConfiguredCacheInterceptor extends AbstractInterceptor {
         }
     }
 
-    /**
-     * iterates through configuration to find a match. Probably the slowest method of intercepting for the cache, but sometimes
-     * unavoidable due to generated client jars.
-     * @param invocation
-     * @return
-     * @throws Throwable
-     */
     public Object invoke(MethodInvocation invocation) throws Throwable {
         String methodName = invocation.getMethod().getName();
 

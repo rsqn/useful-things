@@ -14,11 +14,6 @@ import java.lang.annotation.Target;
 /**
  * Author: mandrewes
  * Date: 17/06/11
- *
- * <p/>
- * method level annotation for intercepting read operations in order to cache the results
- *
- * @author mandrewes
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

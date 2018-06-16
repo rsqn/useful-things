@@ -10,11 +10,6 @@ package tech.rsqn.cacheservice.support;
 /**
  * Author: mandrewes
  * Date: 17/06/11
- *
- * <p/>
- * Aids in building up keys from multiple values
- *
- * @author mandrewes
  */
 public class DelimitedKey {
     public static final String delimiter = ".";

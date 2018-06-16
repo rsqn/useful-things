@@ -14,10 +14,6 @@ import org.aopalliance.intercept.MethodInvocation;
 /**
  * Author: mandrewes
  * Date: 17/06/11
- *
- * <p/>
- *
- * @author mandrewes
  */
 public class WriteInterceptor extends AbstractInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {

@@ -5,8 +5,6 @@ package tech.rsqn.cacheservice.support;
  * Created by IntelliJ IDEA.
  * User: mandrewes
  * Date: 16/03/12
- *
- * To change this template use File | Settings | File Templates.
  */
 public class CacheStatsHolder {
     int reads;

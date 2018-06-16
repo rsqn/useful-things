@@ -10,9 +10,6 @@ package tech.rsqn.cacheservice.interceptors;
 /**
  * Author: mandrewes
  * Date: 12/08/11
- *
- *
- * @author mandrewes
  */
 public class InterceptorMetadata {
     private String target;

@@ -9,11 +9,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 
-/**
- * Author: mandrewes
- * Date: 17/06/11
- * @author mandrewes
- */
 public class ReflectionHelper {
     public static boolean isPrimitiveOrStringOrWrapper(Object o) {
         return isPrimitiveOrStringOrWrapperClass(o.getClass());
@@ -31,14 +26,6 @@ public class ReflectionHelper {
         return false;
     }
 
-    /**
-     * Searches the interface/proxy and the implementations methods for annotations.
-     *
-     * @param invocation
-     * @param annotationClass
-     * @param <T>
-     * @return
-     */
     public static <T extends Annotation> T getAnnotationFromInvocation(
         MethodInvocation invocation, Class<T> annotationClass) {
         Method method = invocation.getMethod();

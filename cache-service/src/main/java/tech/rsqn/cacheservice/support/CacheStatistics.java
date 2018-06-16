@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
  * Created by IntelliJ IDEA.
  * User: mandrewes
  * Date: 15/03/12
- *
- * To change this template use File | Settings | File Templates.
  */
 public class CacheStatistics {
     private static Logger log = LoggerFactory.getLogger(CacheStatistics.class);

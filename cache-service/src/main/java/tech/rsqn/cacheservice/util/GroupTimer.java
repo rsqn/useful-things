@@ -7,15 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/**
- * Created by IntelliJ IDEA.
- * User: mandrewes
- * Date: 18/08/11
- *
- * <p/>
- * Utility for reporting times, useful when evaluating performance changes after enabling caching
- * short of setting up a profiler
- */
+
 public class GroupTimer {
     private Logger log = LoggerFactory.getLogger(getClass());
     Map<String, Timer> timers;
