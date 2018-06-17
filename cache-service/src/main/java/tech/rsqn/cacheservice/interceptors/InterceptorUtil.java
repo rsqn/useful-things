@@ -1,24 +1,15 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.interceptors;
 
 import tech.rsqn.cacheservice.TransparentCacheService;
 import tech.rsqn.cacheservice.support.DelimitedKey;
-import tech.rsqn.cacheservice.support.ReflectionHelper;
 
 import org.aopalliance.intercept.MethodInvocation;
+import tech.rsqn.useful.things.reflection.ReflectionHelper;
 
 import java.lang.reflect.Method;
 
 
-/**
- * Author: mandrewes
- * Date: 21/06/11
- */
+
 public class InterceptorUtil {
 
     public static String generateCacheKeyBasedOnMethodInvocation(

@@ -12,15 +12,12 @@ import java.nio.channels.FileChannel;
  * Created by IntelliJ IDEA.
  * User: mandrewes
  * Date: 23/02/12
- * Time: 9:21 AM
- * To change this template use File | Settings | File Templates.
  */
 public class FileUtil {
 
     public static byte[] readFileToByteArray(File f) throws IOException {
         return FileUtils.readFileToByteArray(f);
     }
-
 
     public static void copy(File input, File output) throws URISyntaxException, IOException {
         copy(new URI("file://" + input.getAbsolutePath()), output);
@@ -36,10 +33,6 @@ public class FileUtil {
                     in = new FileInputStream(f);
             } catch (Exception notAFile) {
             }
-
-//            File out = new File(output);
-//            File dir = out.getParentFile();
-//            dir.mkdirs();
 
             File out = output;
 
@@ -67,7 +60,7 @@ public class FileUtil {
                 target.close();
 
                 return;
-            } catch (Exception e) { /* failover to byte stream version */
+            } catch (Exception e) {
             }
         }
 

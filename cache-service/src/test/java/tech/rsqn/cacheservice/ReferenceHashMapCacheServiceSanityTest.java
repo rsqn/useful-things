@@ -1,9 +1,4 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
+
 package tech.rsqn.cacheservice;
 
 import tech.rsqn.cacheservice.hashmapcache.ReferenceHashMapCacheService;
@@ -15,13 +10,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 
-/**
- * Author: mandrewes
- * Date: 16/06/11
- *
- *
- * @author mandrewes
- */
 public class ReferenceHashMapCacheServiceSanityTest {
     private ReferenceHashMapCacheService service;
 

@@ -4,14 +4,6 @@ import org.testng.Assert;
 
 import org.testng.annotations.Test;
 
-
-/**
- * Author: mandrewes
- * Date: 17/06/11
- *
- *
- * @author mandrewes
- */
 public class DelimitedKeyTest {
     @Test
     public void shouldBuildKeyFromTwoStringsAndOneIntegerAndOneBooleanPrimitiveType()

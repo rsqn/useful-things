@@ -1,9 +1,3 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.interceptors;
 
 import tech.rsqn.cacheservice.proxy.CachingProxyConfigEntry;
@@ -19,10 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Author: mandrewes
- * Date: 17/06/11
- */
 public class ConfiguredCacheInterceptor extends AbstractInterceptor {
     private Logger log = LoggerFactory.getLogger(getClass());
     private List<CachingProxyConfigEntry> config;

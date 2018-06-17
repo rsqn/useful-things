@@ -1,9 +1,3 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.advisors;
 
 import tech.rsqn.cacheservice.annotations.ReadOperation;
@@ -16,11 +10,6 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 
-
-/**
- * Author: mandrewes
- * Date: 17/06/11
- */
 public class ReadOperationAdvisor extends StaticMethodMatcherPointcutAdvisor {
     public ReadOperationAdvisor(Advice advice) {
         super(advice);

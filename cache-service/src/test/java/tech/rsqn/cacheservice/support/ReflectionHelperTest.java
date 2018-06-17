@@ -1,25 +1,13 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
+
 package tech.rsqn.cacheservice.support;
 
 import org.testng.Assert;
 
 import org.testng.annotations.Test;
+import tech.rsqn.useful.things.reflection.ReflectionHelper;
 
 import java.util.HashMap;
 
-
-/**
- * Author: mandrewes
- * Date: 17/06/11
- *
- *
- * @author mandrewes
- */
 public class ReflectionHelperTest {
     @Test
     public void shouldReturnFalseForMapOrObject() throws Exception {

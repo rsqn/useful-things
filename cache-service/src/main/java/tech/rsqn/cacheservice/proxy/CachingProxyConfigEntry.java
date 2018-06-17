@@ -1,9 +1,3 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.proxy;
 
 import tech.rsqn.cacheservice.exceptions.CacheConfigurationRuntimeException;
@@ -12,9 +6,7 @@ import tech.rsqn.cacheservice.interceptors.InterceptorMetadata;
 import java.text.MessageFormat;
 
 
-/**
- * Author: mandrewes
- */
+
 public class CachingProxyConfigEntry {
     private static final String delimiter = ",";
     private String methodName;

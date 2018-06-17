@@ -1,8 +1,7 @@
 
-package tech.rsqn.cacheservice.support;
+package tech.rsqn.useful.things.reflection;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
@@ -29,8 +28,6 @@ public class ReflectionHelper {
     public static <T extends Annotation> T getAnnotationFromInvocation(
         MethodInvocation invocation, Class<T> annotationClass) {
         Method method = invocation.getMethod();
-
-        //This may be useful for CGLib		Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
         Method originalMethod = ReflectionUtils.findMethod(invocation.getThis()
                                                                      .getClass(),
                 method.getName(), method.getParameterTypes());

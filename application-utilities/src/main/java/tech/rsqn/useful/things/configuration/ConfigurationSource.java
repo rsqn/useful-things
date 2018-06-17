@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
  * User: mandrewes
  * Date: Sep 28, 2012
- * To change this template use File | Settings | File Templates.
  */
 public interface ConfigurationSource {
 

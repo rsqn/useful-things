@@ -1,16 +1,6 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.support;
 
 
-/**
- * Author: mandrewes
- * Date: 17/06/11
- */
 public class DelimitedKey {
     public static final String delimiter = ".";
     private String s;

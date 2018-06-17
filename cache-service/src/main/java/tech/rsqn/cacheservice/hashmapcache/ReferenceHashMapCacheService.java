@@ -10,10 +10,6 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-/**
- * Author: mandrewes
- * Date: 15/06/11
- */
 public class ReferenceHashMapCacheService implements CacheService {
 
     private Map<String, DefaultCacheEntryValue> map;

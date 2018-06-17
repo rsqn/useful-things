@@ -1,21 +1,9 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.support;
 
 import tech.rsqn.cacheservice.TransparentCacheService;
 
 import java.util.List;
 
-
-/**
- * Author: mandrewes
- * Date: 16/06/11
-
- */
 public abstract class CacheKeyGenerator<T> {
     public boolean supportsEntity(Object entity) {
         return supportsClass(entity.getClass());

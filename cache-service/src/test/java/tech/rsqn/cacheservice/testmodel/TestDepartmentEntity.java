@@ -1,23 +1,9 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.testmodel;
 
 import java.io.Serializable;
 
 import java.util.List;
 
-
-/**
- * Author: mandrewes
- * Date: 16/06/11
- *
- *
- * @author mandrewes
- */
 public class TestDepartmentEntity implements Serializable {
     private String name;
     private List<TestAssetEntity> assets;

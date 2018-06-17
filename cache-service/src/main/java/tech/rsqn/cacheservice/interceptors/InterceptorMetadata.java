@@ -1,16 +1,5 @@
-/*
- *
- *
- * Author: mandrewes
- *
- */
 package tech.rsqn.cacheservice.interceptors;
 
-
-/**
- * Author: mandrewes
- * Date: 12/08/11
- */
 public class InterceptorMetadata {
     private String target;
     private Operation operation;

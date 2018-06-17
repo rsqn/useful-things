@@ -47,6 +47,9 @@
         <jetty.version>9.3.0.M1</jetty.version>
         <servlet.api.version>4.0.0-b01</servlet.api.version>
         <aws.java.sdk.version>1.11.81</aws.java.sdk.version>
+        <aopalliance.version>1.0</aopalliance.version>
+        <gson.version>2.2.2</gson.version>
+
     </properties>
 
     <dependencyManagement>
