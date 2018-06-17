@@ -9,7 +9,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.factory.annotation.Required;
-import tech.rsqn.useful.things.reflection.ReflectionHelper;
+import tech.rsqn.reflectionhelpers.ReflectionHelper;
 
 import java.lang.annotation.Annotation;
 

@@ -21,7 +21,7 @@ import tech.rsqn.cacheservice.interceptors.InterceptorMetadata;
 import tech.rsqn.cacheservice.interceptors.InterceptorUtil;
 import tech.rsqn.cacheservice.support.*;
 import tech.rsqn.cacheservice.util.GroupTimer;
-import tech.rsqn.useful.things.reflection.ReflectionHelper;
+import tech.rsqn.reflectionhelpers.ReflectionHelper;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -273,45 +273,6 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
             log.debug("Write Interceptor invalidating key (" + cacheKey + ")");
             cache.remove(cacheKey);
         }
-
-        /*
-        GraphInspectorTypeMatcher matcher = new GraphInspectorTypeMatcher().withClasses(getSupportedTypes());
-
-        GraphInspector inspector = new GraphInspector().withObject(args)
-                                                       .withMatcher(matcher).withCallBack(new GraphInspectorCallBack<Object>() {
-                    public boolean onCallBack(Object o) {
-                        if (!(o instanceof Serializable)) {
-                            return true;
-                        }
-
-                        String cacheKey = generateCacheKey((Serializable) o);
-
-                        int n = 0;
-
-                        if (cacheKey != null) {
-                            if (debugLogging) {
-                                log.debug(MessageFormat.format(
-                                        "Write Interceptor cache key {0} ",
-                                        cacheKey));
-                            }
-
-                            n = cache.remove(cacheKey);
-                        }
-
-                        if (debugLogging) {
-                            if (n > 0) {
-                                log.debug(MessageFormat.format(
-                                        "Write Interceptor removed {0} items from cache",
-                                        n));
-                            }
-                        }
-
-                        return true;
-                    }
-                });
-
-        inspector.runInspection();
-        */
 
         groupTimer.stopAndReport("aroundWriteMethodInvocation");
 

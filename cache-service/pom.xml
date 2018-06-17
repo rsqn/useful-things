@@ -37,6 +37,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>tech.rsqn.reflection-helpers</groupId>
+            <artifactId>reflection-helpers</artifactId>
+            <version>${reflection.helper.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>simple-utilities</artifactId>
             <version>1.0.37-SNAPSHOT</version>
