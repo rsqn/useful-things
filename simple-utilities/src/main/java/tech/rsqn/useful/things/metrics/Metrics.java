@@ -23,6 +23,10 @@ public class Metrics {
     }
 
 
+    public static MetricRegistry getRegistry() {
+        return registry;
+    }
+
     public static synchronized void startReporting() {
         if (!startedReporting) {
             startedReporting = true;
