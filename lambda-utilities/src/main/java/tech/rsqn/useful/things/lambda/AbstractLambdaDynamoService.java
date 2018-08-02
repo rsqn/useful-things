@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public abstract class AbstractDynamoBackedService {
-    private static final Logger LOG = Logger.getLogger(AbstractDynamoBackedService.class);
+public abstract class AbstractLambdaDynamoService<C, R> extends  AbstractLambdaSpringService<C, R> {
+    private static final Logger LOG = Logger.getLogger(AbstractLambdaDynamoService.class);
 
     protected AmazonDynamoDB dynamodb = null;
     protected DynamoDBMapper mapper = null;
     private String region = null;
     private String endpoint = null;
 
-    public AbstractDynamoBackedService() {
+    public AbstractLambdaDynamoService() {
         region = System.getProperty("dynamo.region");
         endpoint = System.getProperty("dynamo.endpoint");
 
