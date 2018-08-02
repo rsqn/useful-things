@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.40</version>
+        <version>1.0.41-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>web-utilities</artifactId>
-    <version>1.0.40</version>
+    <version>1.0.41-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>web-utilities</name>
