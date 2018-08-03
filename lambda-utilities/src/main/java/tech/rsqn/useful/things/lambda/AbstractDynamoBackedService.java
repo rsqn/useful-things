@@ -5,6 +5,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ public abstract class AbstractDynamoBackedService {
 
     protected AmazonDynamoDB dynamodb = null;
     protected DynamoDBMapper mapper = null;
+    protected DynamoDBMapperConfig mapperConfig;
     private String region = null;
     private String endpoint = null;
 
@@ -26,6 +28,7 @@ public abstract class AbstractDynamoBackedService {
         if ( region != null && region.length() > 0) {
             r = Regions.fromName(region);
         }
+        mapperConfig = DynamoDBMapperConfig.DEFAULT;
 
         if (endpoint != null && endpoint.length() > 0) {
             dynamodb = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(

@@ -1,9 +1,7 @@
 package tech.rsqn.useful.things.util;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
