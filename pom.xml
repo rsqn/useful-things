@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.42-SNAPSHOT</version>
+    <version>1.0.42</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -36,7 +36,7 @@
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
         <url>https://github.com/mandrewes/useful-things</url>
-        <tag>HEAD</tag>
+        <tag>useful-things-1.0.42</tag>
     </scm>
 
     <properties>
