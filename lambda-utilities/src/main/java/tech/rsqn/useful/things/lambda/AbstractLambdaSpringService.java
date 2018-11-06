@@ -8,8 +8,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 
 import java.io.IOException;
+import java.util.Date;
 
 
 public abstract class AbstractLambdaSpringService<C, R> implements RequestHandler<APIGatewayProxyRequestEvent, R> {
@@ -39,6 +42,18 @@ public abstract class AbstractLambdaSpringService<C, R> implements RequestHandle
             if ( proxyEvent.getHeaders() == null && proxyEvent.getHttpMethod() == null) {
                 LOG.debug("v2 This seems to be a keepalive. returning");
                 return null;
+            }
+            if ( "GET".equals(proxyEvent.getHttpMethod())) {
+                if ( proxyEvent.getQueryStringParameters() != null ) {
+                    if ( "true".equals(proxyEvent.getQueryStringParameters().get("ping"))) {
+                        LOG.debug("v2 This seems to be a ping. returning an OK");
+                        return (R) ApiGatewayResponse.builder()
+                                .withNoCache()
+                                .setStatusCode(HttpStatus.OK.value())
+                                .setRawBody(new Date().toString())
+                                .build();
+                    }
+                }
             }
             if (proxyEvent.getBody() != null && proxyEvent.getBody().length() > 0) {
                 model = (C) objectMapper.readValue(proxyEvent.getBody(), getModelClass());
