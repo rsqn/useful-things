@@ -64,6 +64,7 @@
 
     <modules>
         <module>simple-utilities</module>
+        <module>abstraction-models</module>
         <module>embedded-jetty</module>
         <module>web-utilities</module>
         <module>application-utilities</module>
