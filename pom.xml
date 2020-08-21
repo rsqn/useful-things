@@ -4,7 +4,7 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>rsqn-oss-super-pom</artifactId>
-        <version>0.0.7</version>
+        <version>0.0.9-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn</groupId>
@@ -54,6 +54,9 @@
         <bouncy.castle.version>1.66</bouncy.castle.version>
         <commons.lang3.version>3.11</commons.lang3.version>
         <commons.io.version>2.7</commons.io.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -130,5 +133,19 @@
         <module>lambda-utilities</module>
         <module>cache-service</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
