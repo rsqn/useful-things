@@ -14,9 +14,9 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     private String cmkKeyIdArn;
 
     @Override
-    public byte[] encrypt(byte[] plainTextDEK) {
+    public byte[] encrypt(byte[] plainText) {
 
-        ByteBuffer plaintext = ByteBuffer.wrap(plainTextDEK);
+        ByteBuffer plaintext = ByteBuffer.wrap(plainText);
 
         EncryptRequest req = new EncryptRequest().withKeyId(cmkKeyIdArn).withPlaintext(plaintext);
         ByteBuffer ciphertext = kmsClient().encrypt(req).getCiphertextBlob();
@@ -25,10 +25,10 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     }
 
     @Override
-    public byte[] decrypt(byte[] cryptTextDEK) {
-        ByteBuffer ciphertextBlob = ByteBuffer.wrap(cryptTextDEK);
+    public byte[] decrypt(byte[] cryptText) {
+        ByteBuffer ciphertextBlob = ByteBuffer.wrap(cryptText);
 
-        DecryptRequest req = new DecryptRequest().withCiphertextBlob(ciphertextBlob);
+        DecryptRequest req = new DecryptRequest().withKeyId(cmkKeyIdArn).withCiphertextBlob(ciphertextBlob);
         ByteBuffer plainText = kmsClient().decrypt(req).getPlaintext();
         return plainText.array();
     }
