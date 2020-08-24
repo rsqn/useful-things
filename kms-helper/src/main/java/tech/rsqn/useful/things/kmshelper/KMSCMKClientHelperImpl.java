@@ -8,7 +8,6 @@ import com.amazonaws.services.kms.model.DecryptResult;
 import com.amazonaws.services.kms.model.EncryptRequest;
 import com.amazonaws.services.kms.model.EncryptResult;
 import com.amazonaws.services.kms.model.KeyListEntry;
-import com.amazonaws.services.kms.model.ListKeysResult;
 import com.google.common.io.BaseEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     private String cmkKeyIdArn;
 
     private Charset charset;
-
 
 
     @Override
@@ -50,13 +48,13 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     }
 
     @Override
-    public byte[] encode(String data) {
-        return BaseEncoding.base64Url().encode(data.getBytes(charset)).getBytes(charset);
+    public String encode(byte[] data) {
+        return BaseEncoding.base64Url().encode(data);
     }
 
     @Override
-    public String decode(byte[] data) {
-        return BaseEncoding.base64Url().decode(new String(data, charset)).toString();
+    public byte[] decode(String data) {
+        return BaseEncoding.base64Url().decode(data);
     }
 
 

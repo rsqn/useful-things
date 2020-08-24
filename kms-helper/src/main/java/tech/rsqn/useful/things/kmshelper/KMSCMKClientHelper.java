@@ -10,9 +10,9 @@ public interface KMSCMKClientHelper {
 
     byte[] decrypt(byte[] cryptTextDEK);
 
-    byte[] encode(String data);
+    String encode(byte[] data);
 
-    String decode(byte[] data);
+    byte[] decode(String data);
 
     Charset getCharset();
 }
