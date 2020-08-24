@@ -1,25 +1,38 @@
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelper;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.mockito.Mockito.when;
-import org.mockito.Mock;
 
 public class KMSCMKClientHelperTest {
 
-    private String keyArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
+    //private String keyArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
 
-    @Mock
-    private KMSCMKClientHelper kmsCmkClientHelper;
+    private KMSCMKClientHelperImpl kmsCmkClientHelper;
 
     @BeforeClass
     public void setUp() {
-        kmsCmkClientHelper = new KMSCMKClientHelperImpl(keyArnTest);
+        //kmsCmkClientHelper = new KMSCMKClientHelperImpl(keyArnTest);
+        kmsCmkClientHelper = Mockito.mock(KMSCMKClientHelperImpl.class);
 
-        when(kmsCmkClientHelper.encrypt("butter".getBytes(kmsCmkClientHelper.getCharset()))).thenReturn("[B@68b58644".getBytes(kmsCmkClientHelper.getCharset()));
-        when(kmsCmkClientHelper.decrypt("[B@68b58644".getBytes(kmsCmkClientHelper.getCharset()))).thenReturn("butter".getBytes(kmsCmkClientHelper.getCharset()));
+        when(kmsCmkClientHelper.getCharset()).thenReturn(StandardCharsets.UTF_8);
+        byte[] encValue = "[B@68b58644".getBytes(kmsCmkClientHelper.getCharset());
+        byte[] value = "butter".getBytes(kmsCmkClientHelper.getCharset());
+        when(kmsCmkClientHelper.encrypt("butter".getBytes(kmsCmkClientHelper.getCharset())))
+            .thenReturn(encValue);
+        when(kmsCmkClientHelper.decrypt("[B@68b58644".getBytes(kmsCmkClientHelper.getCharset())))
+            .thenReturn(value);
+
+        when(kmsCmkClientHelper.encode("butter".getBytes(kmsCmkClientHelper.getCharset())))
+            .thenReturn("YnV0dGVy");
+
+        byte[] encodedValue = "butter".getBytes(kmsCmkClientHelper.getCharset());
+        when(kmsCmkClientHelper.decode("YnV0dGVy"))
+            .thenReturn(encodedValue);
     }
 
     @Test
@@ -61,8 +74,16 @@ public class KMSCMKClientHelperTest {
 
         byte[] encryptedButter =
             kmsCmkClientHelper.encrypt("butter".getBytes(kmsCmkClientHelper.getCharset()));
+
+        when(kmsCmkClientHelper.encode(encryptedButter))
+            .thenReturn("W0JANjhiNTg2NDQ=");
+        when(kmsCmkClientHelper.decode("W0JANjhiNTg2NDQ="))
+            .thenReturn(encryptedButter);
+
+
         String encodedEncryptedButter =
             kmsCmkClientHelper.encode(encryptedButter);
+
         byte[] decodedEncryptedbutter = kmsCmkClientHelper.decode(encodedEncryptedButter);
         byte[] butter = kmsCmkClientHelper.decrypt(decodedEncryptedbutter);
 

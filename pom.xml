@@ -139,6 +139,7 @@
         <module>storage-utilities</module>
         <module>lambda-utilities</module>
         <module>cache-service</module>
+        <module>kms-helper</module>
     </modules>
 
     <build>
