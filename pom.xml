@@ -51,6 +51,7 @@
         <gson.version>2.8.6</gson.version>
         <reflection.helper.version>1.0.2</reflection.helper.version>
         <guava.version>29.0-jre</guava.version>
+        <mockito.version>3.5.5</mockito.version>
         <bouncy.castle.version>1.66</bouncy.castle.version>
         <commons.lang3.version>3.11</commons.lang3.version>
         <commons.io.version>2.7</commons.io.version>
@@ -119,6 +120,12 @@
                 <version>${spring.boot.version}</version>
                 <scope>provided</scope>
             </dependency>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>${mockito.version}</version>
+                    <scope>test</scope>
+                </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -145,7 +152,22 @@
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

@@ -4,14 +4,22 @@ import org.testng.annotations.Test;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelper;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
 
+import static org.mockito.Mockito.when;
+import org.mockito.Mock;
+
 public class KMSCMKClientHelperTest {
 
     private String keyArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
+
+    @Mock
     private KMSCMKClientHelper kmsCmkClientHelper;
 
     @BeforeClass
     public void setUp() {
         kmsCmkClientHelper = new KMSCMKClientHelperImpl(keyArnTest);
+
+        when(kmsCmkClientHelper.encrypt("butter".getBytes(kmsCmkClientHelper.getCharset()))).thenReturn("[B@68b58644".getBytes(kmsCmkClientHelper.getCharset()));
+        when(kmsCmkClientHelper.decrypt("[B@68b58644".getBytes(kmsCmkClientHelper.getCharset()))).thenReturn("butter".getBytes(kmsCmkClientHelper.getCharset()));
     }
 
     @Test
