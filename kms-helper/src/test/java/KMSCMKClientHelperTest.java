@@ -1,8 +1,6 @@
-
-
-
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelper;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
 
@@ -16,12 +14,13 @@ public class KMSCMKClientHelperTest {
     }
 
     @Test
-    public void encryptDecryptTest() {
+    public void encryptDecryptTestBytes() {
         KMSCMKClientHelper kmsCmkClientHelper = new KMSCMKClientHelperImpl(keyArnTest);
 
         byte[] encryptedButter = kmsCmkClientHelper.encrypt("butter".getBytes());
         byte[] butter = kmsCmkClientHelper.decrypt(encryptedButter);
 
-        Assert.assertEquals(butter.toString(), "butter");
+        Assert.assertEquals(new String(butter, kmsCmkClientHelper.getCharset()), "butter");
     }
+
 }
