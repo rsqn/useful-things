@@ -4,7 +4,7 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>rsqn-oss-super-pom</artifactId>
-        <version>0.0.7</version>
+        <version>0.0.9-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn</groupId>
@@ -40,25 +40,92 @@
     </scm>
 
     <properties>
-        <spring.version>5.0.6.RELEASE</spring.version>
-        <slf4j.version>1.7.21</slf4j.version>
-        <testng.version>6.9.10</testng.version>
+        <spring.version>5.2.8.RELEASE</spring.version>
+        <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <testng.version>6.14.3</testng.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jetty.version>9.3.0.M1</jetty.version>
-        <servlet.api.version>4.0.0-b01</servlet.api.version>
-        <aws.java.sdk.version>1.11.81</aws.java.sdk.version>
+        <servlet.api.version>4.0.1</servlet.api.version>
+        <aws.java.sdk.version>1.11.846</aws.java.sdk.version>
         <aopalliance.version>1.0</aopalliance.version>
-        <gson.version>2.2.2</gson.version>
+        <gson.version>2.8.6</gson.version>
         <reflection.helper.version>1.0.2</reflection.helper.version>
+        <guava.version>29.0-jre</guava.version>
+        <mockito.version>3.5.5</mockito.version>
+        <bouncy.castle.version>1.66</bouncy.castle.version>
+        <commons.lang3.version>3.11</commons.lang3.version>
+        <commons.io.version>2.7</commons.io.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>5.0.6.RELEASE</version>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+                <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>${bouncy.castle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-ext-jdk15on</artifactId>
+                <version>${bouncy.castle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>${bouncy.castle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <scope>compile</scope>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+                <scope>provided</scope>
+            </dependency>
+                <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>${mockito.version}</version>
+                    <scope>test</scope>
+                </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -72,6 +139,36 @@
         <module>storage-utilities</module>
         <module>lambda-utilities</module>
         <module>cache-service</module>
+        <module>kms-helper</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M5</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

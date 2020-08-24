@@ -8,11 +8,11 @@
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
-    <artifactId>encryption-utilities</artifactId>
+    <artifactId>kms-helper</artifactId>
     <version>1.0.49-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>encryption-utilities</name>
+    <name>kms-helper</name>
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
     <url>https://github.com/rsqn/useful-things</url>
 
@@ -49,6 +49,11 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+
         <!--Compile Dependencies-->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -59,6 +64,20 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-kms</artifactId>
+            <version>1.11.846</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>tech.rsqn.useful-things</groupId>
+            <artifactId>encryption-utilities</artifactId>
+            <version>1.0.49-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
