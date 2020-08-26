@@ -13,6 +13,7 @@ public abstract class AbstractConfigurationSource implements ConfigurationSource
 
     private final Logger log = LoggerFactory.getLogger(AbstractConfigurationSource.class);
 
+    // Handle the enc/dec outside of this class
     private String encryptedPropertyPrefix = "enc://";
 
 

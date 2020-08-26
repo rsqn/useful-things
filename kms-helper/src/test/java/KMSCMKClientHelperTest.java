@@ -1,3 +1,5 @@
+import com.amazonaws.services.kms.model.GenerateDataKeyResult;
+import org.bouncycastle.util.encoders.Hex;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -5,24 +7,25 @@ import org.testng.annotations.Test;
 import tech.rsqn.useful.things.kmshelper.Base64ClientHelperImpl;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 
 import static org.mockito.Mockito.when;
 
 public class KMSCMKClientHelperTest {
 
-    //private String keyArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
+//    private String cmkArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
+    private String dekKeyTest = "7eb3153e4af392e4b793b8219fbba0eda2c8e50607972db35ca338a66b9a9573";
 
     private KMSCMKClientHelperImpl kmsCmkClientHelper;
     private Base64ClientHelperImpl base64ClientHelper;
 
     @BeforeClass
     public void setUp() {
-        //kmsCmkClientHelper = new KMSCMKClientHelperImpl(keyArnTest);
+//        kmsCmkClientHelper = new KMSCMKClientHelperImpl();
+//        kmsCmkClientHelper.setCMKKeyArn(cmkArnTest);
         kmsCmkClientHelper = Mockito.mock(KMSCMKClientHelperImpl.class);
-        base64ClientHelper = Mockito.mock(Base64ClientHelperImpl.class);
+        base64ClientHelper = new Base64ClientHelperImpl();
 
-        when(base64ClientHelper.getCharset()).thenReturn(StandardCharsets.UTF_8);
         byte[] encValue = "[B@68b58644".getBytes(base64ClientHelper.getCharset());
         byte[] value = "butter".getBytes(base64ClientHelper.getCharset());
         when(kmsCmkClientHelper.encrypt("butter".getBytes(base64ClientHelper.getCharset())))
@@ -30,12 +33,11 @@ public class KMSCMKClientHelperTest {
         when(kmsCmkClientHelper.decrypt("[B@68b58644".getBytes(base64ClientHelper.getCharset())))
             .thenReturn(value);
 
-        when(base64ClientHelper.encode("butter".getBytes(base64ClientHelper.getCharset())))
-            .thenReturn("YnV0dGVy");
+        GenerateDataKeyResult gdkr = new GenerateDataKeyResult();
+        gdkr.setPlaintext(ByteBuffer.wrap(Hex.decode(dekKeyTest)));
+        when(kmsCmkClientHelper.generateDataKey()).thenReturn(gdkr);
 
-        byte[] encodedValue = "butter".getBytes(base64ClientHelper.getCharset());
-        when(base64ClientHelper.decode("YnV0dGVy"))
-            .thenReturn(encodedValue);
+        when(kmsCmkClientHelper.generateRandom(2)).thenReturn(Hex.decode("99"));
     }
 
     @Test
@@ -55,12 +57,6 @@ public class KMSCMKClientHelperTest {
         byte[] encryptedButter =
             kmsCmkClientHelper.encrypt("butter".getBytes(base64ClientHelper.getCharset()));
 
-        when(base64ClientHelper.encode(encryptedButter))
-            .thenReturn("W0JANjhiNTg2NDQ=");
-        when(base64ClientHelper.decode("W0JANjhiNTg2NDQ="))
-            .thenReturn(encryptedButter);
-
-
         String encodedEncryptedButter =
             base64ClientHelper.encode(encryptedButter);
 
@@ -68,5 +64,19 @@ public class KMSCMKClientHelperTest {
         byte[] butter = kmsCmkClientHelper.decrypt(decodedEncryptedbutter);
 
         Assert.assertEquals(butter, "butter".getBytes(base64ClientHelper.getCharset()));
+    }
+
+    @Test
+    public void generateDataKeyTest() {
+        GenerateDataKeyResult result = kmsCmkClientHelper.generateDataKey();
+
+        Assert.assertEquals(result.getPlaintext().array(), Hex.decode(dekKeyTest));
+    }
+
+    @Test
+    public void generateRandomTest() {
+        byte[] result = kmsCmkClientHelper.generateRandom(2);
+
+        Assert.assertEquals(result, Hex.decode("99"));
     }
 }
