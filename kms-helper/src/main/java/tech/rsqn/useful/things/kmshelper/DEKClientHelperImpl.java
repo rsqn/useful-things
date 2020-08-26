@@ -2,13 +2,13 @@ package tech.rsqn.useful.things.kmshelper;
 
 import tech.rsqn.useful.things.encryption.AESEncryptionTool;
 
-public class DEKHelperImpl implements DEKHelper {
+public class DEKClientHelperImpl implements DEKClientHelper {
 
     private String key;
 
     private AESEncryptionTool aesEncryptionTool;
 
-    public DEKHelperImpl(String key){
+    public DEKClientHelperImpl(String key){
         this.key = key;
         this.aesEncryptionTool = new AESEncryptionTool();
         aesEncryptionTool.setKey(key.getBytes());
@@ -16,11 +16,11 @@ public class DEKHelperImpl implements DEKHelper {
 
     @Override
     public byte[] encrypt(byte[] plainTextData) {
-        return aesEncryptionTool.encrypt(plainTextData);
+        return new byte[0];
     }
 
     @Override
     public byte[] decrypt(byte[] cryptTextData) {
-        return aesEncryptionTool.decrypt(cryptTextData);
+        return new byte[0];
     }
 }

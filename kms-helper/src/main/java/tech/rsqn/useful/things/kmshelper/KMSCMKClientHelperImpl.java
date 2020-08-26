@@ -8,13 +8,10 @@ import com.amazonaws.services.kms.model.DecryptResult;
 import com.amazonaws.services.kms.model.EncryptRequest;
 import com.amazonaws.services.kms.model.EncryptResult;
 import com.amazonaws.services.kms.model.KeyListEntry;
-import com.google.common.io.BaseEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
 
@@ -23,8 +20,6 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     private AWSKMS kmsClient;
 
     private String cmkKeyIdArn;
-
-    private Charset charset;
 
 
     @Override
@@ -47,25 +42,11 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         return result.getPlaintext().array();
     }
 
-    @Override
-    public String encode(byte[] data) {
-        return BaseEncoding.base64Url().encode(data);
-    }
-
-    @Override
-    public byte[] decode(String data) {
-        return BaseEncoding.base64Url().decode(data);
-    }
-
 
     public KMSCMKClientHelperImpl(String keyIdArn) {
-        this(keyIdArn, StandardCharsets.UTF_8);
+        this.cmkKeyIdArn = keyIdArn;
     }
 
-    public KMSCMKClientHelperImpl(String keyIdArn, Charset charset) {
-        this.cmkKeyIdArn = keyIdArn;
-        this.charset = charset;
-    }
 
     private AWSKMS kmsClient() {
         if (kmsClient == null) {
@@ -80,9 +61,6 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         return kmsClient;
     }
 
-    @Override
-    public Charset getCharset() {
-        return charset;
-    }
+
 
 }
