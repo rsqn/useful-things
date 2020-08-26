@@ -4,7 +4,9 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import tech.rsqn.useful.things.kmshelper.Base64ClientHelper;
 import tech.rsqn.useful.things.kmshelper.Base64ClientHelperImpl;
+import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelper;
 import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
 
 import java.nio.ByteBuffer;
@@ -16,8 +18,8 @@ public class KMSCMKClientHelperTest {
 //    private String cmkArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
     private String dekKeyTest = "7eb3153e4af392e4b793b8219fbba0eda2c8e50607972db35ca338a66b9a9573";
 
-    private KMSCMKClientHelperImpl kmsCmkClientHelper;
-    private Base64ClientHelperImpl base64ClientHelper;
+    private KMSCMKClientHelper kmsCmkClientHelper;
+    private Base64ClientHelper base64ClientHelper;
 
     @BeforeClass
     public void setUp() {

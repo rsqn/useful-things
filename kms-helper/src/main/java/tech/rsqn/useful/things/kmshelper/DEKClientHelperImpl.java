@@ -19,12 +19,12 @@ public class DEKClientHelperImpl implements DEKClientHelper {
 
     @Override
     public byte[] encrypt(byte[] plainTextData) {
-        return new byte[0];
+        return aesEncryptionTool.encrypt(plainTextData);
     }
 
     @Override
     public byte[] decrypt(byte[] cryptTextData) {
-        return new byte[0];
+        return aesEncryptionTool.decrypt(cryptTextData);
     }
 
     public byte[] getKey() {
