@@ -1,18 +1,20 @@
 package tech.rsqn.useful.things.kmshelper;
 
-import java.nio.charset.Charset;
+import com.amazonaws.services.kms.model.AliasListEntry;
+import com.amazonaws.services.kms.model.GenerateDataKeyResult;
+
+import java.util.List;
 
 public interface KMSCMKClientHelper {
-
-
 
     byte[] encrypt(byte[] plainTextDEK);
 
     byte[] decrypt(byte[] cryptTextDEK);
 
-    String encode(byte[] data);
+    GenerateDataKeyResult generateDataKey();
 
-    byte[] decode(String data);
+    byte[] generateRandom(int noBytes);
 
-    Charset getCharset();
+    List<AliasListEntry> listAliases();
+
 }
