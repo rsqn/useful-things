@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-kms</artifactId>
-            <version>1.11.846</version>
+            <version>1.11.856</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

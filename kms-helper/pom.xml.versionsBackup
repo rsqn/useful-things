@@ -8,11 +8,11 @@
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
-    <artifactId>simple-utilities</artifactId>
+    <artifactId>kms-helper</artifactId>
     <version>1.0.49-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>simple-utilities</name>
+    <name>kms-helper</name>
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
     <url>https://github.com/rsqn/useful-things</url>
 
@@ -36,33 +36,22 @@
     <dependencies>
         <!--Project Dependencies-->
         <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>1.3.8</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-            <version>${aopalliance.version}</version>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
-            <version>${aws.java.sdk.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>3.0.2</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
 
         <!--Compile Dependencies-->
@@ -71,19 +60,24 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!--Test Dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-kms</artifactId>
+            <version>1.11.846</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>tech.rsqn.useful-things</groupId>
+            <artifactId>encryption-utilities</artifactId>
+            <version>1.0.49-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
