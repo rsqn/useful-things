@@ -25,8 +25,6 @@ public class LocalFileHandle extends FileHandle implements Serializable {
             ext = "";
         }
 
-//        ret.setExtension(ext);
-
         try {
             ret.setMimeType(Files.probeContentType(f.toPath()));
         } catch (IOException e) {
@@ -34,14 +32,6 @@ public class LocalFileHandle extends FileHandle implements Serializable {
         }
         ret.file = f;
         return ret;
-    }
-
-    public InputStream openInputStream() {
-        try {
-            return new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -78,11 +68,6 @@ public class LocalFileHandle extends FileHandle implements Serializable {
         throw new UnsupportedOperationException("no soup for you");
     }
 
-//    @Override
-//    public String getExtension() {
-//        return extension;
-//    }
-
     public void close() {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -99,5 +84,15 @@ public class LocalFileHandle extends FileHandle implements Serializable {
             IOUtils.closeQuietly(is);
         }
         return "failure" + System.currentTimeMillis();
+    }
+
+    @Override
+    public InputStream asInputStream() {
+        try {
+            return new FileInputStream(file);
+        }
+        catch(Exception ex) {
+            throw new RuntimeException(String.format("Local file is imaginary - %s", ex.toString()));
+        }
     }
 }
