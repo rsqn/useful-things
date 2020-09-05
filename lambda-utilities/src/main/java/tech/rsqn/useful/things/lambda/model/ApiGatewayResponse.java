@@ -6,7 +6,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -60,7 +62,7 @@ public class ApiGatewayResponse {
 
     public static class Builder {
 
-        private static final Logger LOG = Logger.getLogger(ApiGatewayResponse.Builder.class);
+        private static final Logger LOG = LoggerFactory.getLogger(ApiGatewayResponse.Builder.class);
 
         private static final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -5,13 +5,16 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Component;
 
 
 @Component
 public abstract class AbstractLambdaDynamoService<C, R> extends  AbstractLambdaSpringService<C, R> {
-    private static final Logger LOG = Logger.getLogger(AbstractLambdaDynamoService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractLambdaDynamoService.class);
 
     protected AmazonDynamoDB dynamodb = null;
     protected DynamoDBMapper mapper = null;
