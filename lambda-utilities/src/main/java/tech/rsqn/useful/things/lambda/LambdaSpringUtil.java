@@ -1,6 +1,8 @@
 package tech.rsqn.useful.things.lambda;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -11,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * Utility to wire in spring when using lambda functions
  */
 public class LambdaSpringUtil {
-    private static final Logger LOG = Logger.getLogger(LambdaSpringUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LambdaSpringUtil.class);
     private static Object lck = new Object();
 
     private static String globalRootContextPath = "/spring/app-ctx.xml";

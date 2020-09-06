@@ -94,4 +94,14 @@ public class FileSystemFileHandle extends FileHandle {
     public Map<String, String> getMeta() {
         return new HashMap<>();  // Has no meta that is not apart of FileHandle
     }
+
+    @Override
+    public InputStream asInputStream() {
+        try {
+            return new FileInputStream(tld);
+        }
+        catch(Exception ex) {
+            throw new RuntimeException(String.format("Local file is imaginary - %s", ex.toString()));
+        }
+    }
 }

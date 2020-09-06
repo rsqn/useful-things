@@ -79,6 +79,10 @@ public class FileHandle {
         throw new UnsupportedOperationException("This class must be extended");
     }
 
+    public InputStream asInputStream() {
+        throw new UnsupportedOperationException("This class must be extended");
+    }
+
     @Override
     public String toString() {
         return "FileHandle{" +

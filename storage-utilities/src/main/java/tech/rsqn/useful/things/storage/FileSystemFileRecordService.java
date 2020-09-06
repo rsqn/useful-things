@@ -20,17 +20,29 @@ public class FileSystemFileRecordService implements FileRecordService {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private static final Map<String, String> cache = new Hashtable<String, String>();
+    private String root;
 
+    public FileSystemFileRecordService(String fsRoot) {
+        root = fsRoot;
+    }
 
+    public FileSystemFileRecordService() {
+        root = System.getProperty("java.io.tmpdir");
+    }
+
+    @Override
+    public String toString() {
+        return String.format("FileSystemFileRecordService({})", root);
+    }
+
+    @Override
     public FileHandle createNew(String name, String mimeType) {
         FileSystemFileHandle handle = new FileSystemFileHandle();
         handle.setUid(UUID.randomUUID().toString());
         handle.setName(name);
         handle.setMimeType(mimeType);
 
-        String tld = System.getProperty("java.io.tmpdir");
-
-        File tldFile = new File(tld);
+        File tldFile = new File(getFullPath("", name));
         if ( ! tldFile.exists()) {
             tldFile.mkdirs();
         }
@@ -59,36 +71,57 @@ public class FileSystemFileRecordService implements FileRecordService {
         }
     }
 
+    @Override
     public FileHandle getByUid (String uid) {
-        FileSystemFileHandle handle = new FileSystemFileHandle();
-        handle.setUid(uid);
-        String tld = System.getProperty("java.io.tmpdir");
-        File tldFile = new File(tld);
-        handle.setTld(tldFile);
-        handle.loadMeta();
-        return handle;
+        return getByUidAndPath("", uid);
     }
 
     @Override
     public FileHandle getByUidAndPath(String path, String uid) {
         FileSystemFileHandle handle = new FileSystemFileHandle();
         handle.setUid(uid);
-        String tld = System.getProperty("java.io.tmpdir");
-        File tldFile = new File(tld);
-        tldFile = new File(tldFile,path);
-
+        File tldFile = new File(getFullPath(path, uid));
         handle.setTld(tldFile);
-        handle.loadMeta();
+        // generate and load metadata for files that don't exist
+        // real file are to be returned as is
+        if (!tldFile.exists())
+            handle.loadMeta();
         return handle;
+    }
+
+    private String getFullPath(String path, String uid) {
+        if (path != null) {
+            return String.format("%s/%s/%s", root, path, uid);
+        } else {
+            return String.format("%s/%s", root, uid);
+        }
     }
 
     @Override
     public void getAll(FileIterator fileIterator) {
-        throw new NotImplementedException();
+        getAllByPath("", fileIterator);
     }
 
     @Override
     public void getAllByPath(String path, FileIterator fileIterator) {
+        File dir = new File(getFullPath(root, path));
+        for (String file : dir.list()) {
+            FileHandle fileHandle = getByUid(file);
+            if (!fileIterator.onfileHandle(fileHandle)) {
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void copy(String fromUid, String toUid)
+    {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void copyTo(String fromUid, FileRecordService toSrv, String toUid)
+    {
         throw new NotImplementedException();
     }
 }

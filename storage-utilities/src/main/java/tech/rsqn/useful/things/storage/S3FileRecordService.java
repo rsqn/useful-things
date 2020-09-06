@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.storage;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -10,6 +12,13 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.lang.IllegalArgumentException;
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,36 +28,68 @@ import java.util.UUID;
 
 public class S3FileRecordService implements FileRecordService {
     private Logger log = LoggerFactory.getLogger(getClass());
+    
     private AmazonS3 s3c;
-    private Map<String, String> properties;
-    private Map<String, Bucket> bucketMap;
-    private String bucketName;
-//    private SSECustomerKey sseCustomerKey = null;
-    private String sseCustomerAlgorithm = null;
-    private Region region;
     private String defaultPath = null;
+    private String bucketName = null;
+    private String regionName = null;
+    private String accessKey = null;
+    private String accessSecret = null;
 
     public S3FileRecordService() {
-        bucketMap = new HashMap<>();
     }
 
     public String getBucketName() {
         return bucketName;
     }
 
-    public void setBucketName(String bucketName) {
-        this.bucketName = bucketName;
+    public void setBucketName(String bucket) {
+        if (bucket.startsWith("s3://")) {
+            bucket = bucket.substring(5);
+        }
+        this.bucketName = bucket;
     }
 
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
+    public String getRegionName() {
+        return regionName;
     }
 
-    public void setDefaultPath(String defaultPath) {
-        this.defaultPath = defaultPath;
+    public void setRegionName(String region) {
+        this.regionName = region;
     }
 
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String key) {
+        this.accessKey = key;
+    }
+
+    public String getAccessSecret() {
+        return accessSecret;
+    }
+
+    public void setAccessSecret(String secret) {
+        this.accessSecret = secret;
+    }
+
+    public AmazonS3 getClient() {
+        return s3c;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("S3FileRecordService(%s)", bucketName);
+    }
+
+    @PostConstruct
     public void connect() {
+        // make sure we're given bucket name before proceeding
+        if (bucketName == null) {
+            throw new IllegalArgumentException("Property 'bucketName' must be set for S3FileRecordService");
+        }
+
         ClientConfiguration clientConfig = null;
 
         if (System.getProperty("proxyHost") != null) {
@@ -58,33 +99,19 @@ public class S3FileRecordService implements FileRecordService {
             clientConfig.setProxyPort(Integer.parseInt(System.getProperty("proxyPort")));
         }
 
-        if (properties.containsKey("SSECustomerKey")) {
-            // this is to make it compatible with node
-            try {
-                String keyString = properties.get("SSECustomerKey");
-                byte[] key = keyString.getBytes();
-                log.info("Key length " + key.length);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
+        if (clientConfig != null) {
+            builder = builder.withClientConfiguration(clientConfig);
         }
-        if (properties.containsKey("SSECustomerAlgorithm")) {
-            sseCustomerAlgorithm = properties.get("SSECustomerAlgorithm");
+        if (this.accessSecret != null && this.accessKey != null) {
+            builder = builder.withCredentials(
+                new AWSStaticCredentialsProvider(
+                    new BasicAWSCredentials(this.accessKey, this.accessSecret)));
         }
-
-        if (clientConfig == null) {
-            s3c = AmazonS3ClientBuilder.standard().build();
-        } else {
-            s3c = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig).build();
+        if (this.regionName != null) {
+            builder = builder.withRegion(Regions.fromName(this.regionName));
         }
-
-
-        if (properties.get("region") != null) {
-            region = Region.getRegion(Regions.fromName(properties.get("region")));
-            s3c.setRegion(region);
-        }
-
+        s3c = builder.build();
     }
 
     private ObjectMetadata requestMetadata(String bucketName, String uid) {
@@ -109,8 +136,6 @@ public class S3FileRecordService implements FileRecordService {
         handle.setMimeType(mimeType);
         handle.setBucketName(bucketName);
         handle.setS3client(s3c);
-//        handle.setSseCustomerAlgorithm(sseCustomerAlgorithm);
-//        handle.setSseCustomerKey(sseCustomerKey);
         handle.setResourcePath(defaultPath);
         return handle;
     }
@@ -154,12 +179,9 @@ public class S3FileRecordService implements FileRecordService {
         handle.setUid(uid);
         handle.setName(meta.getUserMetadata().get("name"));
         handle.setMimeType(meta.getContentType());
-//        handle.setBucket(bucket);
         handle.setResourcePath(path);
         handle.setBucketName(bucketName);
         handle.setS3client(s3c);
-//        handle.setSseCustomerAlgorithm(sseCustomerAlgorithm);
-//        handle.setSseCustomerKey(sseCustomerKey);
 
         return handle;
 
@@ -170,18 +192,42 @@ public class S3FileRecordService implements FileRecordService {
         try{
             for ( S3ObjectSummary summary : S3Objects.withPrefix(s3c, bucketName, path) ) {
                 // S3Objects iterator handles pagination
+                if (summary.getSize() <= 0) {
+                    log.info("Skipping empty key {}", summary.getKey());
+                    continue;
+                }
                 FileHandle fileHandle = getByUid(summary.getKey());
                 if (!fileIterator.onfileHandle(fileHandle)) {
                     return;
                 }
             }
-        } catch (Exception e){
-            log.error("Problem with getAll", e);
+        } catch (Exception e) {
+            log.error("Failed to list S3 bucket {} content - {}", bucketName, e.toString());
         }
     }
 
     @Override
     public void getAll(FileIterator fileIterator) {
         getAllByPath(defaultPath, fileIterator);
+    }
+
+    @Override
+    public void copy(String fromUid, String toUid)
+    {
+        copyTo(fromUid, this, toUid);
+    }
+
+    @Override
+    public void copyTo(String fromUid, FileRecordService toSrv, String toUid)
+    {
+        // The copy operation is performed by the destination [toSrv] service since it is
+        // expected to have credentials for the target bucket access
+        if (!(toSrv instanceof S3FileRecordService)) {
+            throw new IllegalArgumentException("Destination service must be instance of S3FileRecordService");
+        }
+
+        S3FileRecordService dst = (S3FileRecordService)toSrv;
+        CopyObjectRequest copyObjRequest = new CopyObjectRequest(bucketName, fromUid, dst.getBucketName(), toUid);
+        dst.getClient().copyObject(copyObjRequest);
     }
 }

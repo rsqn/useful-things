@@ -6,13 +6,16 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Component;
 
 
 @Component
 public abstract class AbstractDynamoBackedService {
-    private static final Logger LOG = Logger.getLogger(AbstractDynamoBackedService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamoBackedService.class);
 
     protected AmazonDynamoDB dynamodb = null;
     protected DynamoDBMapper mapper = null;

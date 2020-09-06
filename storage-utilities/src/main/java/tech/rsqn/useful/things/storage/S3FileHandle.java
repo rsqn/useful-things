@@ -121,18 +121,16 @@ public class S3FileHandle extends FileHandle {
     }
 
     @Override
-    public long streamOut(OutputStream os) {
+    public InputStream asInputStream() {
         GetObjectRequest request = new GetObjectRequest(bucketName, getFullPath());
-
-//        if (sseCustomerKey != null) {
-//            request.withSSECustomerKey(sseCustomerKey);
-//        }
-
         S3Object obj = s3client.getObject(request);
-        S3ObjectInputStream is = obj.getObjectContent();
+        return obj.getObjectContent();
+    }
 
+    @Override
+    public long streamOut(OutputStream os) {
         try {
-            long ret = IOUtils.copy(is, os);
+            long ret = IOUtils.copy(asInputStream(), os);
             return ret;
         } catch (IOException e) {
             throw new RuntimeException("Exception copying stream " + e.getMessage(), e);
