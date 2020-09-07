@@ -1,29 +1,23 @@
 package tech.rsqn.useful.things.storage;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.regions.Region;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.iterable.S3Objects;
-import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.lang.IllegalArgumentException;
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+
+
+
 import java.util.UUID;
 
 public class S3FileRecordService implements FileRecordService {

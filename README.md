@@ -1,6 +1,37 @@
 # useful-things
 This is a container of utilities to support rsqn open source projects.
 
-It may be broken up in future however putting these tools in one bucket prevents a proliferation of dependencies that contain very little.
+Build status: [![build_status](https://travis-ci.org/github/rsqn/useful-things?branch=develop)](https://travis-ci.org/github/rsqn/useful-things)
+
+
+
+#abstraction-models
+
+
+#application-utilities
+
+#cache-service
+
+
+#embedded-jetty
+
+
+#encryption-utilities
+
+
+#kms-helper
+
+
+#lambda-utilities
+
+
+#simple-utilities
+
+
+#web-utilities
+
+
+
+
 
 

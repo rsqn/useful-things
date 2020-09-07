@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransparentCacheExecutionBehaviour {
-    private static Logger log = LoggerFactory.getLogger(TransparentCacheExecutionBehaviour.class);
+    //private static Logger log = LoggerFactory.getLogger(TransparentCacheExecutionBehaviour.class);
     public static final ThreadLocal<CacheBehaviour> threadLocal = new ThreadLocal();
 
     public static CacheBehaviour getBehaviour() {
@@ -24,17 +24,17 @@ public class TransparentCacheExecutionBehaviour {
     }
 
     public static void clearCacheAfterReads() {
-        log.info("Changing cache behaviour to clearCacheAfterReads");
+        //log.info("Changing cache behaviour to clearCacheAfterReads");
         getBehaviour().clearCacheAfterRead();
     }
 
     public static void returnIfItemIsNotCached() {
-        log.info("Changing cache behaviour to returnIfItemIsNotCached");
+        //log.info("Changing cache behaviour to returnIfItemIsNotCached");
         getBehaviour().returnIfItemIsNotCached();
     }
 
     public static void enableDefaultBehaviour() {
-        log.info("Changing cache behaviour to enableDefaultBehaviour");
+        //log.info("Changing cache behaviour to enableDefaultBehaviour");
         getBehaviour().enableDefaultBehaviour();
     }
 }
