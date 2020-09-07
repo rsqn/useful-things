@@ -4,16 +4,16 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.50-SNAPSHOT</version>
+        <version>1.0.48</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
-    <artifactId>simple-utilities</artifactId>
-    <version>1.0.50-SNAPSHOT</version>
+    <artifactId>web-utilities</artifactId>
+    <version>1.0.48</version>
     <packaging>jar</packaging>
 
-    <name>simple-utilities</name>
-    <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
+    <name>web-utilities</name>
+    <description>Simple web utilities</description>
     <url>https://github.com/rsqn/useful-things</url>
 
     <licenses>
@@ -34,37 +34,6 @@
 
 
     <dependencies>
-        <!--Project Dependencies-->
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.codahale.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!--Compile Dependencies-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -72,9 +41,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <scope>provided</scope>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <!--Test Dependencies-->
@@ -84,6 +52,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 
