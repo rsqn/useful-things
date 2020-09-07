@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.50-SNAPSHOT</version>
+    <version>1.0.48</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -39,17 +39,13 @@
         <tag>useful-things-1.0.48</tag>
     </scm>
 
-    <properties>
-        <aws.sdk.version>1.11.856</aws.sdk.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
 
             <!-- Own -->
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
-                <version>1.0.50-SNAPSHOT</version>
+                <version>1.0.48</version>
                 <artifactId>simple-utilities</artifactId>
             </dependency>
             <dependency>
@@ -62,43 +58,29 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk</artifactId>
-                <version>${aws.sdk.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-kms</artifactId>
-                <version>${aws.sdk.version}</version>
+                <version>1.11.420</version>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
-                <version>2.2.9</version>
+                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-core</artifactId>
-                <version>1.2.1</version>
+                <version>1.1.0</version>
             </dependency>
             <dependency>
                 <groupId>com.amazon.alexa</groupId>
                 <artifactId>ask-sdk</artifactId>
-                <version>2.33.0</version>
+                <version>2.25.1</version>
             </dependency>
-
 
             <!-- TestNG -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.9.10</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>3.5.10</version>
-                <scope>test</scope>
             </dependency>
             
             <!-- Spring + Boot -->
@@ -334,7 +316,6 @@
         <module>storage-utilities</module>
         <module>lambda-utilities</module>
         <module>cache-service</module>
-        <module>kms-helper</module>
     </modules>
 
 </project>
