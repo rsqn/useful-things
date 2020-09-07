@@ -16,6 +16,7 @@ import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,7 +136,7 @@ public abstract class SpringBootLambdaWrapper {
 
                     @Override
                     public void log(byte[] bytes) {
-                        LOG.info(toString());
+                        LOG.info(new String(bytes, StandardCharsets.UTF_8));
                     }
                 };
             }
