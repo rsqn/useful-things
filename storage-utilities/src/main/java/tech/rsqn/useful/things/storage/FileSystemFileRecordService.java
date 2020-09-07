@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,6 +23,9 @@ public class FileSystemFileRecordService implements FileRecordService {
 
     public FileSystemFileRecordService(String fsRoot) {
         root = fsRoot;
+        if (!root.endsWith("/")) {
+            root = String.format("%s/", root);
+        }
     }
 
     public FileSystemFileRecordService() {
@@ -103,12 +106,20 @@ public class FileSystemFileRecordService implements FileRecordService {
 
     @Override
     public void getAllByPath(String path, FileIterator fileIterator) {
-        File dir = new File(getFullPath(root, path));
-        for (String file : dir.list()) {
-            FileHandle fileHandle = getByUid(file);
-            if (!fileIterator.onfileHandle(fileHandle)) {
-                return;
+        try {
+            List<FileHandle> handles = new ArrayList<FileHandle>();
+            Files.walk(Paths.get(getFullPath(path, "")))
+                    .filter(Files::isRegularFile)
+                    .forEach(i -> handles.add(getByUid(i.toString().replace(root, ""))));
+
+            for (FileHandle h : handles) {
+                if (!fileIterator.onfileHandle(h)) {
+                    return;
+                }
             }
+        }
+        catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 
