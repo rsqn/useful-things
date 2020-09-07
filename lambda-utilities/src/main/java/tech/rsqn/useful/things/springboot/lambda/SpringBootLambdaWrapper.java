@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.*;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -124,8 +125,14 @@ public abstract class SpringBootLambdaWrapper {
 
             public LambdaLogger getLogger() {
                 return new LambdaLogger() {
+
                     public void log(String s) {
                         LOG.info(s);
+                    }
+
+                    @Override
+                    public void log(byte[] bytes) {
+                        LOG.info(toString());
                     }
                 };
             }

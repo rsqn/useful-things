@@ -2,7 +2,6 @@ package tech.rsqn.useful.things.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -116,12 +115,12 @@ public class FileSystemFileRecordService implements FileRecordService {
     @Override
     public void copy(String fromUid, String toUid)
     {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void copyTo(String fromUid, FileRecordService toSrv, String toUid)
     {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 }

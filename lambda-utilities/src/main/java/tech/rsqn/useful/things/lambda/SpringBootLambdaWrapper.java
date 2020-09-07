@@ -132,6 +132,11 @@ public abstract class SpringBootLambdaWrapper {
                     public void log(String s) {
                         LOG.info(s);
                     }
+
+                    @Override
+                    public void log(byte[] bytes) {
+                        LOG.info(toString());
+                    }
                 };
             }
         };
