@@ -62,6 +62,11 @@
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-kms</artifactId>
+                <version>1.11.420</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
                 <version>2.0.1</version>
             </dependency>
@@ -76,11 +81,20 @@
                 <version>2.25.1</version>
             </dependency>
 
+
             <!-- TestNG -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.9.10</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>3.5.10</version>
+                <scope>test</scope>
             </dependency>
             
             <!-- Spring + Boot -->
