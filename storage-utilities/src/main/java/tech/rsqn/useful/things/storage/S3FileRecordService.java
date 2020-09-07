@@ -17,7 +17,6 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.IllegalArgumentException;
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +82,6 @@ public class S3FileRecordService implements FileRecordService {
         return String.format("S3FileRecordService(%s)", bucketName);
     }
 
-    @PostConstruct
     public void connect() {
         // make sure we're given bucket name before proceeding
         if (bucketName == null) {
