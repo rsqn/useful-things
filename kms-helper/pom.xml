@@ -73,7 +73,7 @@
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>encryption-utilities</artifactId>
-            <version>1.0.48-SNAPSHOT</version>
+            <version>1.0.50-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
