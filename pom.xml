@@ -36,7 +36,7 @@
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
         <url>https://github.com/mandrewes/useful-things</url>
-        <tag>useful-things-1.0.48</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
