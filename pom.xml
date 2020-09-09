@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.54-SNAPSHOT</version>
+    <version>1.0.55-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -49,7 +49,7 @@
             <!-- Own -->
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
-                <version>1.0.54-SNAPSHOT</version>
+                <version>1.0.55-SNAPSHOT</version>
                 <artifactId>simple-utilities</artifactId>
             </dependency>
             <dependency>

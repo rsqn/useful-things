@@ -7,10 +7,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.iterable.S3Objects;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,6 +214,7 @@ public class S3FileRecordService implements FileRecordService {
 
         S3FileRecordService dst = (S3FileRecordService)toSrv;
         CopyObjectRequest copyObjRequest = new CopyObjectRequest(bucketName, fromUid, dst.getBucketName(), toUid);
+        copyObjRequest.setCannedAccessControlList(CannedAccessControlList.BucketOwnerFullControl);
         dst.getClient().copyObject(copyObjRequest);
     }
 }
