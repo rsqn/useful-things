@@ -105,6 +105,7 @@ public class S3FileHandle extends FileHandle {
         }
 
         PutObjectRequest request = new PutObjectRequest(bucketName, getFullPath(), is, metadata);
+        request.setCannedAcl(CannedAccessControlList.BucketOwnerFullControl);
 
 //        if (sseCustomerKey != null) {
 //            request.withSSECustomerKey(sseCustomerKey);
