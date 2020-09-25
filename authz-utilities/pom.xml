@@ -8,12 +8,12 @@
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
-    <artifactId>web-utilities</artifactId>
+    <artifactId>authz-utilities</artifactId>
     <version>1.0.57-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>web-utilities</name>
-    <description>Simple web utilities</description>
+    <name>authz-utilities</name>
+    <description>Identity, Authentication, Authorization, Sessions</description>
     <url>https://github.com/rsqn/useful-things</url>
 
     <licenses>
@@ -47,10 +47,6 @@
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>cache-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
         </dependency>
 
         <!--Test Dependencies-->

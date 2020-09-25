@@ -11,17 +11,17 @@ import java.io.Serializable;
 public class NoOpCacheService
         implements CacheService {
     @Override
-    public <V extends Serializable> void put(String key, V value) {
+    public <V> void put(String key, V value) {
 
     }
 
     @Override
-    public <V extends Serializable> void putWithTTL(String key, V value, int timeToLiveSeconds) {
+    public <V> void putWithTTL(String key, V value, long ttlMs) {
 
     }
 
     @Override
-    public <V extends Serializable> V get(String  key) {
+    public <V> V get(String  key) {
         return null;
     }
 

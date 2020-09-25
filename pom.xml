@@ -49,8 +49,13 @@
             <!-- Own -->
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
-                <version>1.0.57-SNAPSHOT</version>
                 <artifactId>simple-utilities</artifactId>
+                <version>1.0.57-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.rsqn.useful-things</groupId>
+                <artifactId>cache-service</artifactId>
+                <version>1.0.57-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
@@ -327,6 +332,7 @@
 
     <modules>
         <module>simple-utilities</module>
+        <module>authz-utilities</module>
         <module>embedded-jetty</module>
         <module>web-utilities</module>
         <module>application-utilities</module>

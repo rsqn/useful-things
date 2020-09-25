@@ -7,12 +7,12 @@ import java.io.Serializable;
 
 public interface CacheService {
 
-    <V extends Serializable>  void put(String key, V value);
+    <V> void put(String key, V value);
 
 
-    <V extends Serializable>  void putWithTTL(String key, V value, int timeToLiveSeconds);
+    <V> void putWithTTL(String key, V value, long ttlMs);
 
-    <V extends Serializable> V get(String key);
+    <V> V get(String key);
 
     int remove(String key);
 
