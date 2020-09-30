@@ -84,4 +84,14 @@ public class RandomUtil {
         return (long) (frac + lo);
     }
 
+    public static double getRange(double lo, double hi) {
+        if (lo > hi) {
+            throw new IllegalArgumentException("lo > hi");
+        }
+        double range = hi -  lo + 1;
+        double frac = (range * g_rn.nextDouble());
+        return (frac + lo);
+    }
+
+
 }

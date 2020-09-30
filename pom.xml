@@ -310,6 +310,12 @@
                 <version>2.2.2</version>
             </dependency>
 
+            <dependency>
+                <groupId>me.lemire.integercompression</groupId>
+                <artifactId>JavaFastPFOR</artifactId>
+                <version>[0.1,)</version>
+            </dependency>
+
             <!-- Logging -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -333,6 +339,8 @@
     <modules>
         <module>simple-utilities</module>
         <module>authz-utilities</module>
+        <module>math-and-data</module>
+
         <module>embedded-jetty</module>
         <module>web-utilities</module>
         <module>application-utilities</module>
