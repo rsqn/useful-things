@@ -4,7 +4,7 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>rsqn-oss-super-pom</artifactId>
-        <version>0.0.7</version>
+        <version>0.0.9</version>
     </parent>
 
     <groupId>tech.rsqn</groupId>
@@ -77,7 +77,7 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
-                <version>2.2.9</version>
+                <version>3.7.0</version>
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
@@ -87,7 +87,7 @@
             <dependency>
                 <groupId>com.amazon.alexa</groupId>
                 <artifactId>ask-sdk</artifactId>
-                <version>2.33.0</version>
+                <version>2.37.1</version>
             </dependency>
 
 
@@ -95,14 +95,14 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.9.10</version>
+                <version>7.3.0</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.5.10</version>
+                <version>3.8.0</version>
                 <scope>test</scope>
             </dependency>
             
@@ -110,83 +110,83 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-aop</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-oxm</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.integration</groupId>
                 <artifactId>spring-integration-bom</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.4.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.4.5</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context-support</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-expression</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
-                <version>5.1.17.RELEASE</version>
+                <version>5.3.4</version>
             </dependency>
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.1.16.RELEASE</version>
+                <version>2.4.3</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
-                <version>2.1.16.RELEASE</version>
+                <version>2.4.3</version>
             </dependency>
             
 
@@ -194,27 +194,27 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>4.0.0-b01</version>
+                <version>4.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
-                <version>9.4.17.v20190418</version>
+                <version>11.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.websocket</groupId>
                 <artifactId>javax-websocket-server-impl</artifactId>
-                <version>9.3.0.M1</version>
+                <version>9.4.37.v20210219</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-webapp</artifactId>
-                <version>9.3.0.M1</version>
+                <version>11.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
-                <version>9.3.0.M1</version>
+                <version>11.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
@@ -224,70 +224,70 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlets</artifactId>
-                <version>9.3.0.M1</version>
+                <version>11.0.1</version>
             </dependency>
             <dependency>
                 <groupId>javax.websocket</groupId>
                 <artifactId>javax.websocket-api</artifactId>
-                <version>1.0</version>
+                <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.websocket</groupId>
                 <artifactId>javax-websocket-client-impl</artifactId>
-                <version>9.3.0.M1</version>
+                <version>9.4.37.v20210219</version>
             </dependency>
 
             <!-- Apache stuff -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.5</version>
+                <version>3.11</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.5</version>
+                <version>20030203.000550</version>
             </dependency>
 
             <!-- Bouncycastle -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.57</version>
+                <version>1.68</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-ext-jdk15on</artifactId>
-                <version>1.57</version>
+                <version>1.68</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk15on</artifactId>
-                <version>1.57</version>
+                <version>1.68</version>
             </dependency>
 
             <!-- Google stuff -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>22.0</version>
+                <version>30.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.2.2</version>
+                <version>2.8.6</version>
             </dependency>
 
             <!-- Etc -->
             <dependency>
                 <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
-                <version>1.6.2</version>
+                <version>1.9.6</version>
             </dependency>
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
-                <version>0.9.8</version>
+                <version>0.9.12</version>
             </dependency>
             <dependency>
                 <groupId>aopalliance</groupId>
@@ -297,7 +297,7 @@
             <dependency>
                 <groupId>io.reactivex</groupId>
                 <artifactId>rxjava</artifactId>
-                <version>1.1.6</version>
+                <version>1.3.8</version>
             </dependency>
             <dependency>
                 <groupId>com.codahale.metrics</groupId>
@@ -307,30 +307,30 @@
             <dependency>
                 <groupId>cglib</groupId>
                 <artifactId>cglib-nodep</artifactId>
-                <version>2.2.2</version>
+                <version>3.3.0</version>
             </dependency>
 
             <dependency>
                 <groupId>me.lemire.integercompression</groupId>
                 <artifactId>JavaFastPFOR</artifactId>
-                <version>[0.1,)</version>
+                <version>0.1.12</version>
             </dependency>
 
             <!-- Logging -->
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.12.1</version>
+                <version>2.14.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.12.1</version>
+                <version>2.14.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.12.1</version>
+                <version>2.14.0</version>
             </dependency>
 
         </dependencies>

@@ -15,9 +15,6 @@ import java.nio.channels.FileChannel;
  */
 public class FileUtil {
 
-    public static byte[] readFileToByteArray(File f) throws IOException {
-        return FileUtils.readFileToByteArray(f);
-    }
 
     public static void copy(File input, File output) throws URISyntaxException, IOException {
         copy(new URI("file://" + input.getAbsolutePath()), output);
@@ -84,7 +81,7 @@ public class FileUtil {
 
     public static String readFileToString(File f) {
         try {
-            return FileUtils.readFileToString(f);
+            return FileUtils.fileRead(f.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("IOException " + e, e);
         }
@@ -92,8 +89,8 @@ public class FileUtil {
 
     public static void writeStringToFile(File f, String data) {
         try {
-            FileUtils.writeStringToFile(f,data);
-        } catch (IOException e) {
+            FileUtils.fileWrite(f.getAbsolutePath(),data);
+        } catch (Exception e) {
             throw new RuntimeException("IOException " + e, e);
         }
     }
