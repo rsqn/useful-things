@@ -6,8 +6,6 @@ public interface DEKClientHelper {
 
     byte[] decrypt(byte[] cryptTextData);
 
-    String getKeyDEKArnOrAlias();
-
     byte[] getKey();
 
 }
