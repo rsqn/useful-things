@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 public class KMSCMKClientHelperTest {
 
-//    private String cmkArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
+    private String cmkArnTest = "arn:aws:kms:ap-southeast-2:258568400917:key/d6851a96-2eb2-4d77-9542-4e6a4f8850b4";
     private String dekKeyTest = "7eb3153e4af392e4b793b8219fbba0eda2c8e50607972db35ca338a66b9a9573";
 
     private KMSCMKClientHelper kmsCmkClientHelper;
@@ -30,14 +30,14 @@ public class KMSCMKClientHelperTest {
 
         byte[] encValue = "[B@68b58644".getBytes(base64ClientHelper.getCharset());
         byte[] value = "butter".getBytes(base64ClientHelper.getCharset());
-        when(kmsCmkClientHelper.encrypt("butter".getBytes(base64ClientHelper.getCharset())))
+        when(kmsCmkClientHelper.encrypt(cmkArnTest, "butter".getBytes(base64ClientHelper.getCharset())))
             .thenReturn(encValue);
         when(kmsCmkClientHelper.decrypt("[B@68b58644".getBytes(base64ClientHelper.getCharset())))
             .thenReturn(value);
 
         GenerateDataKeyResult gdkr = new GenerateDataKeyResult();
         gdkr.setPlaintext(ByteBuffer.wrap(Hex.decode(dekKeyTest)));
-        when(kmsCmkClientHelper.generateDataKey()).thenReturn(gdkr);
+        when(kmsCmkClientHelper.generateDataKey(cmkArnTest)).thenReturn(gdkr);
 
         when(kmsCmkClientHelper.generateRandom(2)).thenReturn(Hex.decode("99"));
     }
@@ -45,7 +45,7 @@ public class KMSCMKClientHelperTest {
     @Test
     public void encryptDecryptTest() {
 
-        byte[] encryptedButter = kmsCmkClientHelper.encrypt("butter".getBytes());
+        byte[] encryptedButter = kmsCmkClientHelper.encrypt(cmkArnTest, "butter".getBytes());
         byte[] butter = kmsCmkClientHelper.decrypt(encryptedButter);
 
         Assert.assertEquals(new String(butter, base64ClientHelper.getCharset()), "butter");
@@ -57,7 +57,7 @@ public class KMSCMKClientHelperTest {
     public void encodeEncryptDecryptDecodeTest() {
 
         byte[] encryptedButter =
-            kmsCmkClientHelper.encrypt("butter".getBytes(base64ClientHelper.getCharset()));
+            kmsCmkClientHelper.encrypt(cmkArnTest, "butter".getBytes(base64ClientHelper.getCharset()));
 
         String encodedEncryptedButter =
             base64ClientHelper.encode(encryptedButter);
@@ -70,7 +70,7 @@ public class KMSCMKClientHelperTest {
 
     @Test
     public void generateDataKeyTest() {
-        GenerateDataKeyResult result = kmsCmkClientHelper.generateDataKey();
+        GenerateDataKeyResult result = kmsCmkClientHelper.generateDataKey(cmkArnTest);
 
         Assert.assertEquals(result.getPlaintext().array(), Hex.decode(dekKeyTest));
     }

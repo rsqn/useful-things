@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface KMSCMKClientHelper {
 
-    byte[] encrypt(byte[] plainTextDEK);
+    byte[] encrypt(String kmsCMKArnAliasOrId, byte[] plainTextDEK);
 
     byte[] decrypt(byte[] cryptTextDEK);
 
-    GenerateDataKeyResult generateDataKey();
+    GenerateDataKeyResult generateDataKey(String kmsCMKArnAliasOrId);
 
     byte[] generateRandom(int noBytes);
 
