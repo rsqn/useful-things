@@ -4,12 +4,20 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
+<<<<<<< HEAD
         <version>1.0.49-SNAPSHOT</version>
+=======
+        <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>cache-service</artifactId>
+<<<<<<< HEAD
     <version>1.0.49-SNAPSHOT</version>
+=======
+    <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     <packaging>jar</packaging>
 
     <name>cache-service</name>
@@ -39,26 +47,28 @@
         <dependency>
             <groupId>tech.rsqn.reflection-helpers</groupId>
             <artifactId>reflection-helpers</artifactId>
-            <version>${reflection.helper.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>simple-utilities</artifactId>
+<<<<<<< HEAD
             <version>1.0.49-SNAPSHOT</version>
+=======
+            <scope>provided</scope>
+>>>>>>> master
         </dependency>
 
         <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -66,34 +76,39 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
+<<<<<<< HEAD
             <version>1.9.6</version>
+=======
+            <scope>provided</scope>
+>>>>>>> master
         </dependency>
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
-            <version>${aopalliance.version}</version>
+            <scope>provided</scope>
         </dependency>
 
+<<<<<<< HEAD
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -103,6 +118,11 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
+=======
+       <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+>>>>>>> master
         </dependency>
     </dependencies>
 

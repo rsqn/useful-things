@@ -6,20 +6,21 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
 
 
 public abstract class AbstractLambdaSpringService<C, R> implements RequestHandler<APIGatewayProxyRequestEvent, R> {
-    private static final Logger LOG = Logger.getLogger(AbstractLambdaSpringService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractLambdaSpringService.class);
 
     public AbstractLambdaSpringService() {
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
     }
 
     protected void wire(Object o) {

@@ -23,7 +23,11 @@ public class DEKClientHelperTest {
 
     @BeforeClass
     public void setUp() {
+<<<<<<< HEAD
         dekClientHelper = new DEKClientHelperImpl(Hex.decode(dekKeyTest), "TEST-pd-20200826");
+=======
+        dekClientHelper = new DEKClientHelperImpl(Hex.decode(dekKeyTest));
+>>>>>>> master
 
         base64ClientHelper = new Base64ClientHelperImpl();
 

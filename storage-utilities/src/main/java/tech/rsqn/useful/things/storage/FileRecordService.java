@@ -17,4 +17,8 @@ public interface FileRecordService {
 
     void getAllByPath(String path, FileIterator fileIterator);
 
+    void copy(String fromUid, String toUid);
+
+    void copyTo(String fromUid, FileRecordService toSrv, String toUid);
+
 }

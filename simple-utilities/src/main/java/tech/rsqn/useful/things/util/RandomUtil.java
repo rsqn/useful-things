@@ -2,6 +2,7 @@ package tech.rsqn.useful.things.util;
 
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +28,14 @@ public class RandomUtil {
         }
         return ret;
 
+    }
+
+    public static String getUid() {
+        UUID uid = UUID.randomUUID();
+        String s = uid.toString();
+        s = s.replace(':','_');
+        s = s.replace('-','_');
+        return s;
     }
 
     public static boolean acceptableChar(int value) {
@@ -74,5 +83,15 @@ public class RandomUtil {
         long frac = (long) (range * g_rn.nextDouble());
         return (long) (frac + lo);
     }
+
+    public static double getRange(double lo, double hi) {
+        if (lo > hi) {
+            throw new IllegalArgumentException("lo > hi");
+        }
+        double range = hi -  lo + 1;
+        double frac = (range * g_rn.nextDouble());
+        return (frac + lo);
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package tech.rsqn.cacheservice.support;
 
 import java.io.Serializable;
-
+import java.util.Objects;
 
 
 public class DefaultCacheEntryValue
@@ -9,9 +9,9 @@ public class DefaultCacheEntryValue
     private String key;
     private Object value;
     private long inserted;
-    private long timeToLiveSeconds;
+    private long timeToLiveMilliSeconds;
 
-    public static <T extends Serializable> DefaultCacheEntryValue with(String key,
+    public static <T> DefaultCacheEntryValue with(String key,
             final Object v) {
         DefaultCacheEntryValue ret = new DefaultCacheEntryValue();
         ret.key = key;
@@ -19,8 +19,8 @@ public class DefaultCacheEntryValue
         return ret;
     }
 
-    public DefaultCacheEntryValue andTimeToLiveSeconds(long ttl) {
-        this.timeToLiveSeconds = ttl;
+    public DefaultCacheEntryValue andTimeToLiveMilliseconds(long ttl) {
+        this.timeToLiveMilliSeconds = ttl;
         inserted = System.currentTimeMillis();
         return this;
     }
@@ -30,8 +30,8 @@ public class DefaultCacheEntryValue
     }
 
     public boolean isValid() {
-        if (timeToLiveSeconds > 0) {
-            return System.currentTimeMillis() < (inserted + timeToLiveSeconds * 1000);
+        if (timeToLiveMilliSeconds > 0) {
+            return System.currentTimeMillis() < (inserted + timeToLiveMilliSeconds);
         }
         return true;
     }
@@ -54,31 +54,20 @@ public class DefaultCacheEntryValue
         this.inserted = inserted;
     }
 
-    public long getTimeToLiveSeconds() {
-        return timeToLiveSeconds;
+    public long getTimeToLiveMilliSeconds() {
+        return timeToLiveMilliSeconds;
     }
 
-    public void setTimeToLiveSeconds(long timeToLiveSeconds) {
-        this.timeToLiveSeconds = timeToLiveSeconds;
+    public void setTimeToLiveMilliSeconds(long timeToLiveMilliSeconds) {
+        this.timeToLiveMilliSeconds = timeToLiveMilliSeconds;
     }
 
     @Override
-    public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
-        }
-
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         DefaultCacheEntryValue that = (DefaultCacheEntryValue) o;
-
-        if ((value != null) ? (!value.equals(that.value)) : (that.value != null)) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(value, that.value);
     }
 
     @Override

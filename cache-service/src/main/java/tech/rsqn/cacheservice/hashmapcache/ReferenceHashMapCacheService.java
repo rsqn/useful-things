@@ -4,8 +4,6 @@ import tech.rsqn.cacheservice.CacheService;
 import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
 import tech.rsqn.cacheservice.support.DefaultCacheEntryValue;
 
-import java.io.Serializable;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -64,18 +62,18 @@ public class ReferenceHashMapCacheService implements CacheService {
         return map.containsValue(DefaultCacheEntryValue.with("", value));
     }
 
-    public <V extends Serializable> void put(String key, V value) {
+    public <V > void put(String key, V value) {
         houseKeep();
         map.put(key, DefaultCacheEntryValue.with(key, value));
     }
 
     @Override
-    public <V extends Serializable> void putWithTTL(String key, V value, int timeToLiveSeconds) {
+    public <V > void putWithTTL(String key, V value, long timeToLiveSeconds) {
         houseKeep();
-        map.put(key, DefaultCacheEntryValue.with(key, value).andTimeToLiveSeconds(timeToLiveSeconds));
+        map.put(key, DefaultCacheEntryValue.with(key, value).andTimeToLiveMilliseconds(timeToLiveSeconds));
     }
 
-    public <V extends Serializable> V get(String key) {
+    public <V > V get(String key) {
         DefaultCacheEntryValue v = map.get(key);
 
         if (v != null) {
