@@ -27,15 +27,12 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
 
     private AWSKMS kmsClient;
 
-    private String keyCMKArn; // CMK Key Id ARN
-
-
     @Override
-    public byte[] encrypt(byte[] plainText) {
+    public byte[] encrypt(String kmsCMKArnAliasOrId, byte[] plainText) {
 
         ByteBuffer wrappedPlainText = ByteBuffer.wrap(plainText);
 
-        EncryptRequest request = new EncryptRequest().withKeyId(keyCMKArn).withPlaintext(wrappedPlainText);
+        EncryptRequest request = new EncryptRequest().withKeyId(retrieveKeyArnFromArnOrAlias(kmsCMKArnAliasOrId)).withPlaintext(wrappedPlainText);
         EncryptResult result = kmsClient().encrypt(request);
 
         return result.getCiphertextBlob().array();
@@ -50,10 +47,11 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         return result.getPlaintext().array();
     }
 
+
     @Override
-    public GenerateDataKeyResult generateDataKey() {
+    public GenerateDataKeyResult generateDataKey(String kmsCMKArnAliasOrId) {
         GenerateDataKeyRequest request = new GenerateDataKeyRequest()
-            .withKeyId(keyCMKArn)//Specifies the type of data key to return.
+            .withKeyId(retrieveKeyArnFromArnOrAlias(kmsCMKArnAliasOrId))//Specifies the type of data key to return.
             .withKeySpec(AES_256);
         return kmsClient().generateDataKey(request);
     }
@@ -67,21 +65,22 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         String keyId = "";
         if (keyArnOrAlias.startsWith(ARN)) {
             keyId = keyArnOrAlias;
-        } else {
-            String keyAlias = keyArnOrAlias;
-
-            if (!keyAlias.startsWith(ALIAS)) {
-                keyAlias = ALIAS + keyArnOrAlias;
-            }
-
+            logger.info("Using key ARN:"+keyId);
+        } else if (!keyArnOrAlias.startsWith(ALIAS)) {
             for (AliasListEntry aliasEntry : listAliases()) {
-                if (aliasEntry.getAliasName().equals(keyAlias)) {
-                    keyId = aliasEntry.getAliasArn();
+                if (aliasEntry.getAliasName().equals(keyArnOrAlias)) {
+                    keyId = aliasEntry.getTargetKeyId();
                     break;
                 }
             }
+            if (keyId.isEmpty()) {
+                logger.warn("keyId is empty for keyAlias:" + keyArnOrAlias);
+            } else {
+                logger.info("Using keyid:"+keyId+" for key alias:"+keyArnOrAlias);
+            }
         }
-
+        keyId = keyArnOrAlias;
+        logger.info("Using keyid:"+keyId);
         return keyId;
     }
 
@@ -109,9 +108,4 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         return kmsClient;
     }
 
-
-    public void setCMKKeyArn(String key) {
-        this.keyCMKArn = retrieveKeyArnFromArnOrAlias(key);
-        ;
-    }
 }
