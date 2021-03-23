@@ -6,6 +6,7 @@ public class DEKClientHelperImpl implements DEKClientHelper {
 
     private byte[] key;
 
+<<<<<<< HEAD
     private String keyDEKArnOrAlias;
 
     private AESEncryptionTool aesEncryptionTool;
@@ -13,6 +14,12 @@ public class DEKClientHelperImpl implements DEKClientHelper {
     public DEKClientHelperImpl(byte[] key, String keyDEKArnOrAlias){
         this.key = key;
         this.keyDEKArnOrAlias = keyDEKArnOrAlias;
+=======
+    private AESEncryptionTool aesEncryptionTool;
+
+    public DEKClientHelperImpl(byte[] key){
+        this.key = key;
+>>>>>>> master
         this.aesEncryptionTool = new AESEncryptionTool();
         aesEncryptionTool.setKey(key);
     }
@@ -31,10 +38,13 @@ public class DEKClientHelperImpl implements DEKClientHelper {
         return key;
     }
 
+<<<<<<< HEAD
     public String getKeyDEKArnOrAlias() {
         return keyDEKArnOrAlias;
     }
 
+=======
+>>>>>>> master
     public AESEncryptionTool getAesEncryptionTool() {
         return aesEncryptionTool;
     }

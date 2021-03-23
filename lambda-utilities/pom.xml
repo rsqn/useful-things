@@ -4,12 +4,20 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
+<<<<<<< HEAD
+        <version>1.0.49-SNAPSHOT</version>
+=======
         <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>lambda-utilities</artifactId>
+<<<<<<< HEAD
+    <version>1.0.49-SNAPSHOT</version>
+=======
     <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     <packaging>jar</packaging>
 
     <name>lambda-utilities</name>
@@ -38,9 +46,26 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
+<<<<<<< HEAD
+            <version>1.2.1</version>
+=======
+>>>>>>> master
             <scope>provided</scope>
         </dependency>
         <dependency>
+<<<<<<< HEAD
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.2.0</version>
+            <scope>provided</scope>
+=======
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
             <scope>provided</scope>
@@ -53,6 +78,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+>>>>>>> master
         </dependency>
 
         <dependency>
@@ -76,6 +102,25 @@
         </dependency>
 
         <dependency>
+<<<<<<< HEAD
+            <groupId>com.amazon.alexa</groupId>
+            <artifactId>ask-sdk</artifactId>
+            <version>2.33.0</version>
+        </dependency>
+
+        <!--Compile Dependencies-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--Test Dependencies-->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+=======
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <exclusions>
@@ -94,6 +139,7 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
+>>>>>>> master
         </dependency>
 
     </dependencies>

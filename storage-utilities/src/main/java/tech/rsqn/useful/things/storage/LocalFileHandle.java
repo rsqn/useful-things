@@ -81,7 +81,15 @@ public class LocalFileHandle extends FileHandle implements Serializable {
         } catch (Exception e) {
 
         } finally {
+<<<<<<< HEAD
+            try {
+                IOUtils.close(is);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+=======
             IOUtil.shutdownStream(is);
+>>>>>>> master
         }
         return "failure" + System.currentTimeMillis();
     }

@@ -1,7 +1,12 @@
 package tech.rsqn.useful.things.storage;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+<<<<<<< HEAD
+
+=======
+>>>>>>> master
 
 import java.io.File;
 import java.nio.file.Files;

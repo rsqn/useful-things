@@ -1,6 +1,10 @@
 language: java
 jdk:
+<<<<<<< HEAD
+  - oracle  jdk11
+=======
   - oraclejdk11
+>>>>>>> master
 sudo: false
 script: mvn clean install
 

@@ -4,12 +4,20 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
+<<<<<<< HEAD
+        <version>1.0.49-SNAPSHOT</version>
+=======
         <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>web-utilities</artifactId>
+<<<<<<< HEAD
+    <version>1.0.49-SNAPSHOT</version>
+=======
     <version>1.0.61-SNAPSHOT</version>
+>>>>>>> master
     <packaging>jar</packaging>
 
     <name>web-utilities</name>
@@ -36,12 +44,17 @@
     <dependencies>
         <!--Compile Dependencies-->
         <dependency>
+<<<<<<< HEAD
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+=======
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>simple-utilities</artifactId>
+>>>>>>> master
         </dependency>
 
         <dependency>

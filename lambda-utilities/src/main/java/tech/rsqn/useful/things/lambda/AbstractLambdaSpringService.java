@@ -40,13 +40,13 @@ public abstract class AbstractLambdaSpringService<C, R> implements RequestHandle
         C model = null;
         try {
             LOG.debug("ProxyRequest " + proxyEvent.toString());
-            if ( proxyEvent.getHeaders() == null && proxyEvent.getHttpMethod() == null) {
+            if (proxyEvent.getHeaders() == null && proxyEvent.getHttpMethod() == null) {
                 LOG.debug("v2 This seems to be a keepalive. returning");
                 return null;
             }
-            if ( "GET".equals(proxyEvent.getHttpMethod())) {
-                if ( proxyEvent.getQueryStringParameters() != null ) {
-                    if ( "true".equals(proxyEvent.getQueryStringParameters().get("ping"))) {
+            if ("GET".equals(proxyEvent.getHttpMethod())) {
+                if (proxyEvent.getQueryStringParameters() != null) {
+                    if ("true".equals(proxyEvent.getQueryStringParameters().get("ping"))) {
                         LOG.debug("v2 This seems to be a ping. returning an OK");
                         return (R) ApiGatewayResponse.builder()
                                 .withNoCache()
@@ -56,14 +56,25 @@ public abstract class AbstractLambdaSpringService<C, R> implements RequestHandle
                     }
                 }
             }
+
             if (proxyEvent.getBody() != null && proxyEvent.getBody().length() > 0) {
                 model = (C) objectMapper.readValue(proxyEvent.getBody(), getModelClass());
             }
 
-            return this.handleRequest(proxyEvent, model, context);
+            Object r = this.handleRequest(proxyEvent, model, context);
+
+            if (r == null) {
+                LOG.warn("Return value is null - this will likely fail");
+            } else if (!(r instanceof ApiGatewayResponse)) {
+                LOG.warn("Return type is not an ApiGatewayResponse, it is a " + r.getClass() + "  - this will likely fail");
+            }
+
+            return (R) r;
         } catch (IOException e) {
-            LOG.error(e.getMessage(),e);
+            LOG.error(e.getMessage(), e);
             throw new RuntimeException(e);
+        } finally {
+            LOG.info("after execute");
         }
     }
 
