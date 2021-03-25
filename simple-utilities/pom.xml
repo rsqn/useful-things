@@ -4,20 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-<<<<<<< HEAD
-        <version>1.0.49-SNAPSHOT</version>
-=======
         <version>1.0.61-SNAPSHOT</version>
->>>>>>> master
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>simple-utilities</artifactId>
-<<<<<<< HEAD
-    <version>1.0.49-SNAPSHOT</version>
-=======
     <version>1.0.61-SNAPSHOT</version>
->>>>>>> master
     <packaging>jar</packaging>
 
     <name>simple-utilities</name>
@@ -46,11 +38,7 @@
         <dependency>
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
-<<<<<<< HEAD
-            <version>1.3.8</version>
-=======
             <scope>provided</scope>
->>>>>>> master
         </dependency>
 
         <dependency>
@@ -62,10 +50,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-<<<<<<< HEAD
-=======
             <scope>provided</scope>
->>>>>>> master
         </dependency>
 
         <dependency>
@@ -82,13 +67,8 @@
 
         <!--Compile Dependencies-->
         <dependency>
-<<<<<<< HEAD
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-=======
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
->>>>>>> master
         </dependency>
 
         <dependency>
