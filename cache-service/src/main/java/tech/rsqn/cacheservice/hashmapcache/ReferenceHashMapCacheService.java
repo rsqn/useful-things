@@ -68,9 +68,9 @@ public class ReferenceHashMapCacheService implements CacheService {
     }
 
     @Override
-    public <V > void putWithTTL(String key, V value, long timeToLiveSeconds) {
+    public <V > void putWithTTL(String key, V value, long timeToLiveMillis) {
         houseKeep();
-        map.put(key, DefaultCacheEntryValue.with(key, value).andTimeToLiveMilliseconds(timeToLiveSeconds));
+        map.put(key, DefaultCacheEntryValue.with(key, value).andTimeToLiveMilliseconds(timeToLiveMillis));
     }
 
     public <V > V get(String key) {

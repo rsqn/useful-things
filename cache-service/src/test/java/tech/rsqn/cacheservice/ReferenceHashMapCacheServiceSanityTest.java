@@ -38,7 +38,7 @@ public class ReferenceHashMapCacheServiceSanityTest {
     public void shouldHonourPutTTL()
             throws Exception {
 
-        service.putWithTTL("xKey","Allo",1);
+        service.putWithTTL("xKey","Allo",500);
 
         Assert.assertNotNull(service.get("xKey"));
 
