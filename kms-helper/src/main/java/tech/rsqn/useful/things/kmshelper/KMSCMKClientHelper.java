@@ -1,5 +1,6 @@
 package tech.rsqn.useful.things.kmshelper;
 
+import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.GenerateDataKeyResult;
 
@@ -16,5 +17,7 @@ public interface KMSCMKClientHelper {
     byte[] generateRandom(int noBytes);
 
     List<AliasListEntry> listAliases();
+
+    AWSKMS kmsClient(); // for local and tests
 
 }
