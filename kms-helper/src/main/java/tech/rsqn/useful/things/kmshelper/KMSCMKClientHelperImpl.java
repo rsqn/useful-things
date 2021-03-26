@@ -25,7 +25,7 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     public static final String AES_256 = "AES_256";
     private static Logger logger = LoggerFactory.getLogger(KMSCMKClientHelperImpl.class);
 
-    private AWSKMS kmsClient;
+    protected AWSKMS kmsClient;
 
     @Override
     public byte[] encrypt(String kmsCMKArnAliasOrId, byte[] plainText) {
@@ -94,7 +94,7 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     }
 
 
-    private AWSKMS kmsClient() {
+    public AWSKMS kmsClient() {
         if (kmsClient == null) {
             kmsClient =
                 AWSKMSClientBuilder.standard().withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
@@ -103,7 +103,6 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
             for (KeyListEntry key : kmsClient.listKeys().getKeys()) {
                 logger.debug("kmsClient key: {}", key.toString());
             }
-
         }
         return kmsClient;
     }
