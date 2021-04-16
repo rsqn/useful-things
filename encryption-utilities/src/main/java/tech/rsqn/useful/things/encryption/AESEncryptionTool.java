@@ -7,6 +7,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Security;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -90,5 +92,24 @@ public class AESEncryptionTool implements EncryptionTool {
         } catch (Exception e) {
             throw new RuntimeException("Decryption exception " + e, e);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AESEncryptionTool that = (AESEncryptionTool) o;
+        return blockSize == that.blockSize && Objects.equals(charSet, that.charSet) && Arrays.equals(key, that.key) && Objects.equals(alorithm, that.alorithm) && Objects.equals(provider, that.provider);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(charSet, blockSize, alorithm, provider);
+        result = 31 * result + Arrays.hashCode(key);
+        return result;
     }
 }
