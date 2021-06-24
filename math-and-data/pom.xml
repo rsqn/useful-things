@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.65-SNAPSHOT</version>
+        <version>1.0.66-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>math-and-data</artifactId>
-    <version>1.0.65-SNAPSHOT</version>
+    <version>1.0.66-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>authz-utilities</name>
@@ -52,6 +52,36 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
