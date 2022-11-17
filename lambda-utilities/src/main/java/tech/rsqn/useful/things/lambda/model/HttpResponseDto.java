@@ -8,7 +8,6 @@ public class HttpResponseDto {
     private int status;
     private String body;
     private Map<String, String> headers;
-    private boolean isBase64Encoded;
     private Object objectBody;
     private String redirect;
 
@@ -47,12 +46,11 @@ public class HttpResponseDto {
     }
 
     public HttpResponseDto body(Object body) {
-//        if ( body instanceof String ) {
-//            this.body = (String)body;
-//        } else {
-//            this.objectBody = body;
-//        }
-        this.objectBody = body;
+        if ( body instanceof String ) {
+            this.body = (String)body;
+        } else {
+            this.objectBody = body;
+        }
         return this;
     }
 
@@ -64,11 +62,18 @@ public class HttpResponseDto {
     public ApiGatewayResponse toResponse() {
         ApiGatewayResponse.Builder builder = ApiGatewayResponse.builder()
                 .setStatusCode(status)
-                .setObjectBody(objectBody)
                 .setHeaders(headers);
 
         if (StringUtils.hasText(redirect)) {
             builder.setRedirect(redirect);
+        }
+
+        if (StringUtils.hasText(body)) {
+            builder.setRawBody(body);
+        }
+
+        if (objectBody != null) {
+            builder.setObjectBody(objectBody);
         }
 
         return builder.build();
@@ -100,19 +105,22 @@ public class HttpResponseDto {
         this.headers = headers;
     }
 
-    public boolean isBase64Encoded() {
-        return isBase64Encoded;
-    }
-
-    public void setBase64Encoded(boolean base64Encoded) {
-        isBase64Encoded = base64Encoded;
-    }
-
     public Object getObjectBody() {
         return objectBody;
     }
 
     public void setObjectBody(Object objectBody) {
         this.objectBody = objectBody;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponseDto{" +
+                "status=" + status +
+                ", body='" + body + '\'' +
+                ", headers=" + headers +
+                ", objectBody=" + objectBody +
+                ", redirect='" + redirect + '\'' +
+                '}';
     }
 }

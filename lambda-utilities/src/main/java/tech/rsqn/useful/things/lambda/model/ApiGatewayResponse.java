@@ -17,10 +17,10 @@ import java.util.Map;
 
 public class ApiGatewayResponse {
 
-    private final int statusCode;
-    private final String body;
-    private final Map<String, String> headers;
-    private final boolean isBase64Encoded;
+    private int statusCode;
+    private String body;
+    private Map<String, String> headers = new HashMap<>();
+    private boolean isBase64Encoded;
     private Object objectBody;
 
 
