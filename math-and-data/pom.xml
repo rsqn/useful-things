@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.70-SNAPSHOT</version>
+        <version>1.0.72-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>math-and-data</artifactId>
-    <version>1.0.70-SNAPSHOT</version>
+    <version>1.0.72-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>authz-utilities</name>
