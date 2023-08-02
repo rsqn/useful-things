@@ -9,6 +9,8 @@ import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 import tech.rsqn.useful.things.lambda.model.HttpRequestDto;
 import tech.rsqn.useful.things.lambda.model.HttpResponseDto;
 
+import java.util.Map;
+
 public abstract class AbstractHttpFunction<C,R> extends AbstractLambdaSpringService<C, ApiGatewayResponse> {
     private static Logger LOG = LoggerFactory.getLogger(AbstractHttpFunction.class);
 
@@ -31,7 +33,6 @@ public abstract class AbstractHttpFunction<C,R> extends AbstractLambdaSpringServ
             } else {
                 responseDto = new HttpResponseDto().ok(v);
                 LOG.info("got a value - so making DTO " + responseDto);
-
             }
         } catch ( ErrorCode ec ) {
             responseDto = new HttpResponseDto().status(ec.getCode(),ec.getMessage());

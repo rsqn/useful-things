@@ -2,12 +2,13 @@ package tech.rsqn.useful.things.lambda.model;
 
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponseDto {
     private int status;
     private String body;
-    private Map<String, String> headers;
+    private Map<String, String> headers = new HashMap<>();
     private Object objectBody;
     private String redirect;
 
@@ -58,6 +59,12 @@ public class HttpResponseDto {
         this.headers.put(k,v);
         return this;
     }
+
+    public HttpResponseDto headers(Map<String,String> map) {
+        this.headers.putAll(map);
+        return this;
+    }
+
 
     public ApiGatewayResponse toResponse() {
         ApiGatewayResponse.Builder builder = ApiGatewayResponse.builder()
