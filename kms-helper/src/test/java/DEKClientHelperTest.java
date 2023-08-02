@@ -1,6 +1,4 @@
-import com.amazonaws.services.kms.model.GenerateDataKeyResult;
 import org.bouncycastle.util.encoders.Hex;
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -8,11 +6,6 @@ import tech.rsqn.useful.things.kmshelper.Base64ClientHelper;
 import tech.rsqn.useful.things.kmshelper.Base64ClientHelperImpl;
 import tech.rsqn.useful.things.kmshelper.DEKClientHelper;
 import tech.rsqn.useful.things.kmshelper.DEKClientHelperImpl;
-import tech.rsqn.useful.things.kmshelper.KMSCMKClientHelperImpl;
-
-import java.nio.ByteBuffer;
-
-import static org.mockito.Mockito.when;
 
 public class DEKClientHelperTest {
 

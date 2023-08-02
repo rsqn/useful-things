@@ -17,7 +17,6 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Required;
 
 import javax.crypto.Cipher;
 import java.io.*;
@@ -51,12 +50,12 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         return alias;
     }
 
-    @Required
+    
     public void setAlias(String alias) {
         this.alias = alias;
     }
 
-    @Required
+    
     public void setKeyDir(String keyDir) {
         this.keyDir = keyDir;
     }
@@ -65,7 +64,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         this.s3Client = s3Client;
     }
 
-    @Required
+    
     public void setPublicKeyFile(String publicKeyFile) {
         this.publicKeyFile = publicKeyFile;
     }
@@ -78,7 +77,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
         this.privateKeyPassword = privateKeyPassword;
     }
 
-    @Required
+    
     public void setPrivateKeyFile(String privateKeyFile) {
         this.privateKeyFile = privateKeyFile;
     }

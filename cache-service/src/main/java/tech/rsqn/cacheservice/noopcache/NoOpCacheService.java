@@ -3,8 +3,6 @@ package tech.rsqn.cacheservice.noopcache;
 import tech.rsqn.cacheservice.CacheService;
 import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
 
-import java.io.Serializable;
-
 /**
  * Created by mandrewes on 23/01/14.
  */

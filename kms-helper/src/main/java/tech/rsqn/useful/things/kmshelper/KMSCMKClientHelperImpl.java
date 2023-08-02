@@ -3,15 +3,7 @@ package tech.rsqn.useful.things.kmshelper;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
-import com.amazonaws.services.kms.model.AliasListEntry;
-import com.amazonaws.services.kms.model.DecryptRequest;
-import com.amazonaws.services.kms.model.DecryptResult;
-import com.amazonaws.services.kms.model.EncryptRequest;
-import com.amazonaws.services.kms.model.EncryptResult;
-import com.amazonaws.services.kms.model.GenerateDataKeyRequest;
-import com.amazonaws.services.kms.model.GenerateDataKeyResult;
-import com.amazonaws.services.kms.model.GenerateRandomRequest;
-import com.amazonaws.services.kms.model.KeyListEntry;
+import com.amazonaws.services.kms.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

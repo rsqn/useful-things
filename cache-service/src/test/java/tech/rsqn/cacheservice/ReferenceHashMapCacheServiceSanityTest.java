@@ -1,13 +1,11 @@
 
 package tech.rsqn.cacheservice;
 
-import tech.rsqn.cacheservice.hashmapcache.ReferenceHashMapCacheService;
-import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
-
 import org.testng.Assert;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import tech.rsqn.cacheservice.hashmapcache.ReferenceHashMapCacheService;
+import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
 
 
 public class ReferenceHashMapCacheServiceSanityTest {

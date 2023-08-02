@@ -1,8 +1,7 @@
 package tech.rsqn.cacheservice.interceptors;
 
-import tech.rsqn.cacheservice.annotations.InvalidatingOperation;
-
 import org.aopalliance.intercept.MethodInvocation;
+import tech.rsqn.cacheservice.annotations.InvalidatingOperation;
 
 
 public class InvalidatingInterceptor extends AbstractInterceptor {

@@ -1,12 +1,7 @@
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import tech.rsqn.useful.things.kmshelper.Base64ClientHelperImpl;
-
-import java.nio.charset.StandardCharsets;
-
-import static org.mockito.Mockito.when;
 
 public class Base64ClientHelperTest {
 

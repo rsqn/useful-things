@@ -6,7 +6,7 @@ import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Required;
+
 
 public class AWSClientFactory implements InitializingBean {
 
@@ -14,17 +14,17 @@ public class AWSClientFactory implements InitializingBean {
     private String secretKey;
     private String region;
 
-    @Required
+    
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
     }
 
-    @Required
+    
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
     }
 
-    @Required
+    
     public void setRegion(String region) {
         this.region = region;
     }

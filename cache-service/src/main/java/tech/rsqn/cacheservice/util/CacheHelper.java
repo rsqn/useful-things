@@ -3,8 +3,6 @@ package tech.rsqn.cacheservice.util;
 import tech.rsqn.cacheservice.CacheService;
 import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
 
-import java.io.Serializable;
-
 import java.util.HashSet;
 import java.util.Set;
 

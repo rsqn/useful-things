@@ -9,8 +9,6 @@ import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 import tech.rsqn.useful.things.lambda.model.HttpRequestDto;
 import tech.rsqn.useful.things.lambda.model.HttpResponseDto;
 
-import java.util.Map;
-
 public abstract class AbstractHttpFunction<C,R> extends AbstractLambdaSpringService<C, ApiGatewayResponse> {
     private static Logger LOG = LoggerFactory.getLogger(AbstractHttpFunction.class);
 

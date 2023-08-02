@@ -1,12 +1,11 @@
 package tech.rsqn.cacheservice;
 
 import org.testng.Assert;
-import tech.rsqn.cacheservice.support.CacheBehaviour;
-import tech.rsqn.cacheservice.support.TransparentCacheExecutionBehaviour;
-
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import tech.rsqn.cacheservice.support.CacheBehaviour;
+import tech.rsqn.cacheservice.support.TransparentCacheExecutionBehaviour;
 
 
 /**

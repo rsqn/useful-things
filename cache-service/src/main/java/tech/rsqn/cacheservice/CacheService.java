@@ -2,8 +2,6 @@ package tech.rsqn.cacheservice;
 
 import tech.rsqn.cacheservice.support.CacheIteratorCallBack;
 
-import java.io.Serializable;
-
 
 public interface CacheService {
 

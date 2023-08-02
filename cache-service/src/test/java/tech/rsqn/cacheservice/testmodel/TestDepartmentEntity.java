@@ -1,7 +1,6 @@
 package tech.rsqn.cacheservice.testmodel;
 
 import java.io.Serializable;
-
 import java.util.List;
 
 public class TestDepartmentEntity implements Serializable {

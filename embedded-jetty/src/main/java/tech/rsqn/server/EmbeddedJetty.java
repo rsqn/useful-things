@@ -5,9 +5,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 
-import javax.servlet.ServletException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +17,17 @@ public class EmbeddedJetty {
     private String contextPath;
     private boolean enableWebSockets = false;
 
-    @Required
+    
     public void setAppBaseSearchPaths(List<String> appBaseSearchPaths) {
         this.appBaseSearchPaths = appBaseSearchPaths;
     }
 
-    @Required
+    
     public void setPort(int port) {
         this.port = port;
     }
 
-    @Required
+    
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
     }

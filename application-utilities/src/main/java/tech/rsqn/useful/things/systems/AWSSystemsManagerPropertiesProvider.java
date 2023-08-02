@@ -9,8 +9,6 @@ import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,12 +49,12 @@ public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
         this.parameterPrefix = parameterPrefix;
     }
 
-    @Required
+    
     public void setSsmClient(AWSSimpleSystemsManagementClient ssmClient) {
         this.ssmClient = ssmClient;
     }
 
-    @Required
+    
     public void setNames(List<String> names) {
         this.names = names;
     }

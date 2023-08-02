@@ -1,8 +1,7 @@
 package tech.rsqn.cacheservice.interceptors;
 
-import tech.rsqn.cacheservice.annotations.ReadOperation;
-
 import org.aopalliance.intercept.MethodInvocation;
+import tech.rsqn.cacheservice.annotations.ReadOperation;
 
 public class ReadInterceptor extends AbstractInterceptor {
     public Object invoke(MethodInvocation invocation) throws Throwable {

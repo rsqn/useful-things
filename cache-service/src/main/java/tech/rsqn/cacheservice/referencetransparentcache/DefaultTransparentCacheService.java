@@ -3,7 +3,6 @@ package tech.rsqn.cacheservice.referencetransparentcache;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
@@ -49,7 +48,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         groupTimer = new GroupTimer();
     }
 
-    @Required
+    
     public void setCaches(
         Map<String, CacheService> caches) {
         this.caches = caches;
@@ -78,7 +77,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         this.cachingDisabled = true;
     }
 
-    @Required
+    
     public void setDefaultCacheName(String defaultCacheName) {
         this.defaultCacheName = defaultCacheName;
     }
@@ -87,12 +86,12 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         this.debugLogging = debugLogging;
     }
 
-    @Required
+    
     public void setKeyGenerators(List<CacheKeyGenerator> keyGenerators) {
         this.keyGenerators = keyGenerators;
     }
 
-    @Required
+    
     public void setParameterKeyGenerators(
         List<ParameterKeyGenerator> parameterKeyGenerators) {
         this.parameterKeyGenerators = parameterKeyGenerators;

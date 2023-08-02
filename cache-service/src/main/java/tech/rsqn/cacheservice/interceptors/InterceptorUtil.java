@@ -1,9 +1,8 @@
 package tech.rsqn.cacheservice.interceptors;
 
+import org.aopalliance.intercept.MethodInvocation;
 import tech.rsqn.cacheservice.TransparentCacheService;
 import tech.rsqn.cacheservice.support.DelimitedKey;
-
-import org.aopalliance.intercept.MethodInvocation;
 import tech.rsqn.reflectionhelpers.ReflectionHelper;
 
 import java.lang.reflect.Method;

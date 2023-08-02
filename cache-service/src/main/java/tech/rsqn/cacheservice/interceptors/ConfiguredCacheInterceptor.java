@@ -1,13 +1,9 @@
 package tech.rsqn.cacheservice.interceptors;
 
-import tech.rsqn.cacheservice.proxy.CachingProxyConfigEntry;
-
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.factory.annotation.Required;
+import tech.rsqn.cacheservice.proxy.CachingProxyConfigEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +13,6 @@ public class ConfiguredCacheInterceptor extends AbstractInterceptor {
     private Logger log = LoggerFactory.getLogger(getClass());
     private List<CachingProxyConfigEntry> config;
 
-    @Required
     public void setConfiguration(List<String> configStrings) {
         log.info("CachingProxy factory created");
 

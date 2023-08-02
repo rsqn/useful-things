@@ -1,12 +1,10 @@
 package tech.rsqn.useful.things.lambda.model;
 
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

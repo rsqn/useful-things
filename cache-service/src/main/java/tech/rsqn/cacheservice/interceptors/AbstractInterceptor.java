@@ -1,14 +1,11 @@
 package tech.rsqn.cacheservice.interceptors;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import tech.rsqn.cacheservice.TransparentCacheService;
 import tech.rsqn.cacheservice.annotations.InvalidatingOperation;
 import tech.rsqn.cacheservice.annotations.ReadOperation;
 import tech.rsqn.cacheservice.annotations.WriteOperation;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.beans.factory.annotation.Required;
 import tech.rsqn.reflectionhelpers.ReflectionHelper;
 
 import java.lang.annotation.Annotation;
@@ -16,7 +13,7 @@ import java.lang.annotation.Annotation;
 public abstract class AbstractInterceptor implements MethodInterceptor {
     protected TransparentCacheService cacheService;
 
-    @Required
+    
     public void setCacheService(TransparentCacheService cacheService) {
         this.cacheService = cacheService;
     }

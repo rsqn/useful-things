@@ -1,13 +1,10 @@
 
 package tech.rsqn.cacheservice.advisors;
 
-import tech.rsqn.cacheservice.annotations.InvalidatingOperation;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-
 import org.springframework.util.ReflectionUtils;
+import tech.rsqn.cacheservice.annotations.InvalidatingOperation;
 
 import java.lang.reflect.Method;
 
