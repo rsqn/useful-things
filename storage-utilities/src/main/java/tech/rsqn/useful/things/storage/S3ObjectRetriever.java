@@ -19,15 +19,15 @@ import java.io.StringWriter;
 
 public class S3ObjectRetriever {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private AmazonS3 s3Client;
     private String region = null;
 
     public String getS3Object(String bucket, String path, String encoding) {
 
-        log.info("Preparing to retrieve an object from S3 bucket: " + bucket);
+        LOG.info("Preparing to retrieve an object from S3 bucket: " + bucket);
         connect();
-        log.info("Established connection with S3.");
+        LOG.info("Established connection with S3.");
 
         if (bucket.equalsIgnoreCase("root")) {
             bucket = "";
@@ -35,9 +35,9 @@ public class S3ObjectRetriever {
 
         S3Object s3Object = null;
         try {
-            log.info("Retrieving an object from S3.");
+            LOG.info("Retrieving an object from S3.");
             s3Object = s3Client.getObject(new GetObjectRequest(bucket, path));
-            log.info("Object Retrieved Successfully from S3");
+            LOG.info("Object Retrieved Successfully from S3");
 
             S3ObjectInputStream s3ObjectInputStream = s3Object.getObjectContent();
 
@@ -46,19 +46,19 @@ public class S3ObjectRetriever {
                 IOUtil.copy(s3ObjectInputStream, writer, encoding);
                 return writer.toString();
             } catch (IOException e) {
-                log.error("IO Error: " + e.getMessage());
+                LOG.error("IO Error: " + e.getMessage());
             }
 
         } catch (AmazonServiceException ase) {
-            log.error("Caught an AmazonServiceException.");
-            log.error("Error Message:    " + ase.getMessage());
-            log.error("HTTP Status Code: " + ase.getStatusCode());
-            log.error("AWS Error Code:   " + ase.getErrorCode());
-            log.error("Error Type:       " + ase.getErrorType());
-            log.error("Request ID:       " + ase.getRequestId());
+            LOG.error("Caught an AmazonServiceException.");
+            LOG.error("Error Message:    " + ase.getMessage());
+            LOG.error("HTTP Status Code: " + ase.getStatusCode());
+            LOG.error("AWS Error Code:   " + ase.getErrorCode());
+            LOG.error("Error Type:       " + ase.getErrorType());
+            LOG.error("Request ID:       " + ase.getRequestId());
         } catch (AmazonClientException ace) {
-            log.error("Caught an AmazonClientException.");
-            log.error("Error Message: " + ace.getMessage());
+            LOG.error("Caught an AmazonClientException.");
+            LOG.error("Error Message: " + ace.getMessage());
         }
         return null;
     }
@@ -67,7 +67,7 @@ public class S3ObjectRetriever {
         ClientConfiguration clientConfig = null;
 
         if (System.getProperty("proxyHost") != null) {
-            log.info("Connecting with proxy to s3 via " + System.getProperty("proxyHost") + ":" + System.getProperty("proxyPort"));
+            LOG.info("Connecting with proxy to s3 via " + System.getProperty("proxyHost") + ":" + System.getProperty("proxyPort"));
             clientConfig = new ClientConfiguration();
             clientConfig.setProxyHost(System.getProperty("proxyHost"));
             clientConfig.setProxyPort(Integer.parseInt(System.getProperty("proxyPort")));

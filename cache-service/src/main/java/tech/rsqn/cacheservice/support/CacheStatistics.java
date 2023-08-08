@@ -1,8 +1,8 @@
 package tech.rsqn.cacheservice.support;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * Date: 15/03/12
  */
 public class CacheStatistics {
-    private static Logger log = LoggerFactory.getLogger(CacheStatistics.class);
+    private static Logger LOG = LoggerFactory.getLogger(CacheStatistics.class);
     public static final ThreadLocal<CacheStatsHolder> threadLocal = new ThreadLocal();
 
     public static CacheStatsHolder getStats() {

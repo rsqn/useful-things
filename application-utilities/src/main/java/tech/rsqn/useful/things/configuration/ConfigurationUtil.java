@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-
 public class ConfigurationUtil {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationUtil.class);
     private static final char DELIMITER_DEFAULT = '.';

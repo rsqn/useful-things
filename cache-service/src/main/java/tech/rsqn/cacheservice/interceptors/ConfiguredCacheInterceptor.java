@@ -10,11 +10,11 @@ import java.util.List;
 
 
 public class ConfiguredCacheInterceptor extends AbstractInterceptor {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private List<CachingProxyConfigEntry> config;
 
     public void setConfiguration(List<String> configStrings) {
-        log.info("CachingProxy factory created");
+        LOG.info("CachingProxy factory created");
 
         this.config = new ArrayList<CachingProxyConfigEntry>();
 
@@ -22,7 +22,7 @@ public class ConfiguredCacheInterceptor extends AbstractInterceptor {
             CachingProxyConfigEntry entry = new CachingProxyConfigEntry();
             entry.parseFromString(s);
             config.add(entry);
-            log.info(s);
+            LOG.info(s);
         }
     }
 

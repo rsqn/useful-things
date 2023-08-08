@@ -24,7 +24,6 @@ import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
-
 public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(RSAEncryptionTool.class);
     private String charSet = "utf-8";

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmbeddedJetty {
-    private static final Logger log = LoggerFactory.getLogger(EmbeddedJetty.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmbeddedJetty.class);
     private List<String> appBaseSearchPaths;
     private int port;
     private String contextPath;
@@ -39,8 +39,8 @@ public class EmbeddedJetty {
     public void start() throws Exception {
         Server server = null;
         try {
-            log.info("Starting EmbeddedJetty on port {}", port);
-            log.info("Current Working Directory is ", new File(".").getAbsolutePath() + " search paths will be relative to this directory");
+            LOG.info("Starting EmbeddedJetty on port {}", port);
+            LOG.info("Current Working Directory is ", new File(".").getAbsolutePath() + " search paths will be relative to this directory");
             server = new Server(port);
             WebAppContext context = new WebAppContext();
             File webXml = null;
@@ -52,27 +52,27 @@ public class EmbeddedJetty {
             for (String webXmlPath : webXmlPaths) {
                 webXml = new File(webXmlPath);
 
-                log.info("Looking for webXml at ({} : {})", webXmlPath, webXml.getAbsolutePath());
+                LOG.info("Looking for webXml at ({} : {})", webXmlPath, webXml.getAbsolutePath());
 
                 if (webXml.exists()) {
-                    log.info("Found webXML at ({})", webXml.getAbsolutePath());
+                    LOG.info("Found webXML at ({})", webXml.getAbsolutePath());
                     break;
                 } else {
-                    log.info("No webXML at ({})", webXmlPath);
+                    LOG.info("No webXML at ({})", webXmlPath);
                     webXml = null;
                 }
             }
 
             if (webXml == null) {
-                log.error("No webXML Found - exiting");
+                LOG.error("No webXML Found - exiting");
                 return;
             }
 
             File webDirectory = webXml.getParentFile().getParentFile();
-            log.info("Webdir is at ({})", webDirectory);
+            LOG.info("Webdir is at ({})", webDirectory);
 
             if (webDirectory == null) {
-                log.error("No webDir Found - exiting");
+                LOG.error("No webDir Found - exiting");
                 return;
             }
 
@@ -102,7 +102,7 @@ public class EmbeddedJetty {
             if (server != null) {
                 server.stop();
             }
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 }

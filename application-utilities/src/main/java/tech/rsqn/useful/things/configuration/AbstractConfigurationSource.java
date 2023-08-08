@@ -11,7 +11,8 @@ import java.util.List;
 
 public abstract class AbstractConfigurationSource implements ConfigurationSource {
 
-    private final Logger log = LoggerFactory.getLogger(AbstractConfigurationSource.class);
+    private final Logger LOG = LoggerFactory.getLogger(AbstractConfigurationSource.class);
+    
 
     // Handle the enc/dec outside of this class
     private String encryptedPropertyPrefix = "enc://";
@@ -27,7 +28,7 @@ public abstract class AbstractConfigurationSource implements ConfigurationSource
     public Integer getIntegerValue(final String name) {
         String s = getStringValue(name);
         if (Strings.isNullOrEmpty(s)) {
-            log.warn("Warning getIntegerValue {} has empty value", name);
+            LOG.warn("Warning getIntegerValue {} has empty value", name);
             return null;
         }
         return Integer.valueOf(s);
@@ -42,7 +43,7 @@ public abstract class AbstractConfigurationSource implements ConfigurationSource
     public boolean getBoolValue(String name) {
         String s = getStringValue(name);
         if (Strings.isNullOrEmpty(s)) {
-            log.warn("Warning parseBool on {} has empty value", name);
+            LOG.warn("Warning parseBool on {} has empty value", name);
         }
         return Boolean.valueOf(s);
     }

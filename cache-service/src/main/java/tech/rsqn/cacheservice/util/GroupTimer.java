@@ -1,5 +1,7 @@
 package tech.rsqn.cacheservice.util;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +11,7 @@ import java.util.Map;
 
 
 public class GroupTimer {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     Map<String, Timer> timers;
 
     public GroupTimer() {
@@ -17,7 +19,7 @@ public class GroupTimer {
     }
 
     private void log(String s) {
-        log.info(s);
+        LOG.info(s);
     }
 
     public void start(String name) {

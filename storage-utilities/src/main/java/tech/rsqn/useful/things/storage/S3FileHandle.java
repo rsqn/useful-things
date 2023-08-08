@@ -16,6 +16,7 @@ import java.util.Map;
 
 public class S3FileHandle extends FileHandle {
     private transient Logger log = LoggerFactory.getLogger(getClass());
+    
     private transient String bucketName;
     private transient AmazonS3 s3client;
     private ObjectMetadata objectMetadata;

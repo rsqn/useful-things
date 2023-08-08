@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.storage;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class FileSystemFileRecordService implements FileRecordService {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
 
     private static final Map<String, String> cache = new Hashtable<String, String>();
     private String root;
@@ -119,7 +121,7 @@ public class FileSystemFileRecordService implements FileRecordService {
             }
         }
         catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
+            LOG.error(ex.getMessage(), ex);
         }
     }
 

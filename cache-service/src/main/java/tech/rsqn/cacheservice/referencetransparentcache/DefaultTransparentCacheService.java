@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class DefaultTransparentCacheService implements TransparentCacheService {
     private boolean debugLogging = false;
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private String defaultCacheName = "default";
     private Map<String, CacheService> caches;
     private List<CacheKeyGenerator> keyGenerators;
@@ -252,7 +252,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         final CacheService cache = resolveCacheService(meta);
 
         if (debugLogging) {
-            log.debug(MessageFormat.format(
+            LOG.debug(MessageFormat.format(
                     "Write Interceptor called for {0}.{1} with return type {2} and {3} arguments",
                     targetMethod.getDeclaringClass(), targetMethod.getName(),
                     returnType.getName(), args.length));
@@ -269,7 +269,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         }
 
         if (cacheKey != null) {
-            log.debug("Write Interceptor invalidating key (" + cacheKey + ")");
+            LOG.debug("Write Interceptor invalidating key (" + cacheKey + ")");
             cache.remove(cacheKey);
         }
 
@@ -290,14 +290,14 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         CacheService cache = resolveCacheService(meta);
 
         if (cachingDisabled) {
-            log.debug("caching is disabled - executing method ");
+            LOG.debug("caching is disabled - executing method ");
             groupTimer.stopAndReport("aroundReadMethodInvocation-READ");
 
             return invocation.proceed();
         }
 
         if (debugLogging) {
-            log.debug(MessageFormat.format(
+            LOG.debug(MessageFormat.format(
                     "Read Interceptor called for {0}.{1} with return type {2} and {3} arguments",
                     targetMethod.getDeclaringClass().getName(),
                     targetMethod.getName(), returnType.getName(), args.length));
@@ -324,7 +324,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         }
 
         if (debugLogging) {
-            log.debug(MessageFormat.format(
+            LOG.debug(MessageFormat.format(
                     "Read Interceptor entityCacheKey ({0}) , methodCacheKey ({1}) ",
                     entityCacheKey, methodCacheKey));
         }
@@ -338,13 +338,13 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
 
             if (cachedValue != null) {
                 if (debugLogging) {
-                    log.debug("Read Interceptor will return item from cache  (" +
+                    LOG.debug("Read Interceptor will return item from cache  (" +
                         entityCacheKey + ")");
                 }
 
                 if (TransparentCacheExecutionBehaviour.getBehaviour()
                                                           .isClearCacheAfterRead()) {
-                    log.debug("Read Interceptor Clearing cache entity key  (" +
+                    LOG.debug("Read Interceptor Clearing cache entity key  (" +
                         entityCacheKey + ") based on " +
                         TransparentCacheExecutionBehaviour.getBehaviour());
                     cache.remove(entityCacheKey);
@@ -367,7 +367,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
             }
 
             if (debugLogging) {
-                log.debug("Read Interceptor not found in cache (" +
+                LOG.debug("Read Interceptor not found in cache (" +
                     entityCacheKey + ")");
             }
         }
@@ -381,13 +381,13 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
 
             if (cachedValue != null) {
                 if (debugLogging) {
-                    log.debug("Read Interceptor returning item from cache (" +
+                    LOG.debug("Read Interceptor returning item from cache (" +
                         methodCacheKey + ")");
                 }
 
                 if (TransparentCacheExecutionBehaviour.getBehaviour()
                                                           .isClearCacheAfterRead()) {
-                    log.debug("Read Interceptor Clearing cache method key  (" +
+                    LOG.debug("Read Interceptor Clearing cache method key  (" +
                         methodCacheKey + ") based on " +
                         TransparentCacheExecutionBehaviour.getBehaviour());
                     cache.remove(methodCacheKey);
@@ -410,14 +410,14 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
             }
 
             if (debugLogging) {
-                log.debug("Read Interceptor not found in cache (" +
+                LOG.debug("Read Interceptor not found in cache (" +
                     methodCacheKey + ")");
             }
         }
 
         if (TransparentCacheExecutionBehaviour.getBehaviour()
                                                   .isReturnIfItemIsNotCached()) {
-            log.debug("Read Interceptor NOT proceeding with invocation (" +
+            LOG.debug("Read Interceptor NOT proceeding with invocation (" +
                 entityCacheKey + ") (" + methodCacheKey + ") based on " +
                 TransparentCacheExecutionBehaviour.getBehaviour());
             groupTimer.stopAndReport("aroundReadMethodInvocation-READ");
@@ -426,7 +426,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         }
 
         if (debugLogging) {
-            log.debug("Read Interceptor proceeding with invocation (" +
+            LOG.debug("Read Interceptor proceeding with invocation (" +
                 entityCacheKey + ") (" + methodCacheKey + ")");
         }
 
@@ -444,7 +444,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
                                                                                         .newInstance();
 
             if (!kludge.allowCaching(returnValue)) {
-                log.info("ReadOperationUnlessKludge did not allow caching of(" +
+                LOG.info("ReadOperationUnlessKludge did not allow caching of(" +
                     entityCacheKey + ") (" + methodCacheKey + ")");
                 groupTimer.stopAndReport("aroundReadMethodInvocation-WRITE");
 
@@ -454,7 +454,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
 
         if ((returnValue != null) && !(returnValue instanceof Serializable)) {
             if (debugLogging) {
-                log.debug(
+                LOG.debug(
                     "Return value is not serializable, wrapping in NonSerializableWrapper to cache in memory only (" +
                     entityCacheKey + ") (" + methodCacheKey + ")");
             }
@@ -468,7 +468,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
             cache.put(entityCacheKey, cacheValue);
 
             if (debugLogging) {
-                log.debug("Read Interceptor cached single entity (" +
+                LOG.debug("Read Interceptor cached single entity (" +
                     entityCacheKey + ")");
             }
         }
@@ -477,28 +477,28 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         if ((methodCacheKey != null) && (entityCacheKey == null)) {
             if (returnValue instanceof Collection) {
                 if (debugLogging) {
-                    log.debug("Read Interceptor cached collection under key (" +
+                    LOG.debug("Read Interceptor cached collection under key (" +
                         methodCacheKey + ")");
                 }
 
                 cache.put(methodCacheKey, cacheValue);
             } else if (returnValue instanceof Map) {
                 if (debugLogging) {
-                    log.debug("Read Interceptor cached map under key (" +
+                    LOG.debug("Read Interceptor cached map under key (" +
                         methodCacheKey + ")");
                 }
 
                 cache.put(methodCacheKey, cacheValue);
             } else if (returnValue instanceof Object[]) {
                 if (debugLogging) {
-                    log.debug("Read Interceptor cached array under key (" +
+                    LOG.debug("Read Interceptor cached array under key (" +
                         methodCacheKey + ")");
                 }
 
                 cache.put(methodCacheKey, cacheValue);
             } else {
                 if (debugLogging) {
-                    log.debug(
+                    LOG.debug(
                         "Read Interceptor cached single object under method key (" +
                         methodCacheKey + ")");
                 }
@@ -523,7 +523,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         CacheService cache = resolveCacheService(meta);
 
         if (debugLogging) {
-            log.debug(MessageFormat.format(
+            LOG.debug(MessageFormat.format(
                     "Invalidating Interceptor called for {0}.{1} with return type {2} and {3} arguments",
                     targetMethod.getDeclaringClass(), targetMethod.getName(),
                     returnType.getName(), args.length));
@@ -541,7 +541,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         }
 
         if (cacheKey != null) {
-            log.debug("Invalidating Interceptor invalidating key (" + cacheKey +
+            LOG.debug("Invalidating Interceptor invalidating key (" + cacheKey +
                 ")");
             cache.remove(cacheKey);
             nRemoved++;
@@ -553,7 +553,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
                     String cacheKeyFromArgs = generateCacheKey((Serializable) arg);
 
                     if (cacheKeyFromArgs != null) {
-                        log.debug("Invalidating Interceptor invalidating key (" +
+                        LOG.debug("Invalidating Interceptor invalidating key (" +
                             cacheKeyFromArgs + ")");
                         cache.remove(cacheKeyFromArgs);
                         nRemoved++;
@@ -570,7 +570,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
         }
 
         if (methodCacheKey != null) {
-            log.debug("Invalidating Interceptor invalidating key (" +
+            LOG.debug("Invalidating Interceptor invalidating key (" +
                 methodCacheKey + ")");
             cache.remove(methodCacheKey);
         }

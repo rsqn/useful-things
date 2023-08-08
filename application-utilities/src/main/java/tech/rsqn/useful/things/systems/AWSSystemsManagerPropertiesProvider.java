@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 public class AWSSystemsManagerPropertiesProvider implements InitializingBean {
     private Logger log = LoggerFactory.getLogger(AWSSystemsManagerPropertiesProvider.class);
 

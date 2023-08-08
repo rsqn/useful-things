@@ -1,6 +1,7 @@
 package tech.rsqn.useful.things.authz.sessions;
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.rsqn.cacheservice.CacheService;
@@ -18,7 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public class SecureSessionManager {
-    protected static final Logger log = LoggerFactory.getLogger(SecureSessionManager.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(SecureSessionManager.class);
     private CacheService sessionCache;
     private CacheService tokenCache;
     private CacheService sessionRemoteIdCache;
@@ -116,7 +117,7 @@ public class SecureSessionManager {
     //todo : threadpool this
     private void processCleanupQueue() {
         if (q.size() > 0) {
-            log.info("Processing cleanup queue ");
+            LOG.info("Processing cleanup queue ");
             Callable cb = null;
             try {
                 while ((cb = q.poll(100, TimeUnit.MILLISECONDS)) != null) {
@@ -127,7 +128,7 @@ public class SecureSessionManager {
                     }
                 }
             } catch (Exception ie) {
-                log.warn(ie.getMessage(), ie);
+                LOG.warn(ie.getMessage(), ie);
             }
 
         }
@@ -145,13 +146,13 @@ public class SecureSessionManager {
                     try {
                         Thread.sleep(delayMs);
                     } catch (Exception ex) {
-                        log.warn("Error calling clean up handler for " + sessionId, ex);
+                        LOG.warn("Error calling clean up handler for " + sessionId, ex);
                     }
                     try {
-                        log.info("Calling cleanup handler for session " + sessionId);
+                        LOG.info("Calling cleanup handler for session " + sessionId);
                         cb.call();
                     } catch (Exception ex) {
-                        log.warn("Error calling clean up handler for " + sessionId, ex);
+                        LOG.warn("Error calling clean up handler for " + sessionId, ex);
                     }
                     return null;
                 }
@@ -164,7 +165,7 @@ public class SecureSessionManager {
         synchronized (cleanUpHandlers) {
             List<Callable> _handlers = cleanUpHandlers.get(sessionId);
             if (_handlers == null) {
-                log.info("no cleanup handlers registered for " + sessionId);
+                LOG.info("no cleanup handlers registered for " + sessionId);
                 return;
             }
             for (Callable handler : _handlers) {
@@ -177,7 +178,7 @@ public class SecureSessionManager {
     }
 
     public void invalidate(SecureSession _ssn) {
-        log.info("Invalidating session " + _ssn);
+        LOG.info("Invalidating session " + _ssn);
         SecureSession ssn = sessionCache.get(_ssn.getId());
 
         if (ssn != null) {
@@ -187,7 +188,7 @@ public class SecureSessionManager {
     }
 
     public void remove(SecureSession _ssn) {
-        log.info("Removing session " + _ssn + " remote " + _ssn.getRemoteId());
+        LOG.info("Removing session " + _ssn + " remote " + _ssn.getRemoteId());
         sessionCache.remove(_ssn.getId());
         sessionRemoteIdCache.remove(_ssn.getRemoteId());
         onCleanUp(_ssn.getId());
@@ -213,7 +214,7 @@ public class SecureSessionManager {
     }
 
     public void scheduleRemoval(String ssnId) {
-        log.info("Scheduling session removal by id " + ssnId);
+        LOG.info("Scheduling session removal by id " + ssnId);
         synchronized (scheduledRemovals) {
             scheduledRemovals.put(ssnId, System.currentTimeMillis() + 1000L * 60L * 10L);
         }
@@ -221,12 +222,12 @@ public class SecureSessionManager {
 
 
     public void remove(String ssnId) {
-        log.info("Removing session by id " + ssnId);
+        LOG.info("Removing session by id " + ssnId);
         SecureSession ssn = sessionCache.get(ssnId);
         if (ssn != null) {
             remove(ssn);
         } else {
-            log.info("Session not found " + ssnId);
+            LOG.info("Session not found " + ssnId);
             onCleanUp(ssnId);
         }
     }
@@ -374,7 +375,7 @@ public class SecureSessionManager {
                 if (tok.isValid()) {
                     ssn.setAuthenticationState(SecureSession.AuthenticationState.AUTHENTICATED);
                     ssn.setIdentity(identity);
-                    log.info("Session " + ssn + " authenticated with credentials " + credentials);
+                    LOG.info("Session " + ssn + " authenticated with credentials " + credentials);
                     tokenCache.remove(tok.getCode());
                     _commitSession(ssn);
                 } else {

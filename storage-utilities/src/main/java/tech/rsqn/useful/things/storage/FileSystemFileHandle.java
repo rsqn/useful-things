@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.storage;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,12 +9,10 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-//import com.mac.libraries.json.JsonUtils;
-//import org.apache.commons.lang3.builder.ToStringBuilder;
 
 
 public class FileSystemFileHandle extends FileHandle {
-    private transient  Logger log = LoggerFactory.getLogger(getClass());
+    private transient Logger LOG = LoggerFactory.getLogger(getClass());
     private transient File tld;
 
     public void setTld(File tld) {
@@ -56,13 +56,13 @@ public class FileSystemFileHandle extends FileHandle {
     public long streamIn( InputStream is ) {
 //        log.info("Streaming in " + ToStringBuilder.reflectionToString(this));
         try (FileOutputStream fos = new FileOutputStream(generateDataFile())) {
-            log.debug("Writing initial metadata " + generateMetaFile().getAbsolutePath());
+            LOG.debug("Writing initial metadata " + generateMetaFile().getAbsolutePath());
             writeMeta();
-            log.info("Writing file " + generateDataFile().getAbsolutePath());
+            LOG.info("Writing file " + generateDataFile().getAbsolutePath());
             FileUtil.copy(is,fos);
             setLength(generateDataFile().length());
             writeMeta();
-            log.debug("Writing final metadata");
+            LOG.debug("Writing final metadata");
         } catch (Exception e) {
             throw new RuntimeException("Unable to write data "+ e, e);
         }
@@ -72,7 +72,7 @@ public class FileSystemFileHandle extends FileHandle {
     public long streamOut( OutputStream os ) {
 //        log.info("Streaming out " + ToStringBuilder.reflectionToString(this));
         try (FileInputStream fis = new FileInputStream(generateDataFile())) {
-            log.info("Reading file " + generateDataFile().getAbsolutePath());
+            LOG.info("Reading file " + generateDataFile().getAbsolutePath());
             FileUtil.copy(fis, os);
             return getLength();
         } catch (Exception e) {

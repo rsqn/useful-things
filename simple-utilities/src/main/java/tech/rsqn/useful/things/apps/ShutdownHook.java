@@ -1,6 +1,8 @@
 package tech.rsqn.useful.things.apps;
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,7 @@ import java.util.concurrent.Callable;
 
 public class ShutdownHook {
 
-    private final Logger logger_ = LoggerFactory.getLogger(getClass());
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     private String name_;
     private Callable callable_;
@@ -30,10 +32,10 @@ public class ShutdownHook {
 
     public void call() {
         try {
-            logger_.info("Calling shutdown hook " + getName());
+            LOG.info("Calling shutdown hook " + getName());
             getCallable().call();
         } catch (Exception ignore) {
-            logger_.warn("Exception calling hook for " + getName() + " - " + ignore.getMessage(), ignore);
+            LOG.warn("Exception calling hook for " + getName() + " - " + ignore.getMessage(), ignore);
         }
     }
 

@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.concurrency;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.*;
 public class Notifier {
     private List<NotifiableContainer> listeners;
     private ExecutorService executorService;
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     private BlockingQueue taskQueue;
     private String name = "default";
 
@@ -76,16 +78,16 @@ public class Notifier {
 
     public void shutdown() {
         try {
-            log.info("Notifier shutting down");
+            LOG.info("Notifier shutting down");
             executorService.shutdown();
             while (!executorService.awaitTermination(2, TimeUnit.SECONDS)) {
-                log.info("Awaiting completion of threads.");
+                LOG.info("Awaiting completion of threads.");
                 executorService.shutdownNow();
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
-        log.info("Notifier Shutdown");
+        LOG.info("Notifier Shutdown");
     }
 
     public void send(String topic, final Object arg) {
@@ -109,7 +111,7 @@ public class Notifier {
                                     listener.callBack.onNotify(arg);
 //                                    completedCtr.inc();
                                 } catch (Exception e) {
-                                    log.warn("Exception  [" + name + "] notifying listeners on topic (" + topic + ") with argument (" + arg + ")", e);
+                                    LOG.warn("Exception  [" + name + "] notifying listeners on topic (" + topic + ") with argument (" + arg + ")", e);
 //                                    errorsCtr.inc();
                                 } finally {
 //                                    c.close();
@@ -119,7 +121,7 @@ public class Notifier {
                             }
                         });
                     } catch (Exception e) {
-                        log.warn("Exception  [" + name + "] queueing task " + e.getMessage());
+                        LOG.warn("Exception  [" + name + "] queueing task " + e.getMessage());
 //                        errorsCtr.inc();
                         throw new NotifierException("Exception Queueing task ", e);
                     }

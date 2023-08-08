@@ -15,7 +15,7 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
     public static final String ALIAS = "alias/";
     public static final String ARN = "arn:";
     public static final String AES_256 = "AES_256";
-    private static Logger logger = LoggerFactory.getLogger(KMSCMKClientHelperImpl.class);
+    private static Logger LOG = LoggerFactory.getLogger(KMSCMKClientHelperImpl.class);
 
     protected AWSKMS kmsClient;
 
@@ -57,7 +57,7 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
         String keyId = "";
         if (keyArnOrAlias.startsWith(ARN)) {
             keyId = keyArnOrAlias;
-            logger.info("Using key ARN:"+keyId);
+            LOG.info("Using key ARN:"+keyId);
         } else if (!keyArnOrAlias.startsWith(ALIAS)) {
             for (AliasListEntry aliasEntry : listAliases()) {
                 if (aliasEntry.getAliasName().equals(keyArnOrAlias)) {
@@ -66,13 +66,13 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
                 }
             }
             if (keyId.isEmpty()) {
-                logger.warn("keyId is empty for keyAlias:" + keyArnOrAlias);
+                LOG.warn("keyId is empty for keyAlias:" + keyArnOrAlias);
             } else {
-                logger.info("Using keyid:"+keyId+" for key alias:"+keyArnOrAlias);
+                LOG.info("Using keyid:"+keyId+" for key alias:"+keyArnOrAlias);
             }
         }
         keyId = keyArnOrAlias;
-        logger.info("Using keyid:"+keyId);
+        LOG.info("Using keyid:"+keyId);
         return keyId;
     }
 
@@ -91,9 +91,9 @@ public class KMSCMKClientHelperImpl implements KMSCMKClientHelper {
             kmsClient =
                 AWSKMSClientBuilder.standard().withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                     .build();
-            logger.info("kmsClient initialised:");
+            LOG.info("kmsClient initialised:");
             for (KeyListEntry key : kmsClient.listKeys().getKeys()) {
-                logger.debug("kmsClient key: {}", key.toString());
+                LOG.debug("kmsClient key: {}", key.toString());
             }
         }
         return kmsClient;

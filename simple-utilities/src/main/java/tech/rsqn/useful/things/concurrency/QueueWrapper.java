@@ -12,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class QueueWrapper<T> {
-    private static final Logger log = LoggerFactory.getLogger(QueueWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QueueWrapper.class);
     private String id;
     private BlockingQueue q;
     private volatile boolean keepRunning = false;
@@ -53,7 +53,7 @@ public class QueueWrapper<T> {
             }
         } catch (InterruptedException e) {
             errorsCtr.inc();
-            log.warn(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
         return ret;
     }
@@ -63,7 +63,7 @@ public class QueueWrapper<T> {
             @Override
             public void run() {
                 try {
-                    log.info("QueueListener {} starting",id);
+                    LOG.info("QueueListener {} starting",id);
                     while (keepRunning) {
                         T item = deQueue(5000);
                         if (item != null && keepRunning) {
@@ -72,17 +72,17 @@ public class QueueWrapper<T> {
                                 l.onItem(item);
                                 notifyCtr.inc();
                             } catch (Exception e) {
-                                log.warn("Error notifying queue listener " + id + " " + e.getMessage(), e);
+                                LOG.warn("Error notifying queue listener " + id + " " + e.getMessage(), e);
                                 errorsCtr.inc();
                             } finally {
                                 ctx.stop();
                             }
                         }
                     }
-                    log.info("QueueListener {} exiting",id);
+                    LOG.info("QueueListener {} exiting",id);
                 } catch (Exception e) {
                     errorsCtr.inc();
-                    log.warn("Exception in queueWrapper " + id + " " + e.getMessage(), e);
+                    LOG.warn("Exception in queueWrapper " + id + " " + e.getMessage(), e);
                 }
             }
         };

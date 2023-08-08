@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.web.filters;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,14 +12,14 @@ import java.util.Enumeration;
 
 public class LogHttpHeadersFilter implements Filter {
 
-    private static Logger log = LoggerFactory.getLogger(LogHttpHeadersFilter.class);
+    private static Logger LOG = LoggerFactory.getLogger(LogHttpHeadersFilter.class);
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) servletRequest;
 
-        log.debug("LogHttpHeadersFilter - RequstedURI is: " + req.getRequestURL());
+        LOG.debug("LogHttpHeadersFilter - RequstedURI is: " + req.getRequestURL());
 
         Enumeration<String> en = req.getHeaderNames();
 
@@ -26,7 +28,7 @@ public class LogHttpHeadersFilter implements Filter {
 
             String v = req.getHeader(n);
 
-            log.info(n + " = " + v);
+            LOG.info(n + " = " + v);
         }
 
         filterChain.doFilter(servletRequest, servletResponse);

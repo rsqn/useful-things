@@ -35,14 +35,8 @@
 
     <dependencies>
         <!--Compile Dependencies-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
+
+
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>simple-utilities</artifactId>

@@ -1,12 +1,14 @@
 package tech.rsqn.useful.things.mathanddata;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
 public class Histogram {
-    private static final Logger log = LoggerFactory.getLogger(Histogram.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Histogram.class);
 
     private double[] bins;
     private int numBins = -1;
@@ -76,7 +78,7 @@ public class Histogram {
             throw new RuntimeException("Histogram not initialised with ranges");
         }
         if (v < minValue || v > maxValue) {
-            log.warn("Value " + v + " is not within initialised range " + minValue + " -> " + maxValue);
+            LOG.warn("Value " + v + " is not within initialised range " + minValue + " -> " + maxValue);
 //            throw new RuntimeException("Value " + v + " is not within initialised range " + minValue + " -> " + maxValue);
             return -1;
         } else {

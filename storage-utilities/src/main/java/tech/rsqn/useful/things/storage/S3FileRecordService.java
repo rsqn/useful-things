@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 public class S3FileRecordService implements FileRecordService {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger LOG = LoggerFactory.getLogger(getClass());
     
     private AmazonS3 s3c;
     private String defaultPath = null;
@@ -79,7 +79,7 @@ public class S3FileRecordService implements FileRecordService {
         ClientConfiguration clientConfig = null;
 
         if (System.getProperty("proxyHost") != null) {
-            log.info("Will proxy to s3 via " + System.getProperty("proxyHost") + ":" + System.getProperty("proxyPort"));
+            LOG.info("Will proxy to s3 via " + System.getProperty("proxyHost") + ":" + System.getProperty("proxyPort"));
             clientConfig = new ClientConfiguration();
             clientConfig.setProxyHost(System.getProperty("proxyHost"));
             clientConfig.setProxyPort(Integer.parseInt(System.getProperty("proxyPort")));
@@ -152,11 +152,11 @@ public class S3FileRecordService implements FileRecordService {
         try {
             meta = this.requestMetadata(bucketName, getFullPath(path, uid));
         } catch (Exception e) {
-            log.error("Unable to request meta data for path: " + path + ", uid: " + uid + ", error:" + e.getMessage(), e);
+            LOG.error("Unable to request meta data for path: " + path + ", uid: " + uid + ", error:" + e.getMessage(), e);
             return null;
         }
         if (meta == null) {
-            log.error("Unable to request meta data for path: " + path + ", uid: " + uid);
+            LOG.error("Unable to request meta data for path: " + path + ", uid: " + uid);
             return null;
         }
 
@@ -179,7 +179,7 @@ public class S3FileRecordService implements FileRecordService {
             for ( S3ObjectSummary summary : S3Objects.withPrefix(s3c, bucketName, path) ) {
                 // S3Objects iterator handles pagination
                 if (summary.getSize() <= 0) {
-                    log.info("Skipping empty key {}", summary.getKey());
+                    LOG.info("Skipping empty key {}", summary.getKey());
                     continue;
                 }
                 FileHandle fileHandle = getByUid(summary.getKey());
@@ -188,7 +188,7 @@ public class S3FileRecordService implements FileRecordService {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to list S3 bucket {} content - {}", bucketName, e.toString());
+            LOG.error("Failed to list S3 bucket {} content - {}", bucketName, e.toString());
         }
     }
 

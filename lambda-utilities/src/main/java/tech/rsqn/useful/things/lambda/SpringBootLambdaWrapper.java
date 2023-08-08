@@ -1,7 +1,6 @@
 package tech.rsqn.useful.things.lambda;
 
 
-
 import com.amazonaws.services.lambda.runtime.*;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;

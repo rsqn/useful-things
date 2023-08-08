@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.concurrency;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class QueueDistributor<T> {
-    private static final Logger log = LoggerFactory.getLogger(QueueDistributor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QueueDistributor.class);
     private Map<String, QueueWrapper<T>> subscriptions;
 
     public QueueDistributor() {
@@ -26,9 +28,9 @@ public class QueueDistributor<T> {
     public void removeQueue(String id) {
         synchronized (subscriptions) {
             if ( subscriptions.remove(id) != null ) {
-                log.info("removed subscription " + id);
+                LOG.info("removed subscription " + id);
             } else {
-                log.warn("subscription not found " + id);
+                LOG.warn("subscription not found " + id);
             }
         }
     }

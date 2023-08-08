@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.apps;
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class KeepRunning {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger LOG = LoggerFactory.getLogger(getClass());
     private Object lockObj_;
     private volatile boolean keepRunning_;
     private volatile boolean hasRunShutdownTasks_;
@@ -48,7 +50,7 @@ public class KeepRunning {
                 lockObj_.notifyAll();
             }
         } catch (Exception ignore) {
-            log.error("in keeprunning ", ignore);
+            LOG.error("in keeprunning ", ignore);
         }
         runShutdownTasks();
     }
@@ -83,7 +85,7 @@ public class KeepRunning {
             try {
                 lockObj_.wait(ms);
             } catch (InterruptedException e) {
-                log.error("in keeprunning ", e);
+                LOG.error("in keeprunning ", e);
             }
         }
     }
