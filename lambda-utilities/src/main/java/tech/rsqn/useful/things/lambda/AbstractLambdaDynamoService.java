@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public abstract class AbstractLambdaDynamoService<C, R> extends  AbstractLambdaSpringService<C, R> {
+public abstract class AbstractLambdaDynamoService<C, R> extends  AbstractHttpFunction<C, R> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLambdaDynamoService.class);
 
     protected AmazonDynamoDB dynamodb = null;

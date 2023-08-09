@@ -1,10 +1,11 @@
 package tech.rsqn.useful.things.lambda.model;
 
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequestDto {
@@ -15,11 +16,20 @@ public class HttpRequestDto {
     private Map<String, String> queryStringParameters = new HashMap<>();
     private Map<String, String> pathParameters = new HashMap<>();
     private Map<String, String> stageVariables = new HashMap<>();
-    private APIGatewayProxyRequestEvent.ProxyRequestContext requestContext;
-    private String body;
+    private String Body;
+    private List<String> cookies;
 
-    public HttpRequestDto with(APIGatewayProxyRequestEvent evt) {
+    private String version;
+    private String routeKey;
+    private String rawPath;
+    private String rawQueryString;
+
+
+
+    public HttpRequestDto with(APIGatewayV2HTTPEvent evt) {
         BeanUtils.copyProperties(evt,this);
+        path = evt.getRawPath();
+        httpMethod = evt.getRequestContext().getHttp().getMethod();
         return this;
     }
 
@@ -38,6 +48,7 @@ public class HttpRequestDto {
         }
         return null;
     }
+
 
     public String getResource() {
         return resource;
@@ -95,19 +106,70 @@ public class HttpRequestDto {
         this.stageVariables = stageVariables;
     }
 
-    public APIGatewayProxyRequestEvent.ProxyRequestContext getRequestContext() {
-        return requestContext;
-    }
-
-    public void setRequestContext(APIGatewayProxyRequestEvent.ProxyRequestContext requestContext) {
-        this.requestContext = requestContext;
-    }
-
     public String getBody() {
-        return body;
+        return Body;
     }
 
     public void setBody(String body) {
-        this.body = body;
+        Body = body;
+    }
+
+    public List<String> getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(List<String> cookies) {
+        this.cookies = cookies;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getRouteKey() {
+        return routeKey;
+    }
+
+    public void setRouteKey(String routeKey) {
+        this.routeKey = routeKey;
+    }
+
+    public String getRawPath() {
+        return rawPath;
+    }
+
+    public void setRawPath(String rawPath) {
+        this.rawPath = rawPath;
+    }
+
+    public String getRawQueryString() {
+        return rawQueryString;
+    }
+
+    public void setRawQueryString(String rawQueryString) {
+        this.rawQueryString = rawQueryString;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestDto{" +
+                "resource='" + resource + '\'' +
+                ", path='" + path + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", headers=" + headers +
+                ", queryStringParameters=" + queryStringParameters +
+                ", pathParameters=" + pathParameters +
+                ", stageVariables=" + stageVariables +
+                ", Body='" + Body + '\'' +
+                ", cookies=" + cookies +
+                ", version='" + version + '\'' +
+                ", routeKey='" + routeKey + '\'' +
+                ", rawPath='" + rawPath + '\'' +
+                ", rawQueryString='" + rawQueryString + '\'' +
+                '}';
     }
 }

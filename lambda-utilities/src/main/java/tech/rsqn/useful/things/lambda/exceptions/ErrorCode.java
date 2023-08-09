@@ -1,7 +1,9 @@
 package tech.rsqn.useful.things.lambda.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 public class ErrorCode extends RuntimeException {
-    private int code = -1;
+    private int code = HttpStatus.INTERNAL_SERVER_ERROR.value();
     private String message = "";
 
     public ErrorCode(int code) {

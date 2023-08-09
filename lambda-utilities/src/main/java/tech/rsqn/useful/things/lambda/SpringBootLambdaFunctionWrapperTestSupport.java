@@ -2,7 +2,7 @@ package tech.rsqn.useful.things.lambda;
 
 
 import com.amazonaws.services.lambda.runtime.*;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
@@ -25,9 +24,9 @@ import java.util.Map;
  * This class is intended for use in development of java lambda functions, allowing you to run them locally as spring boot.
  */
 
-public abstract class SpringBootLambdaWrapper {
+public abstract class SpringBootLambdaFunctionWrapperTestSupport {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SpringBootLambdaWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SpringBootLambdaFunctionWrapperTestSupport.class);
 
     protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, T model, RequestHandler lambdaHandler) {
         return handleRequest(req, resp, model, lambdaHandler, new HashMap<>());
@@ -35,7 +34,7 @@ public abstract class SpringBootLambdaWrapper {
 
     protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, T model, RequestHandler lambdaHandler, Map<String, String> pathVariables) {
         ObjectMapper objectMapper = new ObjectMapper();
-        APIGatewayProxyRequestEvent lambdaEvent = new APIGatewayProxyRequestEvent();
+        APIGatewayV2HTTPEvent lambdaEvent = new APIGatewayV2HTTPEvent();
 
         // headers
         HashMap<String, String> hdrs = new HashMap<String, String>();
@@ -63,8 +62,13 @@ public abstract class SpringBootLambdaWrapper {
         }
         lambdaEvent.setHeaders(hdrs);
         lambdaEvent.setQueryStringParameters(qs);
-        lambdaEvent.setHttpMethod(req.getMethod());
-        lambdaEvent.setPath(req.getRequestURI());
+        APIGatewayV2HTTPEvent.RequestContext requestContext = new APIGatewayV2HTTPEvent.RequestContext();
+        APIGatewayV2HTTPEvent.RequestContext.Http http = new APIGatewayV2HTTPEvent.RequestContext.Http();
+        http.setMethod(req.getMethod());
+        http.setPath(req.getRequestURI());
+        requestContext.setHttp(http);
+        lambdaEvent.setRawPath(req.getRequestURI());
+        lambdaEvent.setRequestContext(requestContext);
         lambdaEvent.setPathParameters(pathVariables);
 
         ApiGatewayResponse ret = (ApiGatewayResponse) lambdaHandler.handleRequest(lambdaEvent, makeContext());
