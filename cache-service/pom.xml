@@ -39,13 +39,11 @@
         <dependency>
             <groupId>tech.rsqn.reflection-helpers</groupId>
             <artifactId>reflection-helpers</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>simple-utilities</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- TestNG -->
@@ -64,7 +62,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -74,6 +72,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -89,7 +92,7 @@
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
 
 
