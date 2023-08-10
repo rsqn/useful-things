@@ -16,6 +16,13 @@
     <description>A collection of common utilities used by rsqn.tech opensource projects.</description>
     <url>https://github.com/rsqn/useful-things</url>
 
+    <scm>
+        <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
+        <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
+        <url>https://github.com/rsqns/useful-things</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <licenses>
         <license>
             <name>GNU General Public License, Version 3.0</name>
@@ -32,12 +39,6 @@
         </developer>
     </developers>
 
-    <scm>
-        <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
-        <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
-        <url>https://github.com/mandrewes/useful-things</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <properties>
         <aws.sdk.version>1.12.524</aws.sdk.version>

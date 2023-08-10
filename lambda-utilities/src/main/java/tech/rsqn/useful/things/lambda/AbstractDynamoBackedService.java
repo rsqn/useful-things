@@ -8,10 +8,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 
-@Component
+@Deprecated
 public abstract class AbstractDynamoBackedService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDynamoBackedService.class);
 
@@ -26,7 +25,7 @@ public abstract class AbstractDynamoBackedService {
         endpoint = System.getProperty("dynamo.endpoint");
 
         Regions r = Regions.AP_SOUTHEAST_2;
-        if ( region != null && region.length() > 0) {
+        if (region != null && region.length() > 0) {
             r = Regions.fromName(region);
         }
         mapperConfig = DynamoDBMapperConfig.DEFAULT;
