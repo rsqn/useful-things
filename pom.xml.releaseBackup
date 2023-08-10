@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>rsqn-oss-super-pom</artifactId>
-        <version>0.0.17</version>
+        <version>0.0.13</version>
     </parent>
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.75-SNAPSHOT</version>
+    <version>1.0.74-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -51,12 +51,12 @@
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>simple-utilities</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.74-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>cache-service</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.74-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
