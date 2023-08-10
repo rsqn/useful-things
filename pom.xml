@@ -19,7 +19,7 @@
     <scm>
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
-        <url>https://github.com/rsqns/useful-things</url>
+        <url>https://github.com/rsqn/useful-things</url>
         <tag>HEAD</tag>
     </scm>
 
