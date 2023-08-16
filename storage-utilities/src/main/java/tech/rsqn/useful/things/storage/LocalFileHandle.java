@@ -1,6 +1,6 @@
 package tech.rsqn.useful.things.storage;
 
-import org.apache.commons.io.IOUtil;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -81,7 +81,7 @@ public class LocalFileHandle extends FileHandle implements Serializable {
         } catch (Exception e) {
 
         } finally {
-            IOUtil.shutdownStream(is);
+            IOUtils.closeQuietly(is);
         }
         return "failure" + System.currentTimeMillis();
     }

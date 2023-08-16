@@ -81,7 +81,7 @@ public class FileUtil {
 
     public static String readFileToString(File f) {
         try {
-            return FileUtils.fileRead(f.getAbsolutePath());
+            return FileUtils.readFileToString(f);
         } catch (IOException e) {
             throw new RuntimeException("IOException " + e, e);
         }
@@ -89,7 +89,7 @@ public class FileUtil {
 
     public static void writeStringToFile(File f, String data) {
         try {
-            FileUtils.fileWrite(f.getAbsolutePath(),data);
+            FileUtils.writeStringToFile(f,data);
         } catch (Exception e) {
             throw new RuntimeException("IOException " + e, e);
         }

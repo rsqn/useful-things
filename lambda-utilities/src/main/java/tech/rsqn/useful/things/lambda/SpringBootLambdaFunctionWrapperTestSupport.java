@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -28,11 +31,11 @@ public abstract class SpringBootLambdaFunctionWrapperTestSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpringBootLambdaFunctionWrapperTestSupport.class);
 
-    protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, T model, RequestHandler lambdaHandler) {
-        return handleRequest(req, resp, model, lambdaHandler, new HashMap<>());
+    protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, RequestHandler lambdaHandler) {
+        return handleRequest(req, resp, lambdaHandler, new HashMap<>());
     }
 
-    protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, T model, RequestHandler lambdaHandler, Map<String, String> pathVariables) {
+    protected <T> ResponseEntity handleRequest(HttpServletRequest req, HttpServletResponse resp, RequestHandler lambdaHandler, Map<String, String> pathVariables) {
         ObjectMapper objectMapper = new ObjectMapper();
         APIGatewayV2HTTPEvent lambdaEvent = new APIGatewayV2HTTPEvent();
 
@@ -53,13 +56,16 @@ public abstract class SpringBootLambdaFunctionWrapperTestSupport {
         }
 
         // body
-        if (model != null) {
-            try {
-                lambdaEvent.setBody(objectMapper.writeValueAsString(model));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+        try {
+            if ( req.getContentLength() > 0) {
+                BufferedReader reader = req.getReader();
+                String body = IOUtils.toString(reader);
+                lambdaEvent.setBody(body);
             }
+        } catch (IOException e) {
+           throw new RuntimeException(e);
         }
+
         lambdaEvent.setHeaders(hdrs);
         lambdaEvent.setQueryStringParameters(qs);
         APIGatewayV2HTTPEvent.RequestContext requestContext = new APIGatewayV2HTTPEvent.RequestContext();
@@ -84,8 +90,9 @@ public abstract class SpringBootLambdaFunctionWrapperTestSupport {
 
             HttpHeaders h = new HttpHeaders();
             for (String n : ret.getHeaders().keySet()) {
-                h.add(n, hdrs.get(n));
+                h.set(n, ret.getHeaders().get(n));
             }
+
             return new ResponseEntity<Object>(ret._getObjectBody(), h, HttpStatus.valueOf(ret.getStatusCode()));
         }
     }

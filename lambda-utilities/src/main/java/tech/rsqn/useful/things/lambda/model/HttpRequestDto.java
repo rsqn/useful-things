@@ -1,9 +1,16 @@
 package tech.rsqn.useful.things.lambda.model;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.fileupload.MultipartStream;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,14 +31,41 @@ public class HttpRequestDto {
     private String rawPath;
     private String rawQueryString;
 
+    private APIGatewayV2HTTPEvent event;
+    private Object model;
 
-
-    public HttpRequestDto with(APIGatewayV2HTTPEvent evt) {
+    public HttpRequestDto with(APIGatewayV2HTTPEvent evt, Object model) {
         BeanUtils.copyProperties(evt,this);
         path = evt.getRawPath();
         httpMethod = evt.getRequestContext().getHttp().getMethod();
+        event = evt;
+        Body = evt.getBody();
+        this.model = model;
         return this;
     }
+
+    public <T> T getModel() {
+        return (T) model;
+    }
+//    private void parseFormData() {
+//        if ( false ) {
+//            return;
+//        }
+//        try {
+//            DataSource source = new ByteArrayDataSource(new ByteArrayInputStream(Base64.decodeBase64(event.getBody())), "multipart/form-data");
+//            MimeMultipart mp = new MimeMultipart(source);
+//
+//            for (int i = 0; i < mp.getCount(); i++) {
+//                BodyPart bp = mp.getBodyPart(i);
+//                bp.get
+//            }
+//            MultipartStream stream = new MultipartStream();
+//            stream.readBodyData(new String)
+//        } catch ( Exception ex ) {
+//
+//        }
+//
+//    }
 
     public String getParameter(String key) {
         String s = queryStringParameters.get(key);
