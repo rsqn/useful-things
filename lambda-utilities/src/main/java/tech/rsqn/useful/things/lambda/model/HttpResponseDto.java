@@ -1,5 +1,6 @@
 package tech.rsqn.useful.things.lambda.model;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -23,10 +24,22 @@ public class HttpResponseDto {
         return this;
     }
 
+    public HttpResponseDto status(HttpStatus status) {
+        this.status = status.value();
+        return this;
+    }
+
     public HttpResponseDto status(int status) {
         this.status = status;
         return this;
     }
+
+    public HttpResponseDto status(HttpStatus status,Object b) {
+        this.status = status.value();
+        this.body(b);
+        return this;
+    }
+
 
     public HttpResponseDto status(int status,Object b) {
         this.status = status;

@@ -17,6 +17,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.http.HttpStatus;
 import tech.rsqn.useful.things.lambda.exceptions.ErrorCode;
 import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
+import tech.rsqn.useful.things.lambda.model.ErrorDto;
 import tech.rsqn.useful.things.lambda.model.HttpRequestDto;
 import tech.rsqn.useful.things.lambda.model.HttpResponseDto;
 
@@ -90,11 +91,12 @@ public abstract class AbstractLambdaFunctionRouter implements RequestHandler<API
                 LOG.info("got a value - so making DTO " + responseDto);
             }
         } catch (ErrorCode ec) {
-            responseDto = new HttpResponseDto().status(ec.getCode(), ec.getMessage());
+            responseDto = new HttpResponseDto().status(ec.getCode(), new ErrorDto().from(ec));
             LOG.warn("Got an errorCode so making DTO " + responseDto);
         } catch (Exception ex) {
             LOG.warn(ex.getMessage(), ex);
-            responseDto = new HttpResponseDto().status(500).error(ex.getMessage());
+            ErrorCode ec = new ErrorCode(500,ex.getMessage());
+            responseDto = new HttpResponseDto().status(500,new ErrorDto().from(ec));
             LOG.warn("Got an Exception so making DTO " + responseDto);
 
         }

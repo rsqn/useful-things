@@ -3,7 +3,6 @@ package tech.rsqn.useful.things.lambda;
 
 import com.amazonaws.services.lambda.runtime.*;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import tech.rsqn.useful.things.lambda.model.ApiGatewayResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -57,13 +55,13 @@ public abstract class SpringBootLambdaFunctionWrapperTestSupport {
 
         // body
         try {
-            if ( req.getContentLength() > 0) {
+            if (req.getContentLength() > 0) {
                 BufferedReader reader = req.getReader();
                 String body = IOUtils.toString(reader);
                 lambdaEvent.setBody(body);
             }
         } catch (IOException e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
 
         lambdaEvent.setHeaders(hdrs);

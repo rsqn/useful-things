@@ -11,6 +11,18 @@ public class ErrorCode extends RuntimeException {
         this.code = code;
     }
 
+    public ErrorCode(HttpStatus code) {
+        super();
+        this.code = code.value();
+    }
+
+    public ErrorCode(HttpStatus code, String message) {
+        super(message);
+        this.code = code.value();
+        this.message = message;
+    }
+
+
     public ErrorCode(int code, String message) {
         super(message);
         this.code = code;
