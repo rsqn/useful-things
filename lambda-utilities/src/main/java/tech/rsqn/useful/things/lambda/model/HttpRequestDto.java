@@ -11,6 +11,7 @@ import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,21 @@ public class HttpRequestDto {
         event = evt;
         Body = evt.getBody();
         this.model = model;
+        if ( this.headers == null) {
+            this.headers = new HashMap<>();
+        }
+        if ( this.queryStringParameters == null) {
+            this.queryStringParameters = new HashMap<>();
+        }
+        if ( this.pathParameters == null) {
+            this.pathParameters = new HashMap<>();
+        }
+        if ( this.stageVariables == null) {
+            this.stageVariables = new HashMap<>();
+        }
+        if ( this.cookies == null) {
+            this.cookies = new ArrayList<>();
+        }
         return this;
     }
 
