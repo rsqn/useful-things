@@ -23,7 +23,7 @@ public class S3FileHandle extends FileHandle {
     private transient String sseCustomerAlgorithm = null;
 //    private transient SSECustomerKey sseCustomerKey = null;
 
-    private static final String APPLICATION_META = "isx-app-meta-";
+    private static final String APPLICATION_META = "app-meta-";
 
     public void setS3client(AmazonS3 s3client) {
         this.s3client = s3client;
