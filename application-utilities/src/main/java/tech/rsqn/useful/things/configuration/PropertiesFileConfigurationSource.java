@@ -31,6 +31,9 @@ public class PropertiesFileConfigurationSource extends AbstractConfigurationSour
 
     @Override
     public String getEnvironment() {
+        if ( Strings.isNullOrEmpty( System.getProperty("env"))) {
+            return System.getenv("env");
+        }
         return System.getProperty("env");
     }
 
@@ -45,7 +48,7 @@ public class PropertiesFileConfigurationSource extends AbstractConfigurationSour
     public PropertiesFileConfigurationSource() {
     }
 
-    private void reportOnProperties() {
+    public void reportOnProperties() {
         List<String> notUsed = new ArrayList<>();
 
         for (Object o : myProps.keySet()) {

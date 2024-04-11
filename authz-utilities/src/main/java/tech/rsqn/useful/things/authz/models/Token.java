@@ -55,6 +55,11 @@ public class Token implements Serializable {
         return this;
     }
 
+    public Token andValidMillis(final int millis) {
+        this.validTo = new Date(System.currentTimeMillis() + millis);
+        return this;
+    }
+
     public Token andValidMinutes(final int minutes) {
         this.validTo = new Date(System.currentTimeMillis() + (1000L * 60L * minutes));
         return this;
