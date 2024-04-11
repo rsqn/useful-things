@@ -39,6 +39,12 @@
         <dependency>
             <groupId>tech.rsqn.reflection-helpers</groupId>
             <artifactId>reflection-helpers</artifactId>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.slf4j</groupId>-->
+<!--                    <artifactId>slf4j-api</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
         </dependency>
 
         <dependency>

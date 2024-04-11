@@ -21,7 +21,11 @@ public class Token implements Serializable {
 
     public Token() {
         this.validFrom = new Date();
+    }
+
+    public Token withRandomCode(int len) {
         this.code = RandomUtil.getRandomString(32);
+        return this;
     }
 
     public Token(final String code) {
