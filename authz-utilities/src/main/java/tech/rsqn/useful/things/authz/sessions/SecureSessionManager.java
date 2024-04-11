@@ -253,7 +253,7 @@ public class SecureSessionManager {
 
         Token token = generateBlankToken(validationTokenTtl);
         token.setResource(ssn.getId());
-        token.setTokenScope(TOKEN_TYPE_SESSION_VALIDATION);
+        token.setScope(TOKEN_TYPE_SESSION_VALIDATION);
         token.setValidTo(new Date(System.currentTimeMillis() + validationTokenTtl));
         tokenCache.putWithTTL(token.getCode(), token, validationTokenTtl + tokenExpiryGracePeriod);
         return token;
@@ -298,7 +298,7 @@ public class SecureSessionManager {
             throw new SessionException("Session is in invalid state to perform validation VE004");
         }
 
-        if (TOKEN_TYPE_SESSION_VALIDATION.equals(tok.getTokenScope())) {
+        if (TOKEN_TYPE_SESSION_VALIDATION.equals(tok.getScope())) {
             if (ssn.getId().equals(tok.getResource())) {
                 if (tok.isValid()) {
                     ssn.setSessionState(SecureSession.SessionState.VALIDATED);
@@ -355,7 +355,7 @@ public class SecureSessionManager {
 
         Token token = generateBlankToken(authenticationTokenTtl);
         token.setResource(ssn.getId());
-        token.setTokenScope(TOKEN_TYPE_AUTHENTICATION_WINDOW);
+        token.setScope(TOKEN_TYPE_AUTHENTICATION_WINDOW);
         token.setValidTo(new Date(System.currentTimeMillis() + authenticationTokenTtl));
         tokenCache.putWithTTL(token.getCode(), token, authenticationTokenTtl + tokenExpiryGracePeriod);
         return token;
@@ -370,7 +370,7 @@ public class SecureSessionManager {
             throw new SessionException("session state invalid for authentication A001");
         }
 
-        if (TOKEN_TYPE_AUTHENTICATION_WINDOW.equals(tok.getTokenScope())) {
+        if (TOKEN_TYPE_AUTHENTICATION_WINDOW.equals(tok.getScope())) {
             if (ssn.getId().equals(tok.getResource())) {
                 if (tok.isValid()) {
                     ssn.setAuthenticationState(SecureSession.AuthenticationState.AUTHENTICATED);

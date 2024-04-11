@@ -220,7 +220,7 @@ public class SecureSessionManagerTest {
         mgr.validateSession(ssn, token.getCode());
         Token tok = mgr.generateAuthenticationToken(ssn);
 
-        tok.setTokenScope("FRED"); // this will work as the cache is a hashmap in this test
+        tok.setScope("FRED"); // this will work as the cache is a hashmap in this test
 
         Identity ident = new Identity();
         ident.setUid(UUID.randomUUID().toString());

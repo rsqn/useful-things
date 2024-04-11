@@ -12,7 +12,7 @@ public class Token implements Serializable {
     private Identity identity;
     private String code;
     private String grantedBy;
-    private String tokenScope;
+    private String scope;
     private String resourceScope;
     private String resource;
     private Date validFrom;
@@ -23,14 +23,20 @@ public class Token implements Serializable {
         this.validFrom = new Date();
     }
 
-    public Token withRandomCode(int len) {
-        this.code = RandomUtil.getRandomString(32);
+    public Token withScope(String scope) {
+        this.scope = scope;
         return this;
     }
 
-    public Token(final String code) {
-        this.validFrom = new Date();
+
+    public Token withCode(String code) {
         this.code = code;
+        return this;
+    }
+
+    public Token withRandomCode(int len) {
+        this.code = RandomUtil.getRandomString(len);
+        return this;
     }
 
     public boolean isValid() {
@@ -38,25 +44,27 @@ public class Token implements Serializable {
         return this.validFrom.getTime() <= ms && this.validTo.getTime() >= ms;
     }
 
-
     public Token withResource(String scope, String resource) {
         this.resourceScope = scope;
         this.resource = resource;
         return this;
     }
 
-
-    public String getTokenScope() {
-        return tokenScope;
+    public String getScope() {
+        return scope;
     }
 
-    public void setTokenScope(String tokenScope) {
-        this.tokenScope = tokenScope;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public Token attr(String key, String value) {
         this.attrs.put(key, value);
         return this;
+    }
+
+    public String getAttr(String key) {
+        return attrs.get(key);
     }
 
     public Token andValidMillis(final int millis) {
