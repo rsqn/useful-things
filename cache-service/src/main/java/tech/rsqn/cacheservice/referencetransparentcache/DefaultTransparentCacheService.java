@@ -3,7 +3,7 @@ package tech.rsqn.cacheservice.referencetransparentcache;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -39,7 +39,7 @@ public class DefaultTransparentCacheService implements TransparentCacheService {
     private List<CacheKeyGenerator> keyGenerators;
     private List<ParameterKeyGenerator> parameterKeyGenerators;
     private boolean cachingDisabled = false;
-    private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+    private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
     private ExpressionParser expressionParser = new SpelExpressionParser();
     private boolean supportParameterNameDiscovery = false;
     private GroupTimer groupTimer;

@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import org.apache.commons.io.IOUtil;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class S3ObjectRetriever {
 
             StringWriter writer = new StringWriter();
             try {
-                IOUtil.copy(s3ObjectInputStream, writer, encoding);
+                IOUtils.copy(s3ObjectInputStream, writer, encoding);
                 return writer.toString();
             } catch (IOException e) {
                 LOG.error("IO Error: " + e.getMessage());

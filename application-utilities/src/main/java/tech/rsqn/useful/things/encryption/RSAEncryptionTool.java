@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
@@ -190,7 +190,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
                 log.info("KeyTool - fetching " + s);
 
                 os = new FileOutputStream(f);
-                IOUtil.copy(is, os);
+                IOUtils.copy(is, os);
 
                 log.info("local path now " + f.getAbsolutePath());
                 return f.getAbsolutePath();
@@ -200,7 +200,7 @@ public class RSAEncryptionTool implements EncryptionTool, InitializingBean {
                 throw new RuntimeException(ex);
             } finally {
                 if (os != null) {
-                    IOUtil.shutdownStream(os);
+                    IOUtils.closeQuietly(os);
                 }
             }
         }
