@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.75-SNAPSHOT</version>
+    <version>1.0.75</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -62,12 +62,12 @@
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>simple-utilities</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.75</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>cache-service</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.75</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
