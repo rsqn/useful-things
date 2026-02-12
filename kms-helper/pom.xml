@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>kms-helper</artifactId>
-    <version>1.0.74-SNAPSHOT</version>
+    <version>1.0.75-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>kms-helper</name>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>tech.rsqn.useful-things</groupId>
             <artifactId>encryption-utilities</artifactId>
-            <version>1.0.74-SNAPSHOT</version>
+            <version>1.0.75-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
