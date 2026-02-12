@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.75-SNAPSHOT</version>
+    <version>1.0.73-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -51,12 +51,12 @@
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>simple-utilities</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.73-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>cache-service</artifactId>
-                <version>1.0.75-SNAPSHOT</version>
+                <version>1.0.73-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
@@ -304,11 +304,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
@@ -320,15 +315,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.9.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>central</publishingServerId>
-                </configuration>
             </plugin>
         </plugins>
     </build>

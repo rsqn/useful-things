@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>tech.rsqn</groupId>
+        <artifactId>useful-things</artifactId>
+        <version>1.0.73-SNAPSHOT</version>
+    </parent>
+
+    <groupId>tech.rsqn.useful-things</groupId>
+    <artifactId>authz-utilities</artifactId>
+    <version>1.0.73-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>authz-utilities</name>
+    <description>Identity, Authentication, Authorization, Sessions</description>
+    <url>https://github.com/rsqn/useful-things</url>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, Version 3.0</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Michael Andrewes</name>
+            <email>mandrewes@roguesquadron.com.au</email>
+            <organization>Rogue Squadron Pty Ltd</organization>
+            <organizationUrl>http://www.roguesquadron.com.au</organizationUrl>
+        </developer>
+    </developers>
+
+
+    <dependencies>
+        <!--Compile Dependencies-->
+
+
+        <dependency>
+            <groupId>tech.rsqn.useful-things</groupId>
+            <artifactId>simple-utilities</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>tech.rsqn.useful-things</groupId>
+            <artifactId>cache-service</artifactId>
+        </dependency>
+
+        <!--Test Dependencies-->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>javax.servlet</groupId>-->
+<!--            <artifactId>javax.servlet-api</artifactId>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
+    </dependencies>
+
+
+</project>

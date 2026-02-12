@@ -1,0 +1,48 @@
+{
+    "name": "useful-things",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    "features": {},
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "java.home": "/usr/lib/jvm/java-21-amazon-corretto",
+                "java.configuration.runtimes": [
+                    {
+                        "name": "JavaSE-21",
+                        "path": "/usr/lib/jvm/java-21-amazon-corretto",
+                        "default": true
+                    }
+                ],
+                "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m",
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-maven",
+                "vscjava.vscode-java-debug",
+                "vscjava.vscode-java-test",
+                "vscjava.vscode-java-dependency",
+                "redhat.java",
+                "ms-vscode.vscode-json",
+                "redhat.vscode-yaml",
+                "github.copilot",
+                "github.copilot-chat"
+            ]
+        }
+    },
+    "postCreateCommand": "chmod +x .devcontainer/post-create.sh && ./.devcontainer/post-create.sh",
+    "remoteUser": "root",
+    "containerUser": "root",
+    "mounts": [
+        "source=vscode-ssh-keys,target=/root/.ssh,type=volume",
+        "source=vscode-aws-credentials,target=/root/.aws,type=volume",
+        "source=vscode-maven-m2,target=/root/.m2,type=volume",
+        "source=vscode-gnupg,target=/root/.gnupg,type=volume"
+    ],
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "shutdownAction": "stopContainer"
+}
