@@ -2,58 +2,64 @@ package tech.rsqn.useful.things.ledger;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Registry for EventLedger instances.
- * Pure lookup table, no lifecycle management.
+ * Registry for Ledger instances.
+ * Acts as a factory and cache for ledgers.
  */
 public class LedgerRegistry {
-    private final Map<EventType, EventLedger> ledgers = new HashMap<>();
-    private final Path ledgerDir;
-    private final ExecutorService sharedExecutor;
+    private final Map<EventType, Ledger> ledgers = new ConcurrentHashMap<>();
+    private LedgerConfig config;
+    private Path ledgerDir;
+    private ExecutorService sharedExecutor;
 
-    public LedgerRegistry(LedgerConfig config, Path ledgerDir) {
-        this(config, ledgerDir, null);
+    public LedgerRegistry() {
     }
 
-    public LedgerRegistry(LedgerConfig config, Path ledgerDir, ExecutorService sharedExecutor) {
+    public void setConfig(LedgerConfig config) {
+        this.config = config;
+    }
+
+    public void setLedgerDir(Path ledgerDir) {
         this.ledgerDir = ledgerDir;
-        this.sharedExecutor = sharedExecutor != null ? sharedExecutor : Executors.newCachedThreadPool();
-        initializeLedgers(config);
     }
 
-    private void initializeLedgers(LedgerConfig config) {
-        Map<EventType, String> filenameMap = new HashMap<>();
-        filenameMap.put(EventType.PRICE_UPDATE, "market_data.jsonl");
-        filenameMap.put(EventType.CANDLE_UPDATE, "market_candles.jsonl");
-        filenameMap.put(EventType.PORTFOLIO_UPDATE, "portfolio_state.jsonl");
-        filenameMap.put(EventType.TRADE_PLACEMENT, "trade_placement.jsonl");
-        filenameMap.put(EventType.TRADE_FILLS, "trade_fills.jsonl");
-        filenameMap.put(EventType.VIRTUAL_ORDERS, "virtual_orders.jsonl");
-        filenameMap.put(EventType.SYSTEM_EVENT, "system_events.jsonl");
-        filenameMap.put(EventType.MARKET_ANALYSIS, "market_analysis.jsonl");
-        filenameMap.put(EventType.COINBASE_ORDER_PLACEMENT, "coinbase_order_placement.jsonl");
-        filenameMap.put(EventType.COINBASE_ORDER_STATUS, "coinbase_order_status.jsonl");
-        filenameMap.put(EventType.COINBASE_FILL_HISTORY, "coinbase_fill_history.jsonl");
-        filenameMap.put(EventType.TRADE_MATCH, "market_trades.jsonl");
-        filenameMap.put(EventType.ORDER_BOOK_SNAPSHOT, "market_order_books.jsonl");
-        filenameMap.put(EventType.TRADING_DECISION, "trading_decision.jsonl");
-        filenameMap.put(EventType.SYSTEM_COMMAND, "system_command.jsonl");
+    public void setSharedExecutor(ExecutorService sharedExecutor) {
+        this.sharedExecutor = sharedExecutor;
+    }
 
-        for (EventType type : EventType.values()) {
-            String filename = filenameMap.getOrDefault(type, type.getValue() + ".jsonl");
-            Path ledgerFile = ledgerDir.resolve(filename);
-            ledgers.put(type, new EventLedger(type, ledgerFile, config, sharedExecutor));
+    public Ledger getLedger(EventType type) {
+        return ledgers.computeIfAbsent(type, this::createLedger);
+    }
+
+    private Ledger createLedger(EventType type) {
+        if (config == null || ledgerDir == null) {
+            throw new IllegalStateException("LedgerRegistry not initialized: config and ledgerDir must be set");
         }
+
+        if (sharedExecutor == null) {
+            sharedExecutor = Executors.newCachedThreadPool();
+        }
+
+        String filename = type.getValue() + ".jsonl";
+        Path ledgerFile = ledgerDir.resolve(filename);
+        
+        // Create driver
+        DiskPersistenceDriver driver = new DiskPersistenceDriver(ledgerFile, config);
+        try {
+            driver.start();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to start ledger driver", e);
+        }
+        
+        // Create ledger (WriteBehindMemoryLedger for FAST access)
+        return new WriteBehindMemoryLedger(type, driver, config, null, sharedExecutor);
     }
 
-    public EventLedger getLedger(EventType type) {
-        return ledgers.get(type);
-    }
-
-    public Collection<EventLedger> getAllLedgers() {
+    public Collection<Ledger> getAllLedgers() {
         return Collections.unmodifiableCollection(ledgers.values());
     }
 }

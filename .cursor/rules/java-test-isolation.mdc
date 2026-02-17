@@ -1,0 +1,24 @@
+---
+description: Prevent test-aware logic in production code
+globs: *.java
+---
+
+# Test Awareness (Java)
+
+## Description
+
+Production code should never know it is being tested. Do not add flags like `boolean isTest`.
+
+## Rules
+
+1.  **No Mock Detection**:
+
+    - Never check `Mockito.mockingDetails(obj).isMock()`.
+
+2.  **Interfaces for Isolation**:
+
+    - Extract interfaces for hard-to-test dependencies (e.g., `ExchangeAdapter`).
+    - Do NOT add `if (config.isTestMode())` in production implementations.
+
+3.  **Clock Injection**:
+    - Inject `java.time.Clock` to avoid time-based hacks.

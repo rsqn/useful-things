@@ -45,26 +45,31 @@ public class LedgerRegistryTest {
 
     @Test
     public void testRegistryInitialization() {
-        LedgerRegistry registry = new LedgerRegistry(config, tempDir, executor);
+        LedgerRegistry registry = new LedgerRegistry();
+        registry.setConfig(config);
+        registry.setLedgerDir(tempDir);
+        registry.setSharedExecutor(executor);
 
-        EventLedger priceLedger = registry.getLedger(EventType.PRICE_UPDATE);
+        Ledger priceLedger = registry.getLedger(EventType.PRICE_UPDATE);
         Assert.assertNotNull(priceLedger);
         
-        EventLedger systemLedger = registry.getLedger(EventType.SYSTEM_EVENT);
+        Ledger systemLedger = registry.getLedger(EventType.SYSTEM_EVENT);
         Assert.assertNotNull(systemLedger);
         Assert.assertNotSame(priceLedger, systemLedger);
 
-        Collection<EventLedger> allLedgers = registry.getAllLedgers();
-        Assert.assertEquals(allLedgers.size(), EventType.values().length);
+        Collection<Ledger> allLedgers = registry.getAllLedgers();
+        Assert.assertEquals(allLedgers.size(), 2); // Only created 2
         Assert.assertTrue(allLedgers.contains(priceLedger));
         Assert.assertTrue(allLedgers.contains(systemLedger));
     }
 
     @Test
     public void testDefaultExecutor() {
-        LedgerRegistry registry = new LedgerRegistry(config, tempDir);
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        LedgerRegistry registry = new LedgerRegistry();
+        registry.setConfig(config);
+        registry.setLedgerDir(tempDir);
+        
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
         Assert.assertNotNull(ledger);
-        // We can't easily verify the internal executor without reflection, but we verify it doesn't crash
     }
 }

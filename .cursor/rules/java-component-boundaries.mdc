@@ -1,0 +1,31 @@
+---
+description: Components must respect their boundaries - prevent cross-domain contamination
+globs: **/*.java
+---
+
+# Component Boundary Enforcement (Java)
+
+## Description
+
+Each Spring @Service has specific responsibilities. Prevent cross-domain contamination.
+
+## Rules
+
+1.  **DataManager** (or equivalent state holder):
+
+    - **Allowed**: Managing domain state (e.g., entities, collections).
+    - **Forbidden**: Performing analysis or computation that belongs to another component.
+
+2.  **EventPublisher** (or equivalent observer):
+
+    - **Allowed**: Publishing events, notifying subscribers.
+    - **Forbidden**: Updating domain state directly.
+
+3.  **EntityProcessor** (or equivalent domain logic):
+
+    - **Allowed**: Calculating derived values, applying business rules on entities.
+    - **Forbidden**: Managing cross-entity state or orchestration.
+
+4.  **Orchestrator** (or equivalent coordinator):
+    - **Allowed**: Coordinating workflows, delegating to other components.
+    - **Forbidden**: Performing low-level operations that belong to domain entities or specialized services.

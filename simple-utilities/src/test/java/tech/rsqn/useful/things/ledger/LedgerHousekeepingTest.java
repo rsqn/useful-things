@@ -25,7 +25,11 @@ public class LedgerHousekeepingTest {
         config = new MapLedgerConfig();
         config.put("ledger.auto_flush", "false"); // Disable auto flush to test manual flush
         executor = Executors.newCachedThreadPool();
-        registry = new LedgerRegistry(config, tempDir, executor);
+        
+        registry = new LedgerRegistry();
+        registry.setConfig(config);
+        registry.setLedgerDir(tempDir);
+        registry.setSharedExecutor(executor);
     }
 
     @AfterMethod
@@ -47,27 +51,37 @@ public class LedgerHousekeepingTest {
     }
 
     @Test
-    public void testFlushAllLedgers() throws IOException {
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.start();
-        ledger.writeEvent(createData("val", 1), Instant.now());
+    public void testFlushAllLedgers() throws IOException, InterruptedException {
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        // No start() needed
+        
+        ledger.write(createData("val", 1), Instant.now());
 
-        // Should not be flushed yet
-        Assert.assertEquals(Files.size(ledger.getLedgerPath()), 0);
+        // Wait a bit for async write to hit the driver (but driver buffers)
+        Thread.sleep(500);
+
+        Path ledgerPath = tempDir.resolve("price_update.jsonl");
+
+        // Should not be flushed yet (file might exist but be empty or have partial buffer not written to disk if OS buffers? 
+        // No, BufferedWriter buffers in heap. If not flushed, file size on disk is 0 or unchanged.)
+        // But WriteBehindMemoryLedger uses a background thread.
+        // If auto_flush is false, DiskPersistenceDriver buffers.
+        
+        if (Files.exists(ledgerPath)) {
+            Assert.assertEquals(Files.size(ledgerPath), 0);
+        }
 
         int count = LedgerHousekeeping.flushAllLedgers(registry);
         Assert.assertTrue(count > 0);
+        
+        Thread.sleep(100); // Allow flush to complete
 
         // Should be flushed
-        Assert.assertTrue(Files.size(ledger.getLedgerPath()) > 0);
+        Assert.assertTrue(Files.size(ledgerPath) > 0);
     }
 
     @Test
     public void testHousekeepingThread() throws InterruptedException, IOException {
-        // Start thread with short interval (though flush is hardcoded to 60s in implementation)
-        // We can't easily test the loop timing without refactoring for clock injection
-        // But we can test that it starts and can be interrupted
-        
         Thread thread = LedgerHousekeeping.startHousekeepingThread(registry, 1);
         Assert.assertTrue(thread.isAlive());
         Assert.assertTrue(thread.isDaemon());

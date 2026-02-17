@@ -1,0 +1,22 @@
+# Git Push Workflow (push)
+
+## Description
+
+Provides a streamlined workflow for adding changes, committing with a descriptive message, and pushing to the remote repository. Triggered by the keyword "push" or explicit requests to commit and push.
+
+## Details
+
+- **Trigger:** When the user says "push", "commit and push", or "/push".
+- **Workflow:**
+  1.  **Status Check:** Run `git status` and `git diff` to identify all changed and untracked files.
+  2.  **Stage Changes:** Add all relevant files to the staging area using `git add .`.
+  3.  **Analyze Changes:** Review the staged diff to understand the "why" and "what" of the changes.
+  4.  **Draft Commit Message:** Follow the repository's commit style and focus on the "why".
+  5.  **Commit:** Use a HEREDOC to ensure proper formatting of the commit message.
+  6.  **Push:** Execute `git push` to upload changes to the remote branch.
+
+## Safety Protocol
+
+- **No Secrets:** Never commit files likely to contain secrets.
+- **No Force Push:** Never use `--force` unless specifically requested.
+- **Verify Success:** Run `git status` after the commit and push.

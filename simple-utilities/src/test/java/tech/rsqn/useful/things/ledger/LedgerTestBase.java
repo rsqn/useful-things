@@ -9,12 +9,13 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
-public abstract class EventLedgerTestBase {
+public abstract class LedgerTestBase {
     protected Path tempDir;
     protected Path ledgerFile;
     protected MapLedgerConfig config;
-    protected EventLedger ledger;
+    protected Ledger ledger;
 
     @BeforeMethod
     public void setUp() throws IOException {
@@ -25,6 +26,8 @@ public abstract class EventLedgerTestBase {
         config.put("ledger.flush_interval_writes", "5");
         config.put("ledger.flush_interval_seconds", "1.0");
         config.put("ledger.auto_flush", "true");
+        config.put("ledger.memory.preferred_max_size", "100");
+        config.put("ledger.memory.alarm_size", "200");
     }
 
     @AfterMethod
@@ -49,5 +52,25 @@ public abstract class EventLedgerTestBase {
         Map<String, Object> data = new HashMap<>();
         data.put(key, value);
         return data;
+    }
+
+    protected Ledger createLedger() {
+        DiskPersistenceDriver driver = new DiskPersistenceDriver(ledgerFile, config);
+        try {
+            driver.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new MemoryLedger(EventType.PRICE_UPDATE, driver, config, null, Executors.newCachedThreadPool());
+    }
+    
+    protected Ledger createWriteBehindLedger() {
+        DiskPersistenceDriver driver = new DiskPersistenceDriver(ledgerFile, config);
+        try {
+            driver.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new WriteBehindMemoryLedger(EventType.PRICE_UPDATE, driver, config, null, Executors.newCachedThreadPool());
     }
 }

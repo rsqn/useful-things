@@ -1,0 +1,28 @@
+---
+description: Enforce robust exception handling (no silent catch blocks)
+globs: *.java
+---
+
+# Exception Handling (Java)
+
+## Description
+
+Silent exceptions lead to corrupted state. Catch, log, and handle every exception.
+
+## Rules
+
+1.  **No Silent Catch**:
+
+    - _Forbidden_: `catch (Exception e) {}`.
+    - _Required_: Log error before returning or rethrowing.
+
+2.  **No Catching `Exception`**:
+
+    - Catch specific exceptions where possible.
+
+3.  **Custom Exceptions**:
+
+    - Use `DomainException` or `InfrastructureException`.
+
+4.  **No `e.printStackTrace()`**:
+    - Use `log.error()`.

@@ -1,0 +1,31 @@
+---
+description: Enforce Domain-Driven Design logic placement
+globs: **/*.java
+---
+
+# Domain Logic Placement (Java)
+
+## Description
+
+Business logic MUST reside in Domain Entities. Services are for orchestration only.
+
+## Rules
+
+1.  **Entities hold Logic**:
+
+    - Domain entities (e.g., `Order`, `Account`, `Item`) encapsulate state and behavior.
+    - _Violations_: `OrderService.calculateTotal(order)` is FORBIDDEN — the entity should expose `order.calculateTotal()`.
+
+2.  **Services are Stateless**:
+
+    - Services orchestrate interactions between entities and external systems.
+    - They do not hold domain state (e.g., collections of entities) — that belongs in repositories or entities.
+
+3.  **Rich Domain Models**: Avoid "Anemic Domain Models".
+
+    - _Correct_: `order.fill(price, quantity)` — behavior on the entity.
+    - _Incorrect_: `order.setFilledQuantity(q);` — external code mutating state without domain logic.
+
+4.  **Entity Completeness**:
+    - Each entity should implement the methods that represent its business rules.
+    - If a calculation involves only that entity's data, it belongs on the entity.

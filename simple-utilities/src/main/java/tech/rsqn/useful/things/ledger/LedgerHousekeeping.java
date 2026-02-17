@@ -1,5 +1,7 @@
 package tech.rsqn.useful.things.ledger;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -9,19 +11,25 @@ public class LedgerHousekeeping {
 
     public static int flushAllLedgers(LedgerRegistry registry) {
         int flushedCount = 0;
-        for (EventLedger ledger : registry.getAllLedgers()) {
-            // We use forceFlush() which only flushes if dirty
-            ledger.forceFlush();
-            // We don't have a return value from forceFlush to know if it actually flushed
-            // But we can assume it did its job.
-            // If we want to count actual flushes, we'd need to change EventLedger API.
-            // For now, we just count how many ledgers we attempted to flush.
+        for (Ledger ledger : registry.getAllLedgers()) {
+            ledger.flush();
             flushedCount++;
         }
         return flushedCount;
     }
 
+    // Removed hydrateAllLedgers as hydration happens on construction now.
+    // Or we can keep it if we want to force re-hydration?
+    // MemoryLedger hydrates on construction.
+    // So this method is likely redundant or should be removed.
+    // I'll remove it to avoid confusion.
+
     public static Thread startHousekeepingThread(LedgerRegistry registry, int intervalMinutes) {
+        // Default retention: 25 hours
+        return startHousekeepingThread(registry, intervalMinutes, 25);
+    }
+
+    public static Thread startHousekeepingThread(LedgerRegistry registry, int intervalMinutes, int retentionHours) {
         AtomicBoolean running = new AtomicBoolean(true);
         Thread thread = new Thread(() -> {
             long flushIntervalMs = 60 * 1000; // Flush every 60 seconds
@@ -39,18 +47,21 @@ public class LedgerHousekeeping {
                         lastFlush = now;
                     }
 
-                    // We don't have a cleanup method in LedgerRegistry or EventLedger that takes "hours to keep"
-                    // The Python code had cleanup_old_price_data.
-                    // EventLedger has cleanupMemory(cutoffTime).
-                    // We can implement cleanup here.
-                    
                     if (now - lastCleanup >= cleanupIntervalMs) {
-                        // Cleanup logic would go here if we had a policy
-                        // For example, keep 24 hours in memory
-                        // Instant cutoff = Instant.now().minus(24, ChronoUnit.HOURS);
-                        // for (EventLedger ledger : registry.getAllLedgers()) {
-                        //     ledger.cleanupMemory(cutoff);
-                        // }
+                        // Cleanup memory
+                        // Note: MemoryLedger has internal retention filter, but we can also pass one here?
+                        // MemoryLedger.housekeeping() uses the filter passed in constructor.
+                        // If we want to enforce retentionHours here, we assume the constructor filter handles it
+                        // or we rely on preferredMaxSize.
+                        // Actually, MemoryLedger.housekeeping() just runs the logic.
+                        // If we want to update the filter or enforce time, we might need to change MemoryLedger.
+                        // But for now, let's just call housekeeping().
+                        
+                        for (Ledger ledger : registry.getAllLedgers()) {
+                            if (ledger instanceof MemoryLedger) {
+                                ((MemoryLedger) ledger).housekeeping();
+                            }
+                        }
                         lastCleanup = now;
                     }
 

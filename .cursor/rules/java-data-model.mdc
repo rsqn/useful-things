@@ -1,0 +1,27 @@
+---
+description: Enforce usage of Java Records for immutable data carriers
+globs: *.java
+---
+
+# Data Model Consistency (Java)
+
+## Description
+
+Use Java `record` types for immutable data carriers. Passing untyped Maps/JSON in the domain layer is forbidden.
+
+## Rules
+
+1.  **Use Records**:
+
+    - `MarketEvent`, `Trade`, `PositionSnapshot` must be `public record`.
+
+2.  **Validation**:
+
+    - Use compact constructors for validation.
+
+3.  **No Magic Maps**:
+
+    - Always define a named Record instead of `Map<String, Object>`.
+
+4.  **Protobuf Compatibility**:
+    - Verify fields in the Adapter layer before creating Domain Records.

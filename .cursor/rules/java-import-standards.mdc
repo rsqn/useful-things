@@ -1,0 +1,27 @@
+---
+description: Enforce consistent and clean import statements
+globs: *.java
+---
+
+# Import Standards (Java)
+
+## Description
+
+Clean imports prevent namespace pollution.
+
+## Rules
+
+1.  **No Wildcards**:
+
+    - `import java.util.*;` is **FORBIDDEN**. Explicitly list every class.
+
+2.  **Order**:
+
+    - Standard java/javax -> 3rd party -> Project packages.
+
+3.  **Unused Imports**:
+
+    - Zero tolerance. Remove them.
+
+4.  **Static Imports**:
+    - Use sparingly (Assertions, Math constants).

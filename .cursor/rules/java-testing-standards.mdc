@@ -1,0 +1,32 @@
+---
+description: Enforce comprehensive unit testing standards with JUnit 5 and Mockito
+globs: *.java
+---
+
+# Unit Testing Standards (Java)
+
+## Description
+
+Unit tests must test the "Smallest Unit of Work" in isolation using JUnit 5 and Mockito.
+
+## Rules
+
+1.  **Frameworks**:
+
+    - Use **JUnit 5** and **Mockito**.
+    - _Forbidden_: JUnit 4 legacy.
+
+2.  **Naming Convention**:
+
+    - `ServiceNameTest` and `methodName_condition_expectedResult`.
+
+3.  **Isolation**:
+
+    - Mock everything. Do NOT use `@SpringBootTest` for unit tests (too slow).
+
+4.  **Smallest Unit**:
+
+    - One assert per logical concept. Do not test "Neighbors".
+
+5.  **Coverage**:
+    - Test standard paths, edge cases, and exceptions.

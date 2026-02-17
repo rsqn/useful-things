@@ -1,0 +1,32 @@
+---
+description: Enforce unsafe precision Anti-Patterns (BigDecimal usage)
+globs: *.java
+---
+
+# Precision Safety (Java)
+
+## Description
+
+Financial calculations MUST use `BigDecimal`. `double` is allowed ONLY for non-monetary technical indicators.
+
+## Rules
+
+1.  **Forbidden Constructor**:
+
+    - `new BigDecimal(double val)` is **STRICTLY FORBIDDEN**. Use `BigDecimal.valueOf(val)` or `new BigDecimal(String)`.
+
+2.  **Currency vs Indicators**:
+
+    - Prices/Balances: ALWAYS `BigDecimal`.
+    - Technical Analysis: `double` acceptable for performance.
+
+3.  **Rounding Mode**:
+
+    - Division MUST specify a `RoundingMode`.
+
+4.  **Immutability**:
+
+    - `BigDecimal` is immutable; use `val = val.add(...)`.
+
+5.  **Comparisons**:
+    - Use `a.compareTo(b) == 0`, not `.equals()`.

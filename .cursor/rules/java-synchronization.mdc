@@ -1,0 +1,127 @@
+---
+description: Synchronization and locking standards for thread-safe Java code
+globs: **/*.java
+alwaysApply: false
+---
+
+# Synchronization Standards
+
+## 1. Never Synchronize on a Method
+
+Always use a dedicated, private final lock object. Method-level `synchronized` leaks the lock (it uses `this`), preventing fine-grained control.
+
+```java
+// ❌ BAD
+public synchronized void updateState(State s) {
+    this.state = s;
+}
+
+// ✅ GOOD
+private final Object stateLock = new Object();
+
+public void updateState(State s) {
+    synchronized (stateLock) {
+        this.state = s;
+    }
+}
+```
+
+## 2. Never Synchronize on `this`
+
+External code can also lock on your instance, causing unpredictable deadlocks.
+
+```java
+// ❌ BAD
+synchronized (this) { ... }
+
+// ✅ GOOD
+private final Object lock = new Object();
+synchronized (lock) { ... }
+```
+
+## 3. Never Synchronize on String Literals or Boxed Primitives
+
+String literals are interned and boxed primitives may be cached by the JVM, meaning unrelated code can silently share the same lock.
+
+```java
+// ❌ BAD — interned string, shared across the JVM
+synchronized ("LOCK") { ... }
+
+// ❌ BAD — Integer cache means Integer.valueOf(1) == Integer.valueOf(1)
+private final Integer lock = 1;
+synchronized (lock) { ... }
+
+// ✅ GOOD
+private final Object lock = new Object();
+synchronized (lock) { ... }
+```
+
+## 4. Minimize Critical Sections
+
+Hold locks for the shortest time possible. Never perform I/O, network calls, or expensive computation inside a synchronized block.
+
+```java
+// ❌ BAD — network call inside lock
+synchronized (lock) {
+    snapshot = buildSnapshot();
+    exchangeClient.send(snapshot); // blocks on network
+}
+
+// ✅ GOOD — copy state under lock, then release
+synchronized (lock) {
+    snapshot = buildSnapshot();
+}
+exchangeClient.send(snapshot);
+```
+
+## 5. Prefer `volatile` Over `Atomic*` for Simple Read/Write Fields
+
+Use `volatile` for fields that are simply read and written by different threads (flags, counters read for display, timestamps). Only use `Atomic*` types when you need compound atomic operations (`compareAndSet`, `incrementAndGet`, `accumulateAndGet`).
+
+This applies to all primitive types: `boolean`, `int`, `long`, `double`.
+
+```java
+// ❌ BAD — synchronized for a simple flag
+private boolean running;
+public synchronized void stop() { running = false; }
+
+// ❌ BAD — AtomicBoolean for a lifecycle flag with no compound operation
+private final AtomicBoolean running = new AtomicBoolean(false);
+public void stop() {
+    if (!running.compareAndSet(true, false)) return;
+}
+
+// ❌ BAD — AtomicLong just to read/write a timestamp
+private final AtomicLong lastUpdateMs = new AtomicLong(0);
+
+// ✅ GOOD — volatile for simple read/write
+private volatile boolean running = true;
+public void stop() { running = false; }
+
+// ✅ GOOD — volatile for a timestamp written by one thread, read by others
+private volatile long lastUpdateMs = 0;
+
+// ✅ GOOD — AtomicLong when you need atomic increment
+private final AtomicLong eventCount = new AtomicLong(0);
+public void onEvent() { eventCount.incrementAndGet(); }
+```
+
+## 6. Never Call External Code While Holding a Lock
+
+Calling callbacks, listeners, or event publishers under a lock invites deadlocks. Copy what you need, release the lock, then notify.
+
+```java
+// ❌ BAD — publishing events under lock
+synchronized (lock) {
+    this.price = newPrice;
+    eventPublisher.publishEvent(new PriceUpdatedEvent(newPrice));
+}
+
+// ✅ GOOD — publish after releasing the lock
+BigDecimal priceToPublish;
+synchronized (lock) {
+    this.price = newPrice;
+    priceToPublish = newPrice;
+}
+eventPublisher.publishEvent(new PriceUpdatedEvent(priceToPublish));
+```

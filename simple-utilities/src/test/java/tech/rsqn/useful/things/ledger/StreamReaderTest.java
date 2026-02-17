@@ -18,8 +18,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class StreamReaderTest {
     private Path tempDir;
@@ -34,7 +32,12 @@ public class StreamReaderTest {
         config = new MapLedgerConfig();
         config.put("ledger.auto_flush", "true");
         executor = Executors.newCachedThreadPool();
-        registry = new LedgerRegistry(config, tempDir, executor);
+        
+        registry = new LedgerRegistry();
+        registry.setConfig(config);
+        registry.setLedgerDir(tempDir);
+        registry.setSharedExecutor(executor);
+        
         streamReader = new StreamReader(registry);
     }
 
@@ -66,9 +69,8 @@ public class StreamReaderTest {
             latch.countDown();
         });
 
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.start();
-        ledger.writeEvent(createData("val", 1), Instant.now());
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        ledger.write(createData("val", 1), Instant.now());
 
         Assert.assertTrue(latch.await(1, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 1);
@@ -77,36 +79,37 @@ public class StreamReaderTest {
 
     @Test
     public void testTailEventsHistory() throws IOException {
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.start();
-        ledger.writeEvent(createData("val", 1), Instant.now());
-        ledger.writeEvent(createData("val", 2), Instant.now());
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(createData("val", 2), Instant.now());
+        
+        List<BaseEvent> events = new ArrayList<>();
+        streamReader.tailEvents(EventType.PRICE_UPDATE, false, event -> {
+            events.add(event);
+            return true;
+        });
 
-        try (Stream<BaseEvent> stream = streamReader.tailEvents(EventType.PRICE_UPDATE, false)) {
-            List<BaseEvent> events = stream.collect(Collectors.toList());
-            Assert.assertEquals(events.size(), 2);
-            Assert.assertEquals(events.get(0).getData().get("val"), 1.0);
-            Assert.assertEquals(events.get(1).getData().get("val"), 2.0);
-        }
+        Assert.assertEquals(events.size(), 2);
+        // From memory -> Integer
+        Assert.assertEquals(((Number) events.get(0).getData().get("val")).intValue(), 1);
+        Assert.assertEquals(((Number) events.get(1).getData().get("val")).intValue(), 2);
     }
 
     @Test
     public void testTailEventsFollow() throws IOException, InterruptedException {
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.start();
-        ledger.writeEvent(createData("val", 1), Instant.now());
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        ledger.write(createData("val", 1), Instant.now());
 
         // Start tailing in background thread because it blocks
         CountDownLatch latch = new CountDownLatch(2);
         List<BaseEvent> received = new ArrayList<>();
         
         Thread tailThread = new Thread(() -> {
-            try (Stream<BaseEvent> stream = streamReader.tailEvents(EventType.PRICE_UPDATE, true)) {
-                stream.forEach(e -> {
-                    received.add(e);
-                    latch.countDown();
-                });
-            }
+            streamReader.tailEvents(EventType.PRICE_UPDATE, true, event -> {
+                received.add(event);
+                latch.countDown();
+                return true;
+            });
         });
         tailThread.start();
 
@@ -116,12 +119,12 @@ public class StreamReaderTest {
         // Write new event
         // Give time for tail thread to start and subscribe
         Thread.sleep(500); 
-        ledger.writeEvent(createData("val", 2), Instant.now());
+        ledger.write(createData("val", 2), Instant.now());
 
         Assert.assertTrue(latch.await(2, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 2);
-        // First event from history (file) -> Double
-        Assert.assertEquals(((Number) received.get(0).getData().get("val")).doubleValue(), 1.0);
+        // First event from memory -> Integer
+        Assert.assertEquals(((Number) received.get(0).getData().get("val")).intValue(), 1);
         // Second event from live -> Integer
         Assert.assertEquals(((Number) received.get(1).getData().get("val")).intValue(), 2);
         

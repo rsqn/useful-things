@@ -1,0 +1,23 @@
+---
+description: Enforce strict configuration loading using Config.instance (no magic numbers or hardcoded defaults)
+globs: *.java
+---
+
+# Configuration Strictness (Java)
+
+## Description
+
+Defaults belong in `application.yml`, not in Java code.
+
+## Rules
+
+1.  **Strongly Typed Config**:
+
+    - Use `@ConfigurationProperties` records and `jakarta.validation`.
+
+2.  **No `@Value("${...:default}")`**:
+
+    - Define defaults in `application-default.yml` instead.
+
+3.  **Fail Fast**:
+    - Crash on startup if critical config is missing.

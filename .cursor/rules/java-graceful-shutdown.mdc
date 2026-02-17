@@ -1,0 +1,65 @@
+---
+description: Standards for graceful shutdown and resource cleanup in Java services
+globs: **/*.java
+---
+
+# Graceful Shutdown Standards
+
+All services that allocate resources (threads, connections, file handles) MUST implement a coordinated, graceful shutdown mechanism.
+
+## 1. The `stop()` Method Contract
+
+Every service with resources MUST implement a `public void stop()` method.
+
+- **Signal**: Set running flags to false or cancel futures immediately.
+- **Wait**: Join threads or await termination of executors with a timeout (typically 2-5 seconds).
+- **Force**: If timeout expires, force shutdown (e.g., `shutdownNow()`).
+- **Clean**: Close sockets, file handles, and other I/O resources.
+- **Log**: Log the start and completion of the stop sequence.
+
+### Example Pattern
+
+```java
+public void stop() {
+    log.info("Stopping MyService...");
+
+    // 1. Signal stop
+    this.running = false;
+
+    // 2. Shutdown executors
+    if (scheduler != null) {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                log.warn("Scheduler did not terminate in 5s");
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            scheduler.shutdownNow();
+        }
+    }
+
+    // 3. Close I/O
+    if (socket != null) {
+        socket.close();
+    }
+}
+```
+
+## 2. Shutdown Coordination
+
+Do NOT use `@PreDestroy` for complex services with dependencies on other components. Instead, register the `stop()` method with your application's shutdown coordinator (e.g., a central registry that invokes stop in reverse startup order). Higher-priority components (external connections, executors) should stop before lower-priority ones (persistence, caches).
+
+## 3. Resource Specifics
+
+- **Executors**: ALWAYS use `shutdown()` + `awaitTermination()`. Never just `shutdown()`.
+- **WebSockets**: Send a close frame (`sendClose`) before terminating the client.
+- **Files**: Flush buffers (`force()`) before closing channels.
+- **Daemon Threads**: While daemon threads don't block JVM exit, they should still be stopped cleanly to ensure data integrity.
+
+## 4. Anti-Patterns
+
+- ❌ **@PreDestroy on complex services**: Spring's shutdown order is not deterministic enough for services with inter-component dependencies.
+- ❌ **Fire-and-forget shutdown**: Calling `executor.shutdown()` without waiting allows tasks to be killed mid-execution when the JVM exits.
+- ❌ **Swallowing InterruptedException**: Always restore the interrupt flag: `Thread.currentThread().interrupt()`.

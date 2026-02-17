@@ -1,0 +1,30 @@
+---
+description: Enforce Spring Bean Lifecycle and Singleton usage
+globs: *.java
+---
+
+# Service Lifecycle & Singletons (Java)
+
+## Description
+
+Services are Spring Singletons. They must use Dependency Injection and respect the ApplicationContext lifecycle.
+
+## Rules
+
+1.  **No `new Service()`**:
+
+    - _Forbidden_: `new MarketDataService()`.
+    - _Required_: Constructor Injection.
+    - _Reason_: Spring cannot manage lifecycle/configuration of manually created objects.
+
+2.  **Startup Logic**:
+
+    - Do NOT use `@PostConstruct` for long-running tasks.
+    - Use `ApplicationRunner` or `SmartLifecycle` for background threads.
+
+3.  **Shutdown Logic**:
+
+    - Implement `@PreDestroy` or `stop()` to cleanly close resources.
+
+4.  **Configuration**:
+    - Inject `@ConfigurationProperties`, no "Magic Strings" or `System.getenv()` calls deep in code.

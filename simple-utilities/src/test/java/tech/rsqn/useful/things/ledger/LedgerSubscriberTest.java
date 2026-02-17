@@ -10,41 +10,36 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class EventLedgerSubscriberTest extends EventLedgerTestBase {
+public class LedgerSubscriberTest extends LedgerTestBase {
 
     @Test
     public void testSubscribe() throws IOException {
-        ledger = new EventLedger(EventType.PRICE_UPDATE, ledgerFile, config);
-        ledger.start();
+        ledger = createLedger();
 
         Consumer<BaseEvent> subscriber = Mockito.mock(Consumer.class);
-        ledger.subscribe(subscriber);
+        ledger.subscribe(subscriber, null);
 
-        ledger.writeEvent(createData("val", 1), Instant.now());
+        ledger.write(createData("val", 1), Instant.now());
 
-        // Verify subscriber called (sync or async depending on executor)
-        // Default executor is cached thread pool, so async.
-        // But we need to wait.
+        // Verify subscriber called (async)
         Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.any(BaseEvent.class));
     }
 
     @Test
     public void testSubscribeAsync() throws IOException, InterruptedException {
-        ledger = new EventLedger(EventType.PRICE_UPDATE, ledgerFile, config);
-        ledger.start();
+        ledger = createLedger();
 
         CountDownLatch latch = new CountDownLatch(1);
-        ledger.subscribe(event -> latch.countDown());
+        ledger.subscribe(event -> latch.countDown(), null);
 
-        ledger.writeEvent(createData("val", 1), Instant.now());
+        ledger.write(createData("val", 1), Instant.now());
 
         Assert.assertTrue(latch.await(1, TimeUnit.SECONDS));
     }
 
     @Test
     public void testFilteredSubscribe() throws IOException {
-        ledger = new EventLedger(EventType.PRICE_UPDATE, ledgerFile, config);
-        ledger.start();
+        ledger = createLedger();
 
         Consumer<BaseEvent> subscriber = Mockito.mock(Consumer.class);
         
@@ -55,10 +50,10 @@ public class EventLedgerSubscriberTest extends EventLedgerTestBase {
         });
 
         // Write event that should be filtered OUT
-        ledger.writeEvent(createData("val", 5), Instant.now());
+        ledger.write(createData("val", 5), Instant.now());
         
         // Write event that should be ACCEPTED
-        ledger.writeEvent(createData("val", 15), Instant.now());
+        ledger.write(createData("val", 15), Instant.now());
 
         // Verify subscriber called only once (for the second event)
         Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.argThat(event -> {

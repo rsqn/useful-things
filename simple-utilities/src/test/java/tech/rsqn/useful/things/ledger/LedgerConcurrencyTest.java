@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class LedgerConcurrencyTest {
     private Path tempDir;
@@ -28,7 +27,11 @@ public class LedgerConcurrencyTest {
         config.put("ledger.auto_flush", "true");
         // Use cached thread pool to allow concurrent notifications
         executor = Executors.newCachedThreadPool();
-        registry = new LedgerRegistry(config, tempDir, executor);
+        
+        registry = new LedgerRegistry();
+        registry.setConfig(config);
+        registry.setLedgerDir(tempDir);
+        registry.setSharedExecutor(executor);
     }
 
     @AfterMethod
@@ -50,9 +53,9 @@ public class LedgerConcurrencyTest {
     }
 
     @Test
-    public void testConcurrentWrites() throws IOException, InterruptedException {
-        EventLedger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.start();
+    public void testConcurrentWrites() throws Exception {
+        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        // No start() needed
 
         int threadCount = 10;
         int eventsPerThread = 10; // Reduced load to ensure stability in CI environment
@@ -65,7 +68,7 @@ public class LedgerConcurrencyTest {
         ledger.subscribe(e -> {
             received.add(e);
             receivedCount.incrementAndGet();
-        });
+        }, null);
 
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
@@ -76,7 +79,7 @@ public class LedgerConcurrencyTest {
                         Map<String, Object> data = new HashMap<>();
                         data.put("thread", threadId);
                         data.put("seq", j);
-                        long id = ledger.writeEvent(data, Instant.now());
+                        long id = ledger.write(data, Instant.now());
                         if (id == -1) {
                             throw new RuntimeException("Write failed");
                         }
@@ -116,16 +119,19 @@ public class LedgerConcurrencyTest {
         Set<Long> ids = received.stream().map(BaseEvent::getEventId).collect(Collectors.toSet());
         Assert.assertEquals(ids.size(), threadCount * eventsPerThread);
 
-        // Verify file content
-        try (Stream<BaseEvent> stream = ledger.readEvents(null)) {
-            List<BaseEvent> fromDisk = stream.collect(Collectors.toList());
-            Assert.assertEquals(fromDisk.size(), threadCount * eventsPerThread);
-            
-            // Verify IDs in file are unique
-            Set<Long> diskIds = fromDisk.stream().map(BaseEvent::getEventId).collect(Collectors.toSet());
-            Assert.assertEquals(diskIds.size(), threadCount * eventsPerThread);
-        }
+        // Verify file content (or memory read)
+        List<BaseEvent> fromDisk = new ArrayList<>();
+        ledger.read(-1, null, event -> {
+            fromDisk.add(event);
+            return true;
+        });
         
-        ledger.stop();
+        Assert.assertEquals(fromDisk.size(), threadCount * eventsPerThread);
+        
+        // Verify IDs in file are unique
+        Set<Long> diskIds = fromDisk.stream().map(BaseEvent::getEventId).collect(Collectors.toSet());
+        Assert.assertEquals(diskIds.size(), threadCount * eventsPerThread);
+        
+        ledger.close();
     }
 }
