@@ -6,28 +6,30 @@ import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 
 public abstract class LedgerTestBase {
     protected Path tempDir;
     protected Path ledgerFile;
-    protected MapLedgerConfig config;
-    protected Ledger ledger;
+    protected LedgerRegistry ledgerRegistry;
+    protected Ledger<TestRecord> ledger;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("ledger-test");
         ledgerFile = tempDir.resolve("test.jsonl");
-        config = new MapLedgerConfig();
-        // Default config for tests
-        config.put("ledger.flush_interval_writes", "5");
-        config.put("ledger.flush_interval_seconds", "1.0");
-        config.put("ledger.auto_flush", "true");
-        config.put("ledger.memory.preferred_max_size", "100");
-        config.put("ledger.memory.alarm_size", "200");
+        
+        ledgerRegistry = new LedgerRegistry();
+        ledgerRegistry.setLedgerDir(tempDir);
+        ledgerRegistry.setDefaultPreferredMaxSize(100);
+        ledgerRegistry.setDefaultAlarmSize(200);
+        ledgerRegistry.setDefaultAutoFlush(true);
+        ledgerRegistry.setDefaultFlushIntervalWrites(5);
+        ledgerRegistry.setDefaultFlushIntervalSeconds(1.0);
+        
+        ledgerRegistry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
@@ -48,29 +50,43 @@ public abstract class LedgerTestBase {
         }
     }
 
-    protected Map<String, Object> createData(String key, Object value) {
-        Map<String, Object> data = new HashMap<>();
-        data.put(key, value);
-        return data;
+    protected TestRecord createRecord(String data, int value) {
+        return new TestRecord(Instant.now(), data, value);
     }
 
-    protected Ledger createLedger() {
-        DiskPersistenceDriver driver = new DiskPersistenceDriver(ledgerFile, config);
+    protected Ledger<TestRecord> createLedger() {
+        DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
+        driver.setAutoFlush(ledgerRegistry.isDefaultAutoFlush());
+        driver.setFlushIntervalWrites(ledgerRegistry.getDefaultFlushIntervalWrites());
+        driver.setFlushIntervalSeconds(ledgerRegistry.getDefaultFlushIntervalSeconds());
+        driver.init();
         try {
             driver.start();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new MemoryLedger(EventType.PRICE_UPDATE, driver, config, null, Executors.newCachedThreadPool());
+        MemoryLedger<TestRecord> ledger = new MemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        ledger.setPreferredMaxSize(ledgerRegistry.getDefaultPreferredMaxSize());
+        ledger.setAlarmSize(ledgerRegistry.getDefaultAlarmSize());
+        ledger.init();
+        return ledger;
     }
     
-    protected Ledger createWriteBehindLedger() {
-        DiskPersistenceDriver driver = new DiskPersistenceDriver(ledgerFile, config);
+    protected Ledger<TestRecord> createWriteBehindLedger() {
+        DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
+        driver.setAutoFlush(ledgerRegistry.isDefaultAutoFlush());
+        driver.setFlushIntervalWrites(ledgerRegistry.getDefaultFlushIntervalWrites());
+        driver.setFlushIntervalSeconds(ledgerRegistry.getDefaultFlushIntervalSeconds());
+        driver.init();
         try {
             driver.start();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new WriteBehindMemoryLedger(EventType.PRICE_UPDATE, driver, config, null, Executors.newCachedThreadPool());
+        WriteBehindMemoryLedger<TestRecord> ledger = new WriteBehindMemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        ledger.setPreferredMaxSize(ledgerRegistry.getDefaultPreferredMaxSize());
+        ledger.setAlarmSize(ledgerRegistry.getDefaultAlarmSize());
+        ledger.init();
+        return ledger;
     }
 }

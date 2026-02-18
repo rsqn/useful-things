@@ -5,9 +5,9 @@ package tech.rsqn.useful.things.ledger;
  */
 public interface LedgerSubscriber {
     /**
-     * Called when a new event is written to the ledger.
+     * Called when a new record is written to the ledger.
      *
-     * @param event The event written.
+     * @param record The record written.
      */
-    void onEvent(BaseEvent event);
+    void onRecord(Record record);
 }

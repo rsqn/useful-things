@@ -10,21 +10,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LedgerMemoryTest {
     private Path tempDir;
-    private MapLedgerConfig config;
-    private PersistenceDriver driver;
+    private PersistenceDriver<TestRecord> driver;
+    private LedgerRegistry ledgerRegistry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("memory-test");
-        config = new MapLedgerConfig();
-        config.put("ledger.auto_flush", "false"); // Performance
-        config.put("ledger.flush_interval_writes", "1000");
+        ledgerRegistry = new LedgerRegistry();
+        ledgerRegistry.setLedgerDir(tempDir);
+        ledgerRegistry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
@@ -48,21 +46,22 @@ public class LedgerMemoryTest {
     @Test(timeOut = 300000) // 5 minute timeout
     public void testStreamingMemoryStability() throws IOException {
         Path ledgerFile = tempDir.resolve("memory_test.jsonl");
-        driver = new DiskPersistenceDriver(ledgerFile, config);
+        DiskPersistenceDriver<TestRecord> diskDriver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
+        diskDriver.setAutoFlush(false);
+        diskDriver.setFlushIntervalWrites(1000);
+        diskDriver.init();
+        diskDriver.start();
+        driver = diskDriver;
+        
         // We need to write data first
         
         int eventCount = 10_000; // Enough to cause issues if leaking, but fast enough for test
-        Map<String, Object> data = new HashMap<>();
-        data.put("price", 123.45);
-        data.put("volume", 1000);
-        data.put("symbol", "BTC-USD");
-        // Add some noise to make JSON parsing work
-        data.put("meta", "some metadata string to parse");
 
         // 1. Generate data
         System.out.println("Generating " + eventCount + " events...");
         for (int i = 0; i < eventCount; i++) {
-            BaseEvent event = new BaseEvent(EventType.PRICE_UPDATE, Instant.now(), data, (long) i);
+            TestRecord event = new TestRecord(Instant.now(), "val", i);
+            event.setSequenceId((long) i);
             driver.write(event);
         }
         driver.flush();
@@ -86,7 +85,7 @@ public class LedgerMemoryTest {
             driver.read(-1, e -> {
                 count.incrementAndGet();
                 // Simulate light processing
-                if (e.getData().get("price") == null) {
+                if (e.getValue() < 0) {
                     throw new RuntimeException("Parse error");
                 }
                 return true;

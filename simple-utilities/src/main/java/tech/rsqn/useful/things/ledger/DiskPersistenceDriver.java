@@ -1,39 +1,85 @@
 package tech.rsqn.useful.things.ledger;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import jakarta.annotation.PostConstruct;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
  * Disk-based persistence driver.
+ *
+ * @param <T> The type of record stored.
  */
-public class DiskPersistenceDriver implements PersistenceDriver {
+public class DiskPersistenceDriver<T extends Record> implements PersistenceDriver<T> {
     private final Path ledgerFile;
     private final Gson gson;
     private final Object fileLock = new Object();
     private BufferedWriter fileWriter;
     private volatile boolean started = false;
     private volatile boolean dirty = false;
-    private final boolean autoFlush;
+    private boolean autoFlush = true;
     private int writeCountSinceFlush = 0;
     private long lastFlushTime = System.nanoTime();
-    private final int flushIntervalWrites;
-    private final long flushIntervalNanos;
+    private int flushIntervalWrites = 5000;
+    private long flushIntervalNanos = 5_000_000_000L;
+    private final LedgerRegistry ledgerRegistry;
 
-    public DiskPersistenceDriver(Path ledgerFile, LedgerConfig config) {
+    public DiskPersistenceDriver(Path ledgerFile, LedgerRegistry ledgerRegistry) {
         this.ledgerFile = ledgerFile;
-        this.gson = new GsonBuilder().create();
-        this.autoFlush = config.getBoolean("ledger.auto_flush", true);
-        this.flushIntervalWrites = config.getInt("ledger.flush_interval_writes", 5000);
-        double flushSeconds = config.getDecimal("ledger.flush_interval_seconds", java.math.BigDecimal.valueOf(5.0)).doubleValue();
-        this.flushIntervalNanos = (long) (flushSeconds * 1_000_000_000L);
+        this.ledgerRegistry = ledgerRegistry;
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(RecordType.class, new TypeAdapter<RecordType>() {
+                    @Override
+                    public void write(JsonWriter out, RecordType value) throws IOException {
+                        out.value(value.getValue());
+                    }
+
+                    @Override
+                    public RecordType read(JsonReader in) throws IOException {
+                        return RecordType.of(in.nextString());
+                    }
+                })
+                .registerTypeAdapter(java.time.Instant.class, new TypeAdapter<java.time.Instant>() {
+                    @Override
+                    public void write(JsonWriter out, java.time.Instant value) throws IOException {
+                        out.value(value.toString());
+                    }
+
+                    @Override
+                    public java.time.Instant read(JsonReader in) throws IOException {
+                        return java.time.Instant.parse(in.nextString());
+                    }
+                })
+                .create();
+    }
+
+    public void setAutoFlush(boolean autoFlush) {
+        this.autoFlush = autoFlush;
+    }
+
+    public void setFlushIntervalWrites(int flushIntervalWrites) {
+        this.flushIntervalWrites = flushIntervalWrites;
+    }
+
+    public void setFlushIntervalSeconds(double seconds) {
+        this.flushIntervalNanos = (long) (seconds * 1_000_000_000L);
+    }
+
+    @PostConstruct
+    public void init() {
+        if (ledgerFile == null) {
+            throw new IllegalStateException("Ledger file path must be set");
+        }
+        if (ledgerRegistry == null) {
+            throw new IllegalStateException("LedgerRegistry must be set");
+        }
     }
 
     public void start() throws IOException {
@@ -65,9 +111,9 @@ public class DiskPersistenceDriver implements PersistenceDriver {
     }
 
     @Override
-    public void write(BaseEvent event) throws IOException {
+    public void write(T record) throws IOException {
         // Serialize outside lock
-        String json = gson.toJson(event.toMap());
+        String json = gson.toJson(record);
 
         synchronized (fileLock) {
             if (!started) {
@@ -106,7 +152,7 @@ public class DiskPersistenceDriver implements PersistenceDriver {
     }
 
     @Override
-    public void read(long fromSequence, ReadCallback<BaseEvent> callback) {
+    public void read(long fromSequence, ReadCallback<T> callback) {
         if (!Files.exists(ledgerFile)) {
             return;
         }
@@ -114,12 +160,12 @@ public class DiskPersistenceDriver implements PersistenceDriver {
         try (BufferedReader reader = new BufferedReader(new FileReader(ledgerFile.toFile()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                BaseEvent event = parseEvent(line);
-                if (event != null) {
-                    if (fromSequence != -1 && event.getEventId() <= fromSequence) {
+                T record = parseRecord(line);
+                if (record != null) {
+                    if (fromSequence != -1 && record.getSequenceId() != null && record.getSequenceId() <= fromSequence) {
                         continue;
                     }
-                    if (!callback.onEvent(event)) {
+                    if (!callback.onRecord(record)) {
                         break;
                     }
                 }
@@ -130,22 +176,22 @@ public class DiskPersistenceDriver implements PersistenceDriver {
     }
 
     @Override
-    public void readReverse(long fromSequence, ReadCallback<BaseEvent> callback) {
+    public void readReverse(long fromSequence, ReadCallback<T> callback) {
         if (!Files.exists(ledgerFile)) {
             return;
         }
 
         ReverseFileIterator iterator = new ReverseFileIterator(ledgerFile);
         while (iterator.hasNext()) {
-            BaseEvent event = iterator.next();
+            T record = iterator.next();
             
-            // If fromSequence is specified (not -1), we only want events BEFORE that sequence.
-            // Since we are iterating in reverse (newest to oldest), we skip events until we find one < fromSequence.
-            if (fromSequence != -1 && event.getEventId() >= fromSequence) {
+            // If fromSequence is specified (not -1), we only want records BEFORE that sequence.
+            // Since we are iterating in reverse (newest to oldest), we skip records until we find one < fromSequence.
+            if (fromSequence != -1 && record.getSequenceId() != null && record.getSequenceId() >= fromSequence) {
                 continue;
             }
             
-            if (!callback.onEvent(event)) {
+            if (!callback.onRecord(record)) {
                 break;
             }
         }
@@ -163,23 +209,37 @@ public class DiskPersistenceDriver implements PersistenceDriver {
         }
     }
 
-    private BaseEvent parseEvent(String line) {
+    @SuppressWarnings("unchecked")
+    private T parseRecord(String line) {
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = gson.fromJson(line, Map.class);
-            return BaseEvent.fromMap(map);
+            JsonObject json = JsonParser.parseString(line).getAsJsonObject();
+            JsonElement typeElement = json.get("type");
+            if (typeElement == null) {
+                return null;
+            }
+            String typeStr = typeElement.getAsString();
+            RecordType type = RecordType.of(typeStr);
+            
+            Class<? extends Record> clazz = ledgerRegistry.getRecordClass(type);
+            if (clazz == null) {
+                // Unknown record type
+                return null;
+            }
+            
+            return (T) gson.fromJson(json, clazz);
         } catch (Exception e) {
+            // e.printStackTrace(); // Optional logging
             return null;
         }
     }
 
     // Inner class for reverse file iteration
-    private class ReverseFileIterator implements Iterator<BaseEvent> {
+    private class ReverseFileIterator implements Iterator<T> {
         private final RandomAccessFile raf;
         private long filePos;
         private final byte[] buffer;
         private int bufferPos;
-        private BaseEvent nextEvent;
+        private T nextRecord;
         private final ByteArrayOutputStream lineBuffer;
 
         public ReverseFileIterator(Path file) {
@@ -196,17 +256,17 @@ public class DiskPersistenceDriver implements PersistenceDriver {
         }
 
         private void advance() {
-            nextEvent = null;
+            nextRecord = null;
             try {
-                while (nextEvent == null) {
+                while (nextRecord == null) {
                     String line = readLineReverse();
                     if (line == null) break;
                     if (line.trim().isEmpty()) continue;
 
-                    nextEvent = parseEvent(line);
+                    nextRecord = parseRecord(line);
                 }
 
-                if (nextEvent == null) {
+                if (nextRecord == null) {
                     raf.close();
                 }
             } catch (IOException e) {
@@ -263,13 +323,13 @@ public class DiskPersistenceDriver implements PersistenceDriver {
 
         @Override
         public boolean hasNext() {
-            return nextEvent != null;
+            return nextRecord != null;
         }
 
         @Override
-        public BaseEvent next() {
-            if (nextEvent == null) throw new NoSuchElementException();
-            BaseEvent current = nextEvent;
+        public T next() {
+            if (nextRecord == null) throw new NoSuchElementException();
+            T current = nextRecord;
             advance();
             return current;
         }

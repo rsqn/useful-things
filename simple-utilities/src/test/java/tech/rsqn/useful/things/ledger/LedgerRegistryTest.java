@@ -15,13 +15,11 @@ import java.util.concurrent.Executors;
 
 public class LedgerRegistryTest {
     private Path tempDir;
-    private MapLedgerConfig config;
     private ExecutorService executor;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("registry-test");
-        config = new MapLedgerConfig();
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -46,18 +44,25 @@ public class LedgerRegistryTest {
     @Test
     public void testRegistryInitialization() {
         LedgerRegistry registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
         registry.setSharedExecutor(executor);
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
 
-        Ledger priceLedger = registry.getLedger(EventType.PRICE_UPDATE);
+        Ledger<TestRecord> priceLedger = registry.getLedger(TestRecord.TYPE);
         Assert.assertNotNull(priceLedger);
         
-        Ledger systemLedger = registry.getLedger(EventType.SYSTEM_EVENT);
+        // Register generic record type for system event if needed, or just use Record
+        // Assuming RecordType.of("system_event") is valid and we can use Record.class or a subclass
+        // For this test, let's just use TestRecord type again or another type if we had one.
+        // Or register Record.class for system_event
+        RecordType systemType = RecordType.of("system_event");
+        registry.registerRecordType(systemType, Record.class);
+        
+        Ledger<Record> systemLedger = registry.getLedger(systemType);
         Assert.assertNotNull(systemLedger);
         Assert.assertNotSame(priceLedger, systemLedger);
 
-        Collection<Ledger> allLedgers = registry.getAllLedgers();
+        Collection<Ledger<?>> allLedgers = registry.getAllLedgers();
         Assert.assertEquals(allLedgers.size(), 2); // Only created 2
         Assert.assertTrue(allLedgers.contains(priceLedger));
         Assert.assertTrue(allLedgers.contains(systemLedger));
@@ -66,10 +71,10 @@ public class LedgerRegistryTest {
     @Test
     public void testDefaultExecutor() {
         LedgerRegistry registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
         
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
         Assert.assertNotNull(ledger);
     }
 }

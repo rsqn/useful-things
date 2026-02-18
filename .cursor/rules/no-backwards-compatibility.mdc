@@ -1,0 +1,10 @@
+---
+description: Policy on backwards compatibility
+alwaysApply: true
+---
+
+# Backwards Compatibility Policy
+
+- **NEVER** add backwards compatibility in a plan unless explicitly requested by the user.
+- **ALWAYS** confirm with the user before implementing any backwards compatibility measures.
+- If you think backwards compatibility is needed, ask the user: "Do you need backwards compatibility for this change?"

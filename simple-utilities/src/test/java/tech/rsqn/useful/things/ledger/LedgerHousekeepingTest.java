@@ -15,21 +15,20 @@ import java.util.concurrent.Executors;
 
 public class LedgerHousekeepingTest {
     private Path tempDir;
-    private MapLedgerConfig config;
     private ExecutorService executor;
     private LedgerRegistry registry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("housekeeping-test");
-        config = new MapLedgerConfig();
-        config.put("ledger.auto_flush", "false"); // Disable auto flush to test manual flush
         executor = Executors.newCachedThreadPool();
         
         registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
         registry.setSharedExecutor(executor);
+        registry.setDefaultAutoFlush(false); // Disable auto flush to test manual flush
+        
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
@@ -52,15 +51,15 @@ public class LedgerHousekeepingTest {
 
     @Test
     public void testFlushAllLedgers() throws IOException, InterruptedException {
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
         // No start() needed
         
-        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(new TestRecord(Instant.now(), "val", 1));
 
         // Wait a bit for async write to hit the driver (but driver buffers)
         Thread.sleep(500);
 
-        Path ledgerPath = tempDir.resolve("price_update.jsonl");
+        Path ledgerPath = tempDir.resolve(TestRecord.TYPE.getValue() + ".jsonl");
 
         // Should not be flushed yet (file might exist but be empty or have partial buffer not written to disk if OS buffers? 
         // No, BufferedWriter buffers in heap. If not flushed, file size on disk is 0 or unchanged.)
@@ -89,11 +88,5 @@ public class LedgerHousekeepingTest {
         thread.interrupt();
         thread.join(1000);
         Assert.assertFalse(thread.isAlive());
-    }
-
-    private java.util.Map<String, Object> createData(String key, Object value) {
-        java.util.Map<String, Object> data = new java.util.HashMap<>();
-        data.put(key, value);
-        return data;
     }
 }

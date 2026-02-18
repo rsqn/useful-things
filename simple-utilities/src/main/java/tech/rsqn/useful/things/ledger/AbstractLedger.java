@@ -3,7 +3,6 @@ package tech.rsqn.useful.things.ledger;
 import tech.rsqn.useful.things.apps.KeepRunning;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,21 +15,23 @@ import java.util.function.Predicate;
 
 /**
  * Abstract base class for ledgers.
+ *
+ * @param <T> The type of record stored.
  */
-public abstract class AbstractLedger implements Ledger {
-    protected final EventType eventType;
-    protected final PersistenceDriver driver;
+public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
+    protected final RecordType recordType;
+    protected final PersistenceDriver<T> driver;
     protected final AtomicLong sequenceCounter = new AtomicLong(0);
     protected final KeepRunning keepRunning = new KeepRunning();
     protected final ExecutorService notificationExecutor;
     
     private final Object subscriberLock = new Object();
-    private final List<SubscriberRecord> subscribers = new ArrayList<>();
+    private final List<SubscriberRecord<T>> subscribers = new ArrayList<>();
     
     protected volatile boolean started = false;
 
-    public AbstractLedger(EventType eventType, PersistenceDriver driver, ExecutorService notificationExecutor) {
-        this.eventType = eventType;
+    public AbstractLedger(RecordType recordType, PersistenceDriver<T> driver, ExecutorService notificationExecutor) {
+        this.recordType = recordType;
         this.driver = driver;
         this.notificationExecutor = notificationExecutor != null ? notificationExecutor : Executors.newCachedThreadPool();
         
@@ -40,12 +41,12 @@ public abstract class AbstractLedger implements Ledger {
     }
 
     private void recoverSequenceId() {
-        // Read the last event to determine the sequence counter
-        driver.readReverse(-1, event -> {
-            if (event != null && event.getEventId() != null) {
-                sequenceCounter.set(event.getEventId());
+        // Read the last record to determine the sequence counter
+        driver.readReverse(-1, record -> {
+            if (record != null && record.getSequenceId() != null) {
+                sequenceCounter.set(record.getSequenceId());
             }
-            return false; // Stop after first event (which is the last one)
+            return false; // Stop after first record (which is the last one)
         });
     }
 
@@ -60,14 +61,14 @@ public abstract class AbstractLedger implements Ledger {
     }
 
     @Override
-    public void subscribe(Consumer<BaseEvent> subscriber, Predicate<BaseEvent> filter) {
+    public void subscribe(Consumer<T> subscriber, Predicate<T> filter) {
         synchronized (subscriberLock) {
-            subscribers.add(new SubscriberRecord(subscriber, filter));
+            subscribers.add(new SubscriberRecord<>(subscriber, filter));
         }
     }
 
-    protected void notifySubscribers(BaseEvent event) {
-        List<SubscriberRecord> snapshot;
+    protected void notifySubscribers(T record) {
+        List<SubscriberRecord<T>> snapshot;
         synchronized (subscriberLock) {
             snapshot = new ArrayList<>(subscribers);
         }
@@ -75,17 +76,17 @@ public abstract class AbstractLedger implements Ledger {
         if (snapshot.isEmpty()) return;
 
         if (notificationExecutor != null && !notificationExecutor.isShutdown()) {
-            notificationExecutor.submit(() -> doNotify(snapshot, event));
+            notificationExecutor.submit(() -> doNotify(snapshot, record));
         } else {
-            doNotify(snapshot, event);
+            doNotify(snapshot, record);
         }
     }
 
-    private void doNotify(List<SubscriberRecord> subs, BaseEvent event) {
-        for (SubscriberRecord sub : subs) {
+    private void doNotify(List<SubscriberRecord<T>> subs, T record) {
+        for (SubscriberRecord<T> sub : subs) {
             try {
-                if (sub.filter == null || sub.filter.test(event)) {
-                    sub.subscriber.accept(event);
+                if (sub.filter == null || sub.filter.test(record)) {
+                    sub.subscriber.accept(record);
                 }
             } catch (Exception e) {
                 e.printStackTrace(); // Log error but don't stop notification
@@ -96,7 +97,7 @@ public abstract class AbstractLedger implements Ledger {
     @Override
     public Map<String, Object> healthCheck() {
         Map<String, Object> status = new HashMap<>();
-        status.put("eventType", eventType.getValue());
+        status.put("recordType", recordType.getValue());
         status.put("started", started);
         status.put("sequenceCounter", sequenceCounter.get());
         synchronized (subscriberLock) {
@@ -106,11 +107,11 @@ public abstract class AbstractLedger implements Ledger {
     }
 
     // Inner class to track subscriber state
-    private static class SubscriberRecord {
-        final Consumer<BaseEvent> subscriber;
-        final Predicate<BaseEvent> filter;
+    private static class SubscriberRecord<T> {
+        final Consumer<T> subscriber;
+        final Predicate<T> filter;
 
-        SubscriberRecord(Consumer<BaseEvent> subscriber, Predicate<BaseEvent> filter) {
+        SubscriberRecord(Consumer<T> subscriber, Predicate<T> filter) {
             this.subscriber = subscriber;
             this.filter = filter;
         }

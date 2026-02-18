@@ -13,5 +13,5 @@ public interface ReadCallback<T> {
      * @param event The event read.
      * @return true to continue iterating, false to stop.
      */
-    boolean onEvent(T event);
+    boolean onRecord(T record);
 }

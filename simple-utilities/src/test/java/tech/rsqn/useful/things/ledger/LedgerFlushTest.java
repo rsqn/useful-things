@@ -5,17 +5,16 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.util.List;
 
 public class LedgerFlushTest extends LedgerTestBase {
 
     @Test
     public void testAutoFlush() throws IOException {
-        config.put("ledger.auto_flush", "true");
+        ledgerRegistry.setDefaultAutoFlush(true);
         ledger = createLedger(); // MemoryLedger (sync)
 
-        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(createRecord("val", 1));
 
         // Should be on disk immediately
         List<String> lines = Files.readAllLines(ledgerFile);
@@ -24,12 +23,12 @@ public class LedgerFlushTest extends LedgerTestBase {
 
     @Test
     public void testManualFlush() throws IOException {
-        config.put("ledger.auto_flush", "false");
-        config.put("ledger.flush_interval_writes", "100");
-        config.put("ledger.flush_interval_seconds", "100.0");
+        ledgerRegistry.setDefaultAutoFlush(false);
+        ledgerRegistry.setDefaultFlushIntervalWrites(100);
+        ledgerRegistry.setDefaultFlushIntervalSeconds(100.0);
         ledger = createLedger(); // MemoryLedger (sync)
 
-        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(createRecord("val", 1));
 
         // Should NOT be on disk yet (buffered)
         Assert.assertEquals(Files.size(ledgerFile), 0);

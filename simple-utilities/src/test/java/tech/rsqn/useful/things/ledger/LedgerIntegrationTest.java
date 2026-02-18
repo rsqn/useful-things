@@ -11,9 +11,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,21 +19,20 @@ import java.util.concurrent.TimeUnit;
 
 public class LedgerIntegrationTest {
     private Path tempDir;
-    private MapLedgerConfig config;
     private ExecutorService executor;
     private LedgerRegistry registry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("integration-test");
-        config = new MapLedgerConfig();
-        config.put("ledger.auto_flush", "true");
         executor = Executors.newCachedThreadPool();
         
         registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
         registry.setSharedExecutor(executor);
+        registry.setDefaultAutoFlush(true);
+        
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
@@ -58,12 +55,12 @@ public class LedgerIntegrationTest {
 
     @Test
     public void testEndToEndFlow() throws Exception {
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
         // No start() needed
 
         // 1. Subscribe
         CountDownLatch latch = new CountDownLatch(2);
-        List<BaseEvent> received = new ArrayList<>();
+        List<TestRecord> received = new ArrayList<>();
         ledger.subscribe(event -> {
             received.add(event);
             latch.countDown();
@@ -71,70 +68,63 @@ public class LedgerIntegrationTest {
 
         // 2. Write events
         Instant now = Instant.now();
-        ledger.write(createData("val", 1), now);
-        ledger.write(createData("val", 2), now.plusSeconds(1));
+        ledger.write(new TestRecord(now, "val", 1));
+        ledger.write(new TestRecord(now.plusSeconds(1), "val", 2));
 
         // 3. Verify subscription received events
         Assert.assertTrue(latch.await(2, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 2);
-        Assert.assertEquals(((Number) received.get(0).getData().get("val")).intValue(), 1);
-        Assert.assertEquals(((Number) received.get(1).getData().get("val")).intValue(), 2);
+        Assert.assertEquals(received.get(0).getValue(), 1);
+        Assert.assertEquals(received.get(1).getValue(), 2);
 
         // 4. Read back (from memory)
-        List<BaseEvent> fromMemory = new ArrayList<>();
+        List<TestRecord> fromMemory = new ArrayList<>();
         ledger.read(-1, null, event -> {
             fromMemory.add(event);
             return true;
         });
         
         Assert.assertEquals(fromMemory.size(), 2);
-        // From memory (direct write) -> Integer
-        Assert.assertEquals(((Number) fromMemory.get(0).getData().get("val")).intValue(), 1);
-        Assert.assertEquals(((Number) fromMemory.get(1).getData().get("val")).intValue(), 2);
+        Assert.assertEquals(fromMemory.get(0).getValue(), 1);
+        Assert.assertEquals(fromMemory.get(1).getValue(), 2);
 
         // 5. Close and reopen to force hydration from disk
         ledger.close();
         
         // Re-create registry/ledger
         registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
         registry.setSharedExecutor(executor);
+        registry.setDefaultAutoFlush(true);
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
         
-        ledger = registry.getLedger(EventType.PRICE_UPDATE);
+        ledger = registry.getLedger(TestRecord.TYPE);
         
         // 6. Read from memory (hydrated from disk)
-        List<BaseEvent> hydrated = new ArrayList<>();
+        List<TestRecord> hydrated = new ArrayList<>();
         ledger.read(-1, null, event -> {
             hydrated.add(event);
             return true;
         });
         
         Assert.assertEquals(hydrated.size(), 2);
-        // From disk (Gson) -> Double
-        Assert.assertEquals(((Number) hydrated.get(0).getData().get("val")).doubleValue(), 1.0);
-        Assert.assertEquals(((Number) hydrated.get(1).getData().get("val")).doubleValue(), 2.0);
+        // From disk (Gson) -> int
+        Assert.assertEquals(hydrated.get(0).getValue(), 1);
+        Assert.assertEquals(hydrated.get(1).getValue(), 2);
 
         // 7. Write new event
-        ledger.write(createData("val", 3), now.plusSeconds(2));
+        ledger.write(new TestRecord(now.plusSeconds(2), "val", 3));
         
         // 8. Read again - should have 3 events
-        List<BaseEvent> all = new ArrayList<>();
+        List<TestRecord> all = new ArrayList<>();
         ledger.read(-1, null, event -> {
             all.add(event);
             return true;
         });
         
         Assert.assertEquals(all.size(), 3);
-        // Third event was written directly to memory -> Integer
-        Assert.assertEquals(((Number) all.get(2).getData().get("val")).intValue(), 3);
+        Assert.assertEquals(all.get(2).getValue(), 3);
 
         ledger.close();
-    }
-
-    private Map<String, Object> createData(String key, Object value) {
-        Map<String, Object> data = new HashMap<>();
-        data.put(key, value);
-        return data;
     }
 }

@@ -17,20 +17,20 @@ public class LedgerWriteReadTest extends LedgerTestBase {
         // No start() needed for Ledger interface
 
         Instant now = Instant.now();
-        ledger.write(createData("price", 100.0), now);
-        ledger.write(createData("price", 101.0), now.plusSeconds(1));
+        ledger.write(createRecord("price", 100));
+        ledger.write(createRecord("price", 101));
 
-        List<BaseEvent> events = new ArrayList<>();
+        List<TestRecord> events = new ArrayList<>();
         ledger.read(-1, null, event -> {
             events.add(event);
             return true;
         });
 
         Assert.assertEquals(events.size(), 2);
-        Assert.assertEquals(events.get(0).getData().get("price"), 100.0);
-        Assert.assertEquals(events.get(1).getData().get("price"), 101.0);
-        Assert.assertEquals(events.get(0).getEventId(), Long.valueOf(1));
-        Assert.assertEquals(events.get(1).getEventId(), Long.valueOf(2));
+        Assert.assertEquals(events.get(0).getValue(), 100);
+        Assert.assertEquals(events.get(1).getValue(), 101);
+        Assert.assertEquals(events.get(0).getSequenceId(), Long.valueOf(1));
+        Assert.assertEquals(events.get(1).getSequenceId(), Long.valueOf(2));
     }
 
     @Test
@@ -38,60 +38,60 @@ public class LedgerWriteReadTest extends LedgerTestBase {
         ledger = createLedger();
 
         for (int i = 0; i < 5; i++) {
-            ledger.write(createData("index", i), Instant.now());
+            ledger.write(createRecord("index", i));
         }
 
-        List<BaseEvent> events = new ArrayList<>();
+        List<TestRecord> events = new ArrayList<>();
         ledger.readReverse(-1, null, event -> {
             events.add(event);
             return true;
         });
 
         Assert.assertEquals(events.size(), 5);
-        Assert.assertEquals(((Number)events.get(0).getData().get("index")).doubleValue(), 4.0); // Gson numbers are doubles
-        Assert.assertEquals(((Number)events.get(4).getData().get("index")).doubleValue(), 0.0);
+        Assert.assertEquals(events.get(0).getValue(), 4);
+        Assert.assertEquals(events.get(4).getValue(), 0);
     }
 
     @Test
     public void testReadEventsFiltered() throws IOException {
         ledger = createLedger();
 
-        ledger.write(createData("type", "A"), Instant.now());
-        ledger.write(createData("type", "B"), Instant.now());
-        ledger.write(createData("type", "A"), Instant.now());
+        ledger.write(createRecord("A", 1));
+        ledger.write(createRecord("B", 2));
+        ledger.write(createRecord("A", 3));
 
-        List<BaseEvent> events = new ArrayList<>();
-        ledger.read(-1, e -> "B".equals(e.getData().get("type")), event -> {
+        List<TestRecord> events = new ArrayList<>();
+        ledger.read(-1, e -> "B".equals(e.getData()), event -> {
             events.add(event);
             return true;
         });
 
         Assert.assertEquals(events.size(), 1);
-        Assert.assertEquals(events.get(0).getData().get("type"), "B");
+        Assert.assertEquals(events.get(0).getData(), "B");
     }
 
     @Test
     public void testGetLatestEvent() throws IOException {
         ledger = createLedger();
 
-        ledger.write(createData("val", 1), Instant.now());
-        ledger.write(createData("val", 2), Instant.now());
+        ledger.write(createRecord("val", 1));
+        ledger.write(createRecord("val", 2));
 
-        AtomicReference<BaseEvent> latest = new AtomicReference<>();
+        AtomicReference<TestRecord> latest = new AtomicReference<>();
         ledger.readReverse(-1, null, event -> {
             latest.set(event);
             return false; // Stop after first
         });
 
         Assert.assertNotNull(latest.get());
-        Assert.assertEquals(((Number)latest.get().getData().get("val")).doubleValue(), 2.0);
+        Assert.assertEquals(latest.get().getValue(), 2);
     }
     
     @Test
     public void testReadEmptyLedger() throws IOException {
         ledger = createLedger();
         
-        List<BaseEvent> events = new ArrayList<>();
+        List<TestRecord> events = new ArrayList<>();
         ledger.read(-1, null, event -> {
             events.add(event);
             return true;

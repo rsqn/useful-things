@@ -4,7 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.time.Instant;
 
 public class LedgerSequenceTest extends LedgerTestBase {
 
@@ -12,8 +11,8 @@ public class LedgerSequenceTest extends LedgerTestBase {
     public void testSequenceRecovery() throws IOException {
         ledger = createLedger();
 
-        ledger.write(createData("val", 1), Instant.now()); // ID 1
-        ledger.write(createData("val", 2), Instant.now()); // ID 2
+        ledger.write(createRecord("val", 1)); // ID 1
+        ledger.write(createRecord("val", 2)); // ID 2
         try {
             ledger.close();
         } catch (Exception e) {
@@ -21,9 +20,9 @@ public class LedgerSequenceTest extends LedgerTestBase {
         }
 
         // Restart ledger
-        Ledger newLedger = createLedger();
+        Ledger<TestRecord> newLedger = createLedger();
 
-        long id = newLedger.write(createData("val", 3), Instant.now());
+        long id = newLedger.write(createRecord("val", 3));
         Assert.assertEquals(id, 3);
         
         try {

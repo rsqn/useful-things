@@ -16,13 +16,13 @@ public class LedgerSubscriberTest extends LedgerTestBase {
     public void testSubscribe() throws IOException {
         ledger = createLedger();
 
-        Consumer<BaseEvent> subscriber = Mockito.mock(Consumer.class);
+        Consumer<TestRecord> subscriber = Mockito.mock(Consumer.class);
         ledger.subscribe(subscriber, null);
 
-        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(createRecord("val", 1));
 
         // Verify subscriber called (async)
-        Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.any(BaseEvent.class));
+        Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.any(TestRecord.class));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class LedgerSubscriberTest extends LedgerTestBase {
         CountDownLatch latch = new CountDownLatch(1);
         ledger.subscribe(event -> latch.countDown(), null);
 
-        ledger.write(createData("val", 1), Instant.now());
+        ledger.write(createRecord("val", 1));
 
         Assert.assertTrue(latch.await(1, TimeUnit.SECONDS));
     }
@@ -41,24 +41,18 @@ public class LedgerSubscriberTest extends LedgerTestBase {
     public void testFilteredSubscribe() throws IOException {
         ledger = createLedger();
 
-        Consumer<BaseEvent> subscriber = Mockito.mock(Consumer.class);
+        Consumer<TestRecord> subscriber = Mockito.mock(Consumer.class);
         
-        // Subscribe with filter: only accept events where data.val > 10
-        ledger.subscribe(subscriber, event -> {
-            Number val = (Number) event.getData().get("val");
-            return val != null && val.intValue() > 10;
-        });
+        // Subscribe with filter: only accept events where value > 10
+        ledger.subscribe(subscriber, event -> event.getValue() > 10);
 
         // Write event that should be filtered OUT
-        ledger.write(createData("val", 5), Instant.now());
+        ledger.write(createRecord("val", 5));
         
         // Write event that should be ACCEPTED
-        ledger.write(createData("val", 15), Instant.now());
+        ledger.write(createRecord("val", 15));
 
         // Verify subscriber called only once (for the second event)
-        Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.argThat(event -> {
-            Number val = (Number) event.getData().get("val");
-            return val != null && val.intValue() == 15;
-        }));
+        Mockito.verify(subscriber, Mockito.timeout(1000).times(1)).accept(Mockito.argThat(event -> event.getValue() == 15));
     }
 }

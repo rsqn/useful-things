@@ -11,9 +11,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class StreamReaderTest {
     private Path tempDir;
-    private MapLedgerConfig config;
     private ExecutorService executor;
     private LedgerRegistry registry;
     private StreamReader streamReader;
@@ -29,16 +26,16 @@ public class StreamReaderTest {
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("stream-reader-test");
-        config = new MapLedgerConfig();
-        config.put("ledger.auto_flush", "true");
         executor = Executors.newCachedThreadPool();
         
         registry = new LedgerRegistry();
-        registry.setConfig(config);
         registry.setLedgerDir(tempDir);
         registry.setSharedExecutor(executor);
+        registry.setDefaultAutoFlush(true);
         
         streamReader = new StreamReader(registry);
+        
+        registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
@@ -62,52 +59,59 @@ public class StreamReaderTest {
     @Test
     public void testSubscribe() throws InterruptedException, IOException {
         CountDownLatch latch = new CountDownLatch(1);
-        List<BaseEvent> received = new ArrayList<>();
+        List<TestRecord> received = new ArrayList<>();
 
-        streamReader.subscribe(EventType.PRICE_UPDATE, event -> {
-            received.add(event);
-            latch.countDown();
+        streamReader.subscribe(TestRecord.TYPE, event -> {
+            if (event instanceof TestRecord) {
+                received.add((TestRecord) event);
+                latch.countDown();
+            }
         });
 
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.write(createData("val", 1), Instant.now());
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
+        ledger.write(new TestRecord(Instant.now(), "val", 1));
 
         Assert.assertTrue(latch.await(1, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 1);
-        Assert.assertEquals(((Number) received.get(0).getData().get("val")).intValue(), 1);
+        Assert.assertEquals(received.get(0).getValue(), 1);
     }
 
     @Test
     public void testTailEventsHistory() throws IOException {
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.write(createData("val", 1), Instant.now());
-        ledger.write(createData("val", 2), Instant.now());
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
+        Instant now = Instant.now();
+        ledger.write(new TestRecord(now, "val", 1));
+        ledger.write(new TestRecord(now, "val", 2));
         
-        List<BaseEvent> events = new ArrayList<>();
-        streamReader.tailEvents(EventType.PRICE_UPDATE, false, event -> {
-            events.add(event);
+        List<TestRecord> events = new ArrayList<>();
+        streamReader.tailEvents(TestRecord.TYPE, false, event -> {
+            if (event instanceof TestRecord) {
+                events.add((TestRecord) event);
+            }
             return true;
         });
 
         Assert.assertEquals(events.size(), 2);
-        // From memory -> Integer
-        Assert.assertEquals(((Number) events.get(0).getData().get("val")).intValue(), 1);
-        Assert.assertEquals(((Number) events.get(1).getData().get("val")).intValue(), 2);
+        Assert.assertEquals(events.get(0).getValue(), 1);
+        Assert.assertEquals(events.get(1).getValue(), 2);
     }
 
     @Test
     public void testTailEventsFollow() throws IOException, InterruptedException {
-        Ledger ledger = registry.getLedger(EventType.PRICE_UPDATE);
-        ledger.write(createData("val", 1), Instant.now());
+        Ledger<TestRecord> ledger = registry.getLedger(TestRecord.TYPE);
+        Instant now = Instant.now();
+        ledger.write(new TestRecord(now, "val", 1));
 
         // Start tailing in background thread because it blocks
         CountDownLatch latch = new CountDownLatch(2);
-        List<BaseEvent> received = new ArrayList<>();
+        List<TestRecord> received = new ArrayList<>();
         
         Thread tailThread = new Thread(() -> {
-            streamReader.tailEvents(EventType.PRICE_UPDATE, true, event -> {
-                received.add(event);
-                latch.countDown();
+            streamReader.tailEvents(TestRecord.TYPE, true, event -> {
+                if (event instanceof TestRecord) {
+                    received.add((TestRecord) event);
+                    latch.countDown();
+                }
                 return true;
             });
         });
@@ -119,21 +123,13 @@ public class StreamReaderTest {
         // Write new event
         // Give time for tail thread to start and subscribe
         Thread.sleep(500); 
-        ledger.write(createData("val", 2), Instant.now());
+        ledger.write(new TestRecord(now, "val", 2));
 
         Assert.assertTrue(latch.await(2, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 2);
-        // First event from memory -> Integer
-        Assert.assertEquals(((Number) received.get(0).getData().get("val")).intValue(), 1);
-        // Second event from live -> Integer
-        Assert.assertEquals(((Number) received.get(1).getData().get("val")).intValue(), 2);
+        Assert.assertEquals(received.get(0).getValue(), 1);
+        Assert.assertEquals(received.get(1).getValue(), 2);
         
         tailThread.interrupt(); // Stop infinite stream
-    }
-
-    private Map<String, Object> createData(String key, Object value) {
-        Map<String, Object> data = new HashMap<>();
-        data.put(key, value);
-        return data;
     }
 }

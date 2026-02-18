@@ -5,47 +5,49 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
- * Real-time event stream reader for the ledger system.
+ * Real-time record stream reader for the ledger system.
  */
 public class StreamReader {
     private final LedgerRegistry registry;
-    private final Map<EventType, List<Consumer<BaseEvent>>> subscribers = new ConcurrentHashMap<>();
+    private final Map<RecordType, List<Consumer<Record>>> subscribers = new ConcurrentHashMap<>();
 
     public StreamReader(LedgerRegistry registry) {
         this.registry = registry;
     }
 
-    public void subscribe(EventType eventType, Consumer<BaseEvent> callback) {
-        subscribers.computeIfAbsent(eventType, k -> {
-            List<Consumer<BaseEvent>> list = Collections.synchronizedList(new ArrayList<>());
+    public void subscribe(RecordType recordType, Consumer<Record> callback) {
+        subscribers.computeIfAbsent(recordType, k -> {
+            List<Consumer<Record>> list = Collections.synchronizedList(new ArrayList<>());
             // Subscribe to the underlying ledger once per type, and dispatch to all local subscribers
-            Ledger ledger = registry.getLedger(eventType);
+            Ledger<Record> ledger = (Ledger<Record>) registry.getLedger(recordType);
             if (ledger != null) {
+                // We cast to Ledger<Record> to subscribe with a generic Consumer<Record>
+                // This works because any T extends Record, so Consumer<Record> can consume it.
                 ledger.subscribe(this::notifySubscribers, null);
             }
             return list;
         }).add(callback);
     }
 
-    public void unsubscribe(EventType eventType, Consumer<BaseEvent> callback) {
-        List<Consumer<BaseEvent>> list = subscribers.get(eventType);
+    public void unsubscribe(RecordType recordType, Consumer<Record> callback) {
+        List<Consumer<Record>> list = subscribers.get(recordType);
         if (list != null) {
             list.remove(callback);
             if (list.isEmpty()) {
-                subscribers.remove(eventType);
+                subscribers.remove(recordType);
                 // Note: We don't unsubscribe from the underlying ledger because Ledger interface doesn't support unsubscribe yet
             }
         }
     }
 
-    private void notifySubscribers(BaseEvent event) {
-        List<Consumer<BaseEvent>> list = subscribers.get(event.getEventType());
+    private void notifySubscribers(Record record) {
+        List<Consumer<Record>> list = subscribers.get(record.getType());
         if (list == null || list.isEmpty()) return;
         
         synchronized (list) {
-            for (Consumer<BaseEvent> callback : list) {
+            for (Consumer<Record> callback : list) {
                 try {
-                    callback.accept(event);
+                    callback.accept(record);
                 } catch (Exception e) {
                     // Ignore subscriber errors
                 }
@@ -54,15 +56,15 @@ public class StreamReader {
     }
 
     /**
-     * Tails events from a ledger, optionally following new events.
-     * Uses a callback to process events.
+     * Tails records from a ledger, optionally following new records.
+     * Uses a callback to process records.
      * 
-     * @param eventType The event type to tail.
-     * @param follow    Whether to follow new events (tail -f).
-     * @param callback  Callback for each event. Returns true to continue, false to stop.
+     * @param recordType The record type to tail.
+     * @param follow    Whether to follow new records (tail -f).
+     * @param callback  Callback for each record. Returns true to continue, false to stop.
      */
-    public void tailEvents(EventType eventType, boolean follow, ReadCallback<BaseEvent> callback) {
-        Ledger ledger = registry.getLedger(eventType);
+    public void tailEvents(RecordType recordType, boolean follow, ReadCallback<Record> callback) {
+        Ledger<Record> ledger = (Ledger<Record>) registry.getLedger(recordType);
         if (ledger == null) {
             return;
         }
@@ -72,42 +74,11 @@ public class StreamReader {
             return;
         }
 
-        // For following, we need to subscribe first to capture events while reading history
-        // We use a wrapper callback that checks the return value of the user callback
-        // If user callback returns false, we need to stop everything.
+        // For following, we need to subscribe first to capture records while reading history
         
-        // This is tricky because 'read' is blocking (history), but 'subscribe' is async (live).
-        // If we subscribe, we get live events on a different thread.
-        // We need to coordinate.
-        
-        // Strategy:
-        // 1. Subscribe with a listener that pushes to the user callback.
-        // 2. Read history.
-        // 3. If history read stops (callback returns false), we unsubscribe and return.
-        // 4. If history read finishes, we continue with live events (already subscribed).
-        
-        // BUT: Duplicate handling.
-        // If we subscribe first, we might get an event via subscription that we also read from history.
-        // We need to track max ID seen in history.
-        
-        // Also, if 'read' blocks, and 'subscribe' calls callback on another thread,
-        // we have concurrent calls to 'callback'. Is 'callback' thread-safe?
-        // Usually callbacks should be thread-safe or we should serialize.
-        // Let's assume we need to serialize.
-        
-        // Actually, the user asked for "iterate", implying sequential processing.
-        // If we have history + live, we usually want sequential: history then live.
-        // But live events arrive asynchronously.
-        // So we probably need a queue to serialize them if we want strict ordering and single-threaded callback.
-        // But 'tailEvents' with 'follow' usually blocks the caller thread?
-        // Or does it return and let the callback happen async?
-        // If it blocks, it acts like a server loop.
-        
-        // Let's implement a blocking loop that reads history then drains a queue of live events.
-        
-        // Queue for live events
-        java.util.concurrent.BlockingQueue<BaseEvent> liveQueue = new java.util.concurrent.LinkedBlockingQueue<>();
-        Consumer<BaseEvent> listener = liveQueue::offer;
+        // Queue for live records
+        java.util.concurrent.BlockingQueue<Record> liveQueue = new java.util.concurrent.LinkedBlockingQueue<>();
+        Consumer<Record> listener = liveQueue::offer;
         
         // Subscribe first
         ledger.subscribe(listener, null);
@@ -118,31 +89,29 @@ public class StreamReader {
         // Read history
         // We wrap the callback to update maxId
         boolean[] keepGoing = {true};
-        ledger.read(-1, null, event -> {
-            if (event.getEventId() != null) {
-                maxId.accumulateAndGet(event.getEventId(), Math::max);
+        ledger.read(-1, null, (ReadCallback<Record>) record -> {
+            if (record.getSequenceId() != null) {
+                maxId.accumulateAndGet(record.getSequenceId(), Math::max);
             }
-            boolean result = callback.onEvent(event);
+            boolean result = callback.onRecord(record);
             keepGoing[0] = result;
             return result;
         });
         
         if (!keepGoing[0]) {
             // User stopped during history
-            // Unsubscribe? Ledger doesn't support unsubscribe yet.
-            // We just stop processing.
             return;
         }
         
-        // Process live events
+        // Process live records
         try {
             while (true) {
-                BaseEvent event = liveQueue.take();
-                if (event.getEventId() != null && event.getEventId() <= maxId.get()) {
+                Record record = liveQueue.take();
+                if (record.getSequenceId() != null && record.getSequenceId() <= maxId.get()) {
                     continue; // Skip duplicate
                 }
                 
-                if (!callback.onEvent(event)) {
+                if (!callback.onRecord(record)) {
                     break;
                 }
             }

@@ -1,48 +1,48 @@
 package tech.rsqn.useful.things.ledger;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * Interface for the ledger system.
+ *
+ * @param <T> The type of record stored in this ledger.
  */
-public interface Ledger extends AutoCloseable {
+public interface Ledger<T extends Record> extends AutoCloseable {
     /**
-     * Writes an event to the ledger.
+     * Writes a record to the ledger.
      *
-     * @param data      The data to write.
-     * @param timestamp The timestamp of the event.
-     * @return The sequence ID of the event.
+     * @param record The record to write.
+     * @return The sequence ID of the record.
      */
-    long write(Map<String, Object> data, Instant timestamp);
+    long write(T record);
 
     /**
-     * Reads events from the ledger forward.
+     * Reads records from the ledger forward.
      *
      * @param fromSequence The sequence ID to start reading from (-1 means from the beginning).
      * @param filter       Optional filter (null means no filtering).
-     * @param callback     Callback for each event (returns true to continue, false to stop).
+     * @param callback     Callback for each record (returns true to continue, false to stop).
      */
-    void read(long fromSequence, Predicate<BaseEvent> filter, ReadCallback<BaseEvent> callback);
+    void read(long fromSequence, Predicate<T> filter, ReadCallback<T> callback);
 
     /**
-     * Reads events from the ledger in reverse.
+     * Reads records from the ledger in reverse.
      *
      * @param fromSequence The sequence ID to start reading from (-1 means from the end).
      * @param filter       Optional filter (null means no filtering).
-     * @param callback     Callback for each event (returns true to continue, false to stop).
+     * @param callback     Callback for each record (returns true to continue, false to stop).
      */
-    void readReverse(long fromSequence, Predicate<BaseEvent> filter, ReadCallback<BaseEvent> callback);
+    void readReverse(long fromSequence, Predicate<T> filter, ReadCallback<T> callback);
 
     /**
-     * Subscribes to new events.
+     * Subscribes to new records.
      *
      * @param subscriber The subscriber to notify.
-     * @param filter     Optional filter (null means receive all events).
+     * @param filter     Optional filter (null means receive all records).
      */
-    void subscribe(Consumer<BaseEvent> subscriber, Predicate<BaseEvent> filter);
+    void subscribe(Consumer<T> subscriber, Predicate<T> filter);
 
     /**
      * Flushes any buffered writes to persistence.
