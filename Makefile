@@ -1,22 +1,24 @@
 # Useful-things Maven release Makefile
 # Target 'release': build, release to Maven Central, bump to next SNAPSHOT and commit
 
-.PHONY: build ensure-snapshot release help clean compile test package install deploy site dependency-tree bump-patch
+.PHONY: build ensure-snapshot release release-prepare release-perform help clean compile test package install deploy site dependency-tree bump-patch
 
 help:
 	@echo "Targets:"
-	@echo "  make clean           - mvn clean"
-	@echo "  make compile         - mvn compile"
-	@echo "  make test            - mvn test"
-	@echo "  make package         - mvn package"
-	@echo "  make install         - mvn install"
-	@echo "  make deploy          - mvn deploy"
-	@echo "  make site            - mvn site"
-	@echo "  make dependency-tree - mvn dependency:tree"
-	@echo "  make build           - mvn clean verify"
-	@echo "  make clean-install   - mvn clean install (single reactor)"
-	@echo "  make release         - build, release to Maven Central, bump to next SNAPSHOT (committed)"
-	@echo "  make bump-patch      - bump to next patch version and ensure -SNAPSHOT"
+	@echo "  make clean            - mvn clean"
+	@echo "  make compile          - mvn compile"
+	@echo "  make test             - mvn test"
+	@echo "  make package          - mvn package"
+	@echo "  make install          - mvn install"
+	@echo "  make deploy           - mvn deploy"
+	@echo "  make site             - mvn site"
+	@echo "  make dependency-tree  - mvn dependency:tree"
+	@echo "  make build            - mvn clean verify"
+	@echo "  make clean-install    - mvn clean install (single reactor)"
+	@echo "  make release-prepare - Step 1: ensure SNAPSHOT, build, prepare (tag X.Y.Z, bump to X.Y.(Z+1)-SNAPSHOT)"
+	@echo "  make release-perform  - Step 2: deploy tagged release to Maven Central"
+	@echo "  make release         - Full release: prepare + perform (build, tag, deploy, bump snapshot)"
+	@echo "  make bump-patch       - bump to next patch version and ensure -SNAPSHOT"
 
 # Get current version from POM (requires mvn)
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null || echo "unknown")
@@ -76,9 +78,17 @@ build:
 clean-install:
 	mvn clean install
 
-# Full release: ensure SNAPSHOT, build, then prepare+perform
-# - release:prepare: bumps X.Y.Z-SNAPSHOT -> X.Y.Z (commit, tag), then -> X.Y.(Z+1)-SNAPSHOT (commit)
-# - release:perform: checks out tag, deploys to Maven Central
-release: ensure-snapshot build
-	@echo "Starting Maven release..."
-	mvn release:prepare release:perform -B
+# Step 1: Prepare release - ensure SNAPSHOT, build, then prepare
+# release:prepare does: X.Y.Z-SNAPSHOT -> X.Y.Z (commit, tag), then -> X.Y.(Z+1)-SNAPSHOT (commit)
+release-prepare: ensure-snapshot build
+	@echo "Step 1: Preparing release (tag + bump to next SNAPSHOT)..."
+	mvn release:prepare -B
+
+# Step 2: Perform release - deploy the tagged release to Maven Central
+release-perform:
+	@echo "Step 2: Deploying tagged release to Maven Central..."
+	mvn release:perform -B
+
+# Full release: all 3 steps (prepare + perform; prepare includes snapshot bump)
+release: release-prepare release-perform
+	@echo "Release complete. Version bumped to next SNAPSHOT."
