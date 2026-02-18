@@ -10,12 +10,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 /**
- * Memory-first ledger implementation.
- * Reads are served from memory only.
+ * Memory-first ledger implementation extending DiskLedger.
+ * Hydrates from disk on startup, then serves reads from memory only.
+ * Writes go to both memory and disk (via super).
  *
  * @param <T> The type of record stored.
  */
-public class MemoryLedger<T extends Record> extends AbstractLedger<T> {
+public class MemoryLedger<T extends Record> extends DiskLedger<T> {
     protected final ConcurrentLinkedDeque<T> memory = new ConcurrentLinkedDeque<>();
     protected final AtomicLong memorySize = new AtomicLong(0);
     protected int preferredMaxSize = 10000;
@@ -26,7 +27,7 @@ public class MemoryLedger<T extends Record> extends AbstractLedger<T> {
     private volatile long lastAlarmLogTime = 0;
     private static final long ALARM_LOG_INTERVAL_MS = 5000; // 5 seconds
 
-    public MemoryLedger(RecordType recordType, PersistenceDriver<T> driver, 
+    public MemoryLedger(RecordType recordType, PersistenceDriver<T> driver,
                         Predicate<T> retentionFilter, ExecutorService notificationExecutor) {
         super(recordType, driver, notificationExecutor);
         this.retentionFilter = retentionFilter;
@@ -169,6 +170,11 @@ public class MemoryLedger<T extends Record> extends AbstractLedger<T> {
         }
     }
     
+    @Override
+    public long size() {
+        return memorySize.get();
+    }
+
     @Override
     public Map<String, Object> healthCheck() {
         Map<String, Object> status = super.healthCheck();

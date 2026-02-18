@@ -23,7 +23,7 @@ public class StreamReader {
             if (ledger != null) {
                 // We cast to Ledger<Record> to subscribe with a generic Consumer<Record>
                 // This works because any T extends Record, so Consumer<Record> can consume it.
-                ledger.subscribe(this::notifySubscribers, null);
+                ledger.subscribe(null, this::notifySubscribers);
             }
             return list;
         }).add(callback);
@@ -81,7 +81,7 @@ public class StreamReader {
         Consumer<Record> listener = liveQueue::offer;
         
         // Subscribe first
-        ledger.subscribe(listener, null);
+        ledger.subscribe(null, listener);
         
         // Track max ID
         java.util.concurrent.atomic.AtomicLong maxId = new java.util.concurrent.atomic.AtomicLong(-1);

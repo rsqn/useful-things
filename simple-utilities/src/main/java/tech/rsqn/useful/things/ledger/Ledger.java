@@ -39,10 +39,10 @@ public interface Ledger<T extends Record> extends AutoCloseable {
     /**
      * Subscribes to new records.
      *
-     * @param subscriber The subscriber to notify.
      * @param filter     Optional filter (null means receive all records).
+     * @param subscriber The subscriber to notify.
      */
-    void subscribe(Consumer<T> subscriber, Predicate<T> filter);
+    void subscribe(Predicate<T> filter, Consumer<T> subscriber);
 
     /**
      * Flushes any buffered writes to persistence.
@@ -55,4 +55,13 @@ public interface Ledger<T extends Record> extends AutoCloseable {
      * @return A map of health metrics.
      */
     Map<String, Object> healthCheck();
+
+    /**
+     * Returns the number of records currently in the ledger.
+     *
+     * @return count, or -1 if not supported by this implementation
+     */
+    default long size() {
+        return -1L;
+    }
 }

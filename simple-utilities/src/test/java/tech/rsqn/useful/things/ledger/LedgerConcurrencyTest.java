@@ -64,10 +64,10 @@ public class LedgerConcurrencyTest {
         // Subscribe to verify we get all events
         Queue<TestRecord> received = new ConcurrentLinkedQueue<>();
         AtomicInteger receivedCount = new AtomicInteger(0);
-        ledger.subscribe(e -> {
+        ledger.subscribe(null, e -> {
             received.add(e);
             receivedCount.incrementAndGet();
-        }, null);
+        });
 
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {

@@ -38,4 +38,14 @@ public interface PersistenceDriver<T extends Record> extends AutoCloseable {
      * @throws IOException If the flush fails.
      */
     void flush() throws IOException;
+
+    /**
+     * Returns the number of records in the persistence layer.
+     * Default -1 if not supported.
+     *
+     * @return record count, or -1 if not supported
+     */
+    default long count() {
+        return -1L;
+    }
 }

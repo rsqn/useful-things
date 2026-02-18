@@ -61,7 +61,7 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
     }
 
     @Override
-    public void subscribe(Consumer<T> subscriber, Predicate<T> filter) {
+    public void subscribe(Predicate<T> filter, Consumer<T> subscriber) {
         synchronized (subscriberLock) {
             subscribers.add(new SubscriberRecord<>(subscriber, filter));
         }

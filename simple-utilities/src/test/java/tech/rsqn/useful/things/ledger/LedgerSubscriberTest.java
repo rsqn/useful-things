@@ -17,7 +17,7 @@ public class LedgerSubscriberTest extends LedgerTestBase {
         ledger = createLedger();
 
         Consumer<TestRecord> subscriber = Mockito.mock(Consumer.class);
-        ledger.subscribe(subscriber, null);
+        ledger.subscribe(null, subscriber);
 
         ledger.write(createRecord("val", 1));
 
@@ -30,7 +30,7 @@ public class LedgerSubscriberTest extends LedgerTestBase {
         ledger = createLedger();
 
         CountDownLatch latch = new CountDownLatch(1);
-        ledger.subscribe(event -> latch.countDown(), null);
+        ledger.subscribe(null, event -> latch.countDown());
 
         ledger.write(createRecord("val", 1));
 
@@ -44,7 +44,7 @@ public class LedgerSubscriberTest extends LedgerTestBase {
         Consumer<TestRecord> subscriber = Mockito.mock(Consumer.class);
         
         // Subscribe with filter: only accept events where value > 10
-        ledger.subscribe(subscriber, event -> event.getValue() > 10);
+        ledger.subscribe(event -> event.getValue() > 10, subscriber);
 
         // Write event that should be filtered OUT
         ledger.write(createRecord("val", 5));

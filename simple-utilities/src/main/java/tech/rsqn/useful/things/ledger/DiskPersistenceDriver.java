@@ -209,6 +209,22 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
         }
     }
 
+    @Override
+    public long count() {
+        if (!Files.exists(ledgerFile)) {
+            return 0;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(ledgerFile.toFile()))) {
+            long count = 0;
+            while (reader.readLine() != null) {
+                count++;
+            }
+            return count;
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private T parseRecord(String line) {
         try {

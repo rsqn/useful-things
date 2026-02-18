@@ -62,10 +62,10 @@ public class LedgerIntegrationTest {
         // 1. Subscribe
         CountDownLatch latch = new CountDownLatch(2);
         List<TestRecord> received = new ArrayList<>();
-        ledger.subscribe(event -> {
+        ledger.subscribe(null, event -> {
             received.add(event);
             latch.countDown();
-        }, null);
+        });
 
         // 2. Write events
         Instant now = Instant.now();
