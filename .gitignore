@@ -17,3 +17,4 @@ AwsCredentials.properties
 *.iml
 .idea
 target
+release.properties

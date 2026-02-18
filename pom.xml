@@ -19,8 +19,7 @@
     <scm>
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
-        <url>https://github.com/rsqns/useful-things</url>
-        <tag>useful-things-1.0.78</tag>
+        <url>https://github.com/rsqn/useful-things</url>
     </scm>
 
     <licenses>
@@ -43,17 +42,6 @@
     <properties>
         <aws.sdk.version>1.12.797</aws.sdk.version>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>local-repo</id>
-            <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-        <snapshotRepository>
-            <id>local-snapshot-repo</id>
-            <url>file://${project.build.directory}/mvn-repo-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
