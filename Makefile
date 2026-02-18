@@ -1,7 +1,7 @@
 # Useful-things Maven release Makefile
 # Target 'release': build, release to Maven Central, bump to next SNAPSHOT and commit
 
-.PHONY: build ensure-snapshot release help clean compile test package install deploy site dependency-tree
+.PHONY: build ensure-snapshot release help clean compile test package install deploy site dependency-tree bump-patch
 
 help:
 	@echo "Targets:"
@@ -14,7 +14,9 @@ help:
 	@echo "  make site            - mvn site"
 	@echo "  make dependency-tree - mvn dependency:tree"
 	@echo "  make build           - mvn clean verify"
+	@echo "  make clean-install   - mvn clean install (single reactor)"
 	@echo "  make release         - build, release to Maven Central, bump to next SNAPSHOT (committed)"
+	@echo "  make bump-patch      - bump to next patch version and ensure -SNAPSHOT"
 
 # Get current version from POM (requires mvn)
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null || echo "unknown")
@@ -29,6 +31,18 @@ ensure-snapshot:
 	else \
 		echo "Version $(CURRENT_VERSION) is already a SNAPSHOT"; \
 	fi
+
+# Bump to next patch version and ensure -SNAPSHOT
+bump-patch:
+	@echo "Current version: $(CURRENT_VERSION)"
+	@BASE_VERSION=$$(echo "$(CURRENT_VERSION)" | sed 's/-SNAPSHOT//'); \
+	MAJOR=$$(echo "$$BASE_VERSION" | cut -d. -f1); \
+	MINOR=$$(echo "$$BASE_VERSION" | cut -d. -f2); \
+	PATCH=$$(echo "$$BASE_VERSION" | cut -d. -f3); \
+	NEW_PATCH=$$((PATCH + 1)); \
+	NEW_VERSION="$$MAJOR.$$MINOR.$$NEW_PATCH-SNAPSHOT"; \
+	echo "Bumping version to $$NEW_VERSION..."; \
+	mvn versions:set -DnewVersion=$$NEW_VERSION -DgenerateBackupPoms=false
 
 clean:
 	mvn clean
@@ -57,6 +71,10 @@ dependency-tree:
 # Build (clean verify)
 build:
 	mvn clean verify
+
+# Clean install (single reactor)
+clean-install:
+	mvn clean install
 
 # Full release: ensure SNAPSHOT, build, then prepare+perform
 # - release:prepare: bumps X.Y.Z-SNAPSHOT -> X.Y.Z (commit, tag), then -> X.Y.(Z+1)-SNAPSHOT (commit)

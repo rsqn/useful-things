@@ -25,7 +25,8 @@ public class LedgerIntegrationTest {
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("integration-test");
-        executor = Executors.newCachedThreadPool();
+        // Use single thread executor to ensure ordered delivery of notifications in tests
+        executor = Executors.newSingleThreadExecutor();
         
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
