@@ -1,7 +1,7 @@
 # Useful-things Maven release Makefile
 # Target 'release': build, release to Maven Central, bump to next SNAPSHOT and commit
 
-.PHONY: build ensure-snapshot release release-prepare release-perform help clean compile test package install deploy site dependency-tree bump-patch
+.PHONY: build ensure-snapshot release release-prepare release-perform release-push help clean compile test package install deploy site dependency-tree bump-patch
 
 help:
 	@echo "Targets:"
@@ -15,9 +15,10 @@ help:
 	@echo "  make dependency-tree  - mvn dependency:tree"
 	@echo "  make build            - mvn clean verify"
 	@echo "  make clean-install    - mvn clean install (single reactor)"
-	@echo "  make release-prepare - Step 1: ensure SNAPSHOT, build, prepare (tag X.Y.Z, bump to X.Y.(Z+1)-SNAPSHOT)"
+	@echo "  make release-prepare  - Step 1: ensure SNAPSHOT, build, prepare (tag X.Y.Z, bump to X.Y.(Z+1)-SNAPSHOT)"
 	@echo "  make release-perform  - Step 2: deploy tagged release to Maven Central"
-	@echo "  make release         - Full release: prepare + perform (build, tag, deploy, bump snapshot)"
+	@echo "  make release-push     - Step 3: push commits and tags to origin"
+	@echo "  make release          - Full release: prepare + perform + push (build, tag, deploy, bump snapshot, push)"
 	@echo "  make bump-patch       - bump to next patch version and ensure -SNAPSHOT"
 
 # Get current version from POM (requires mvn)
@@ -89,6 +90,12 @@ release-perform:
 	@echo "Step 2: Deploying tagged release to Maven Central..."
 	mvn release:perform -B
 
-# Full release: all 3 steps (prepare + perform; prepare includes snapshot bump)
-release: release-prepare release-perform
-	@echo "Release complete. Version bumped to next SNAPSHOT."
+# Step 3: Push commits and tags to origin (release plugin may push, but we ensure it)
+release-push:
+	@echo "Step 3: Pushing commits and tags to origin..."
+	git push origin HEAD
+	git push origin --tags
+
+# Full release: prepare, perform, push (build, tag, deploy, bump snapshot, commit, push)
+release: release-prepare release-perform release-push
+	@echo "Release complete. Version bumped to next SNAPSHOT. Changes pushed to origin."
