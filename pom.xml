@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn</groupId>
     <artifactId>useful-things</artifactId>
-    <version>1.0.81-SNAPSHOT</version>
+    <version>1.0.81</version>
     <packaging>pom</packaging>
 
     <name>useful-things</name>
@@ -20,7 +20,8 @@
         <connection>scm:git:git@github.com:rsqn/useful-things.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/useful-things.git</developerConnection>
         <url>https://github.com/rsqn/useful-things</url>
-    </scm>
+      <tag>useful-things-1.0.81</tag>
+  </scm>
 
     <licenses>
         <license>
@@ -61,12 +62,12 @@
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>simple-utilities</artifactId>
-                <version>1.0.81-SNAPSHOT</version>
+                <version>1.0.81</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>cache-service</artifactId>
-                <version>1.0.81-SNAPSHOT</version>
+                <version>1.0.81</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
