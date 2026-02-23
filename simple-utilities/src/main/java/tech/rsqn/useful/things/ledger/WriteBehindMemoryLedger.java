@@ -3,10 +3,12 @@ package tech.rsqn.useful.things.ledger;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Memory-first ledger with asynchronous persistence (write-behind).
@@ -14,13 +16,14 @@ import java.util.function.Predicate;
  * @param <T> The type of record stored.
  */
 public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
+    private static final Logger LOG = Logger.getLogger(WriteBehindMemoryLedger.class.getName());
     private final BlockingQueue<T> writeQueue = new LinkedBlockingQueue<>();
     private Thread writerThread;
     private volatile boolean running = true;
 
-    public WriteBehindMemoryLedger(RecordType recordType, PersistenceDriver<T> driver, 
-                                   Predicate<T> retentionFilter, ExecutorService notificationExecutor) {
-        super(recordType, driver, retentionFilter, notificationExecutor);
+    public WriteBehindMemoryLedger(RecordType recordType, PersistenceDriver<T> driver,
+                                   Predicate<T> retentionFilter) {
+        super(recordType, driver, retentionFilter);
     }
 
     @PostConstruct
@@ -45,7 +48,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
 
         // Queue for persistence
         if (!writeQueue.offer(record)) {
-            System.err.println("ERROR: Ledger write queue full for " + recordType.getValue() + ". Record " + sequenceId + " may be lost from disk.");
+            LOG.log(Level.SEVERE, "ERROR: Ledger write queue full for " + recordType.getValue() + ". Record " + sequenceId + " may be lost from disk.");
         }
 
         notifySubscribers(record);
@@ -87,7 +90,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
                 try {
                     driver.write(record);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.log(Level.SEVERE, "Error draining write queue", e);
                 }
             }
         }
@@ -103,7 +106,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
                     try {
                         driver.write(record);
                     } catch (IOException e) {
-                        e.printStackTrace(); // Log error
+                        LOG.log(Level.SEVERE, "Error processing write queue", e); // Log error
                     }
                 }
             } catch (InterruptedException e) {

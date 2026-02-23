@@ -10,24 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class LedgerRegistryTest {
     private Path tempDir;
-    private ExecutorService executor;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("registry-test");
-        executor = Executors.newSingleThreadExecutor();
     }
 
     @AfterMethod
     public void tearDown() throws IOException {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)
                     .sorted(Comparator.reverseOrder())
@@ -45,7 +38,6 @@ public class LedgerRegistryTest {
     public void testRegistryInitialization() {
         LedgerRegistry registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
 
         Ledger<TestRecord> priceLedger = registry.getLedger(TestRecord.TYPE);

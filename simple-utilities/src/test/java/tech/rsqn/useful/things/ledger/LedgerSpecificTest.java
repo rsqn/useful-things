@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 public class LedgerSpecificTest extends LedgerTestBase {
 
@@ -22,7 +21,7 @@ public class LedgerSpecificTest extends LedgerTestBase {
         DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(testFile, ledgerRegistry);
         driver.init();
         driver.start();
-        MemoryLedger<TestRecord> ledger2 = new MemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        MemoryLedger<TestRecord> ledger2 = new MemoryLedger<>(TestRecord.TYPE, driver, null);
         ledger2.init();
 
         // Write one successful event
@@ -44,7 +43,7 @@ public class LedgerSpecificTest extends LedgerTestBase {
         driver = new DiskPersistenceDriver<>(testFile, ledgerRegistry);
         driver.init();
         driver.start();
-        MemoryLedger<TestRecord> ledger3 = new MemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        MemoryLedger<TestRecord> ledger3 = new MemoryLedger<>(TestRecord.TYPE, driver, null);
         ledger3.init();
 
         // Now destroy the file and make it a directory to force write failure

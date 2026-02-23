@@ -9,6 +9,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -18,6 +20,7 @@ import java.util.NoSuchElementException;
  * @param <T> The type of record stored.
  */
 public class DiskPersistenceDriver<T extends Record> implements PersistenceDriver<T> {
+    private static final Logger LOG = Logger.getLogger(DiskPersistenceDriver.class.getName());
     private final Path ledgerFile;
     private final Gson gson;
     private final Object fileLock = new Object();
@@ -103,6 +106,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                     fileWriter.close();
                 } catch (IOException e) {
                     // Ignore close errors
+                    LOG.log(Level.WARNING, "Error closing ledger file writer", e);
                 }
                 fileWriter = null;
             }
@@ -171,7 +175,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error reading from ledger", e);
         }
     }
 
@@ -244,7 +248,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
             
             return (T) gson.fromJson(json, clazz);
         } catch (Exception e) {
-            // e.printStackTrace(); // Optional logging
+            LOG.log(Level.WARNING, "Error parsing record: " + line, e);
             return null;
         }
     }
@@ -328,7 +332,10 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
         private String flushLineBuffer() {
             byte[] bytes = lineBuffer.toByteArray();
             lineBuffer.reset();
-            // Reverse the bytes because we read them backwards
+            // Reverse the bytes because we read them backwards.
+            // Note: This is safe for UTF-8 because the newline character (0x0A) is a single byte
+            // and in UTF-8, single byte characters (0x00-0x7F) never appear as part of a multi-byte sequence.
+            // So we can safely scan backwards for 0x0A to identify line boundaries.
             for (int i = 0; i < bytes.length / 2; i++) {
                 byte temp = bytes[i];
                 bytes[i] = bytes[bytes.length - 1 - i];

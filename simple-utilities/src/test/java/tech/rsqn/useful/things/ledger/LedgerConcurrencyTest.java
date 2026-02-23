@@ -16,28 +16,19 @@ import java.util.stream.Collectors;
 
 public class LedgerConcurrencyTest {
     private Path tempDir;
-    private ExecutorService executor;
     private LedgerRegistry registry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("concurrency-test");
-        // Use cached thread pool to allow concurrent notifications
-        executor = Executors.newCachedThreadPool();
-        
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.setDefaultAutoFlush(true);
-        
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
     public void tearDown() throws IOException {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)
                     .sorted(Comparator.reverseOrder())

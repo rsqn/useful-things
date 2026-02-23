@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Memory-first ledger implementation extending DiskLedger.
@@ -17,6 +19,7 @@ import java.util.function.Predicate;
  * @param <T> The type of record stored.
  */
 public class MemoryLedger<T extends Record> extends DiskLedger<T> {
+    private static final Logger LOG = Logger.getLogger(MemoryLedger.class.getName());
     protected final ConcurrentLinkedDeque<T> memory = new ConcurrentLinkedDeque<>();
     protected final AtomicLong memorySize = new AtomicLong(0);
     protected int preferredMaxSize = 10000;
@@ -28,8 +31,8 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
     private static final long ALARM_LOG_INTERVAL_MS = 5000; // 5 seconds
 
     public MemoryLedger(RecordType recordType, PersistenceDriver<T> driver,
-                        Predicate<T> retentionFilter, ExecutorService notificationExecutor) {
-        super(recordType, driver, notificationExecutor);
+                        Predicate<T> retentionFilter) {
+        super(recordType, driver);
         this.retentionFilter = retentionFilter;
     }
 
@@ -83,7 +86,7 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
         try {
             driver.write(record);
         } catch (IOException e) {
-            e.printStackTrace(); // Log error but continue
+            LOG.log(Level.SEVERE, "Error writing to persistence driver", e); // Log error but continue
             // We do NOT rollback memory here (FAST requirement)
         }
 
@@ -133,7 +136,7 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
         try {
             driver.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error flushing memory ledger", e);
         }
     }
 
@@ -164,7 +167,7 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
         if (currentSize > alarmSize) {
             long now = System.currentTimeMillis();
             if (now - lastAlarmLogTime > ALARM_LOG_INTERVAL_MS) {
-                System.err.println("ALARM: Memory ledger size " + currentSize + " exceeds alarm size " + alarmSize);
+                LOG.log(Level.WARNING, "ALARM: Memory ledger size " + currentSize + " exceeds alarm size " + alarmSize);
                 lastAlarmLogTime = now;
             }
         }

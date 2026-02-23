@@ -13,36 +13,25 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class StreamReaderTest {
     private Path tempDir;
-    private ExecutorService executor;
     private LedgerRegistry registry;
     private StreamReader streamReader;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("stream-reader-test");
-        executor = Executors.newCachedThreadPool();
-        
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.setDefaultAutoFlush(true);
-        
         streamReader = new StreamReader(registry);
-        
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
     public void tearDown() throws IOException {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)
                     .sorted(Comparator.reverseOrder())

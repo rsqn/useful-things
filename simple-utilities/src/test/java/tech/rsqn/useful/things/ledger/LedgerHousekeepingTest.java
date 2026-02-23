@@ -10,32 +10,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class LedgerHousekeepingTest {
     private Path tempDir;
-    private ExecutorService executor;
     private LedgerRegistry registry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("housekeeping-test");
-        executor = Executors.newCachedThreadPool();
-        
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.setDefaultAutoFlush(false); // Disable auto flush to test manual flush
-        
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
     public void tearDown() throws IOException {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)
                     .sorted(Comparator.reverseOrder())

@@ -13,34 +13,23 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class LedgerIntegrationTest {
     private Path tempDir;
-    private ExecutorService executor;
     private LedgerRegistry registry;
 
     @BeforeMethod
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("integration-test");
-        // Use single thread executor to ensure ordered delivery of notifications in tests
-        executor = Executors.newSingleThreadExecutor();
-        
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.setDefaultAutoFlush(true);
-        
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
     }
 
     @AfterMethod
     public void tearDown() throws IOException {
-        if (executor != null) {
-            executor.shutdownNow();
-        }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)
                     .sorted(Comparator.reverseOrder())
@@ -95,7 +84,6 @@ public class LedgerIntegrationTest {
         // Re-create registry/ledger
         registry = new LedgerRegistry();
         registry.setLedgerDir(tempDir);
-        registry.setSharedExecutor(executor);
         registry.setDefaultAutoFlush(true);
         registry.registerRecordType(TestRecord.TYPE, TestRecord.class);
         

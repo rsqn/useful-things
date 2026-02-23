@@ -2,9 +2,11 @@ package tech.rsqn.useful.things.ledger;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Disk-only ledger implementation.
@@ -15,12 +17,13 @@ import java.util.function.Predicate;
  * @param <T> The type of record stored.
  */
 public class DiskLedger<T extends Record> extends AbstractLedger<T> {
+    private static final Logger LOG = Logger.getLogger(DiskLedger.class.getName());
 
     private final AtomicLong cachedSize = new AtomicLong(-1);
     private final Object sizeLock = new Object();
 
-    public DiskLedger(RecordType recordType, PersistenceDriver<T> driver, ExecutorService notificationExecutor) {
-        super(recordType, driver, notificationExecutor);
+    public DiskLedger(RecordType recordType, PersistenceDriver<T> driver) {
+        super(recordType, driver);
     }
 
     @Override
@@ -33,7 +36,7 @@ public class DiskLedger<T extends Record> extends AbstractLedger<T> {
         try {
             driver.write(record);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error writing to disk ledger", e);
         }
 
         synchronized (sizeLock) {
@@ -71,7 +74,7 @@ public class DiskLedger<T extends Record> extends AbstractLedger<T> {
         try {
             driver.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error flushing disk ledger", e);
         }
     }
 

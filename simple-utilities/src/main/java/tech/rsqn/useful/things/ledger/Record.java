@@ -7,26 +7,29 @@ import java.util.Objects;
  * Abstract base class for all ledger records.
  */
 public abstract class Record {
-    private final RecordType type;
-    private final Instant timestamp;
+    private RecordType type;
+    private Instant timestamp;
     private Long sequenceId;
+    private String eventId;
 
-    protected Record(RecordType type, Instant timestamp) {
-        this.type = Objects.requireNonNull(type, "type must not be null");
-        this.timestamp = Objects.requireNonNull(timestamp, "timestamp must not be null");
-    }
-
-    protected Record(RecordType type, Instant timestamp, Long sequenceId) {
-        this(type, timestamp);
-        this.sequenceId = sequenceId;
+    protected Record() {
+        this.timestamp = Instant.now();
     }
 
     public RecordType getType() {
         return type;
     }
 
+    public void setType(RecordType type) {
+        this.type = type;
+    }
+
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Long getSequenceId() {
@@ -37,6 +40,14 @@ public abstract class Record {
         this.sequenceId = sequenceId;
     }
 
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,12 +55,13 @@ public abstract class Record {
         Record record = (Record) o;
         return Objects.equals(type, record.type) &&
                 Objects.equals(timestamp, record.timestamp) &&
-                Objects.equals(sequenceId, record.sequenceId);
+                Objects.equals(sequenceId, record.sequenceId) &&
+                Objects.equals(eventId, record.eventId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, timestamp, sequenceId);
+        return Objects.hash(type, timestamp, sequenceId, eventId);
     }
 
     @Override
@@ -58,6 +70,7 @@ public abstract class Record {
                 "type=" + type +
                 ", timestamp=" + timestamp +
                 ", sequenceId=" + sequenceId +
+                ", eventId='" + eventId + '\'' +
                 '}';
     }
 }

@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Comparator;
-import java.util.concurrent.Executors;
 
 public abstract class LedgerTestBase {
     protected Path tempDir;
@@ -65,7 +64,7 @@ public abstract class LedgerTestBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        MemoryLedger<TestRecord> ledger = new MemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        MemoryLedger<TestRecord> ledger = new MemoryLedger<>(TestRecord.TYPE, driver, null);
         ledger.setPreferredMaxSize(ledgerRegistry.getDefaultPreferredMaxSize());
         ledger.setAlarmSize(ledgerRegistry.getDefaultAlarmSize());
         ledger.init();
@@ -83,7 +82,7 @@ public abstract class LedgerTestBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        WriteBehindMemoryLedger<TestRecord> ledger = new WriteBehindMemoryLedger<>(TestRecord.TYPE, driver, null, Executors.newCachedThreadPool());
+        WriteBehindMemoryLedger<TestRecord> ledger = new WriteBehindMemoryLedger<>(TestRecord.TYPE, driver, null);
         ledger.setPreferredMaxSize(ledgerRegistry.getDefaultPreferredMaxSize());
         ledger.setAlarmSize(ledgerRegistry.getDefaultAlarmSize());
         ledger.init();

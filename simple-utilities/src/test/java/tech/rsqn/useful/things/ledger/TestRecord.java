@@ -11,7 +11,9 @@ public class TestRecord extends Record {
     private final int value;
 
     public TestRecord(Instant timestamp, String data, int value) {
-        super(TYPE, timestamp);
+        super();
+        setType(TYPE);
+        setTimestamp(timestamp);
         this.data = data;
         this.value = value;
     }

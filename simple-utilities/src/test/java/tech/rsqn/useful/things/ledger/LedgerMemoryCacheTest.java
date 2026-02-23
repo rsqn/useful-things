@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 public class LedgerMemoryCacheTest extends LedgerTestBase {
 
@@ -43,9 +42,8 @@ public class LedgerMemoryCacheTest extends LedgerTestBase {
         DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
         driver.init();
         driver.start();
-        MemoryLedger<TestRecord> memLedger = new MemoryLedger<>(TestRecord.TYPE, driver, 
-                e -> !e.getTimestamp().isBefore(now.minusSeconds(5)), // Keep only recent
-                Executors.newCachedThreadPool());
+        MemoryLedger<TestRecord> memLedger = new MemoryLedger<>(TestRecord.TYPE, driver,
+                e -> !e.getTimestamp().isBefore(now.minusSeconds(5))); // Keep only recent
         memLedger.init();
         ledger = memLedger;
 
