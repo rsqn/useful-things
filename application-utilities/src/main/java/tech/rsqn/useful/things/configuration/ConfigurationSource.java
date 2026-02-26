@@ -1,19 +1,86 @@
 package tech.rsqn.useful.things.configuration;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 public interface ConfigurationSource {
 
     /**
-     * Indicates whether the property exists and is not empty
+     * Indicates whether the property exists (is defined), regardless of whether the value is empty.
      *
      * @param name - property key
-     * @return bool - property set
+     * @return true if the property is defined (getStringValue returns non-null)
+     */
+    boolean containsProperty(final String name);
+
+    /**
+     * Indicates whether the property exists and has a non-empty value.
+     *
+     * @param name - property key
+     * @return true if the property is defined and not null/empty
      */
     boolean hasValue(final String name);
 
     String getEnvironment();
+
+    /**
+     * Returns the string value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return String property value
+     * @throws IllegalStateException if the property is undefined (null)
+     */
+    String requireString(final String name);
+
+    /**
+     * Returns the int value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return int property value
+     * @throws IllegalStateException if the property is undefined (null)
+     * @throws NumberFormatException if the value is not parsable as int
+     */
+    int requireInt(final String name);
+
+    /**
+     * Returns the long value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return long property value
+     * @throws IllegalStateException if the property is undefined (null)
+     * @throws NumberFormatException if the value is not parsable as long
+     */
+    long requireLong(final String name);
+
+    /**
+     * Returns the double value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return double property value
+     * @throws IllegalStateException if the property is undefined (null)
+     * @throws NumberFormatException if the value is not parsable as double
+     */
+    double requireDouble(final String name);
+
+    /**
+     * Returns the boolean value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return boolean property value
+     * @throws IllegalStateException if the property is undefined (null)
+     */
+    boolean requireBoolean(final String name);
+
+    /**
+     * Returns the BigDecimal value for a property, throwing if missing.
+     *
+     * @param name - property key
+     * @return BigDecimal property value
+     * @throws IllegalStateException if the property is undefined (null)
+     * @throws NumberFormatException if the value is not parsable as BigDecimal
+     */
+    BigDecimal requireBigDecimal(final String name);
 
     /**
      * Returns the string value for a property given the key.
@@ -78,6 +145,52 @@ public interface ConfigurationSource {
      * @throws NumberFormatException - If the property value does not contain a parsable Integer
      */
     Integer getIntegerValue(final String name, final Integer dfl);
+
+    /**
+     * Given a property key, return a Long value.
+     * <p>
+     * If the property is present - will attempt to parse as a Long. An empty or undefined property will return null.
+     *
+     * @param name - property key
+     * @return Long property value
+     * @throws NumberFormatException - If the property value does not contain a parsable Long
+     */
+    Long getLongValue(final String name);
+
+    /**
+     * Given a property key and default, return a Long value.
+     * <p>
+     * If the property is present - will attempt to parse as a Long. An empty or undefined property will return the default.
+     *
+     * @param name - property key
+     * @param dfl  - default value
+     * @return Long property value
+     * @throws NumberFormatException - If the property value does not contain a parsable Long
+     */
+    Long getLongValue(final String name, final Long dfl);
+
+    /**
+     * Given a property key, return a BigDecimal value.
+     * <p>
+     * If the property is present - will attempt to parse as a BigDecimal. An empty or undefined property will return null.
+     *
+     * @param name - property key
+     * @return BigDecimal property value
+     * @throws NumberFormatException - If the property value does not contain a parsable BigDecimal
+     */
+    BigDecimal getBigDecimalValue(final String name);
+
+    /**
+     * Given a property key and default, return a BigDecimal value.
+     * <p>
+     * If the property is present - will attempt to parse as a BigDecimal. An empty or undefined property will return the default.
+     *
+     * @param name - property key
+     * @param dfl  - default value
+     * @return BigDecimal property value
+     * @throws NumberFormatException - If the property value does not contain a parsable BigDecimal
+     */
+    BigDecimal getBigDecimalValue(final String name, final BigDecimal dfl);
 
     /**
      * Given a property key and default, return a Double value.

@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -95,6 +96,44 @@ public abstract class AbstractConfigurationSource implements ConfigurationSource
     }
 
     @Override
+    public Long getLongValue(final String name) {
+        String s = getStringValue(name);
+        if (Strings.isNullOrEmpty(s)) {
+            LOG.warn("Warning getLongValue {} has empty value", name);
+            return null;
+        }
+        return Long.valueOf(s);
+    }
+
+    @Override
+    public Long getLongValue(final String name, final Long dfl) {
+        String s = getStringValue(name);
+        if (Strings.isNullOrEmpty(s)) {
+            return dfl;
+        }
+        return Long.valueOf(s);
+    }
+
+    @Override
+    public BigDecimal getBigDecimalValue(final String name) {
+        String s = getStringValue(name);
+        if (Strings.isNullOrEmpty(s)) {
+            LOG.warn("Warning getBigDecimalValue {} has empty value", name);
+            return null;
+        }
+        return new BigDecimal(s);
+    }
+
+    @Override
+    public BigDecimal getBigDecimalValue(final String name, final BigDecimal dfl) {
+        String s = getStringValue(name);
+        if (Strings.isNullOrEmpty(s)) {
+            return dfl;
+        }
+        return new BigDecimal(s);
+    }
+
+    @Override
     public double getDoubleValue(String name, double dfl) {
         if (!Strings.isNullOrEmpty(getStringValue(name))) {
             return Double.valueOf(getStringValue(name));
@@ -112,13 +151,68 @@ public abstract class AbstractConfigurationSource implements ConfigurationSource
     }
 
     @Override
+    public boolean containsProperty(String name) {
+        return getStringValue(name) != null;
+    }
+
+    @Override
     public boolean hasValue(String name) {
         String v = getStringValue(name);
-        if (!Strings.isNullOrEmpty(v)) {
-            return false;
-        } else {
-            return true;
+        return !Strings.isNullOrEmpty(v);
+    }
+
+    @Override
+    public String requireString(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
         }
+        return v;
+    }
+
+    @Override
+    public int requireInt(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
+        }
+        return Integer.parseInt(v);
+    }
+
+    @Override
+    public long requireLong(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
+        }
+        return Long.parseLong(v);
+    }
+
+    @Override
+    public double requireDouble(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
+        }
+        return Double.parseDouble(v);
+    }
+
+    @Override
+    public boolean requireBoolean(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
+        }
+        return Boolean.parseBoolean(v);
+    }
+
+    @Override
+    public BigDecimal requireBigDecimal(String name) {
+        String v = getStringValue(name);
+        if (v == null) {
+            throw new IllegalStateException("Missing required configuration: " + name);
+        }
+        return new BigDecimal(v);
     }
 
     // Handle the enc/dec outside of this class
