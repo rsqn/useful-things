@@ -62,12 +62,17 @@
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>simple-utilities</artifactId>
-                <version>1.0.83-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.useful-things</groupId>
                 <artifactId>cache-service</artifactId>
-                <version>1.0.83-SNAPSHOT</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.rsqn.useful-things</groupId>
+                <artifactId>encryption-utilities</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>tech.rsqn.reflection-helpers</groupId>
