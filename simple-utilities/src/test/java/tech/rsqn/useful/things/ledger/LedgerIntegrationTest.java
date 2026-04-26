@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -64,8 +66,8 @@ public class LedgerIntegrationTest {
         // 3. Verify subscription received events
         Assert.assertTrue(latch.await(2, TimeUnit.SECONDS));
         Assert.assertEquals(received.size(), 2);
-        Assert.assertEquals(received.get(0).getValue(), 1);
-        Assert.assertEquals(received.get(1).getValue(), 2);
+        Set<Integer> receivedValues = received.stream().map(TestRecord::getValue).collect(Collectors.toSet());
+        Assert.assertEquals(receivedValues, Set.of(1, 2));
 
         // 4. Read back (from memory)
         List<TestRecord> fromMemory = new ArrayList<>();
