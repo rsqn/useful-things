@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  * release, a later caller may take over after expiry once the underlying mutex becomes available.
  * Callers should treat fencing tokens as the authority for ordering side effects.</p>
  *
- * <p>Non-reentrant by default: acquiring a key you already hold in the same thread fails.</p>
+ * <p>Non-reentrant: acquiring a key you already hold in the same thread fails.</p>
  */
 public final class ResourceLock {
 
@@ -24,7 +24,6 @@ public final class ResourceLock {
         private final ReentrantLock lock = new ReentrantLock(true);
 
         private volatile long currentToken = 0;
-        private volatile long ownerThreadId = 0;
         private volatile Instant expiresAt = Instant.EPOCH;
     }
 
@@ -33,9 +32,6 @@ public final class ResourceLock {
 
     /**
      * Test hook: whether this lock still tracks internal state for {@code key}.
-     *
-     * <p>In the common uncontended case, successful {@link #release(LockHandle)} should remove the
-     * per-key state to avoid unbounded memory growth.</p>
      */
     boolean isTrackedForTests(String key) {
         return states.containsKey(key);
@@ -75,51 +71,49 @@ public final class ResourceLock {
         }
 
         final long deadlineNs = System.nanoTime() + wait.toNanos();
+        LockState state = states.computeIfAbsent(key, k -> new LockState());
 
-        while (true) {
-            LockState state = states.computeIfAbsent(key, k -> new LockState());
-
-            if (state.currentToken != 0 && state.ownerThreadId == Thread.currentThread().threadId()) {
-                return null; // non-reentrant (ReentrantLock would otherwise allow re-acquire)
-            }
-
-            long remainingNs = deadlineNs - System.nanoTime();
-            if (remainingNs < 0) {
-                return null;
-            }
-
-            boolean acquired;
-            try {
-                acquired = state.lock.tryLock(remainingNs, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return null;
-            }
-
-            if (acquired) {
-                Instant now = Instant.now();
-                if (state.currentToken != 0 && now.isAfter(state.expiresAt)) {
-                    // Lease expired while nobody could acquire; treat as stale and allow takeover.
-                    state.currentToken = 0;
-                    state.ownerThreadId = 0;
-                    state.expiresAt = Instant.EPOCH;
-                }
-
-                long token = globalFence.incrementAndGet();
-                Instant expiresAt = now.plus(lease);
-                state.currentToken = token;
-                state.ownerThreadId = Thread.currentThread().threadId();
-                state.expiresAt = expiresAt;
-                return new LockHandle(key, token, expiresAt);
-            }
+        // Non-reentrant: do not allow the same thread to reacquire the same key.
+        if (state.lock.isHeldByCurrentThread()) {
+            return null;
         }
+
+        long remainingNs = deadlineNs - System.nanoTime();
+        if (remainingNs < 0) {
+            maybeRemoveReleasedState(key, state);
+            return null;
+        }
+
+        boolean acquired;
+        try {
+            acquired = state.lock.tryLock(remainingNs, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            maybeRemoveReleasedState(key, state);
+            return null;
+        }
+
+        if (!acquired) {
+            maybeRemoveReleasedState(key, state);
+            return null;
+        }
+
+        Instant now = Instant.now();
+        if (state.currentToken != 0 && now.isAfter(state.expiresAt)) {
+            // Lease expired while nobody could acquire; treat as stale and allow takeover.
+            state.currentToken = 0;
+            state.expiresAt = Instant.EPOCH;
+        }
+
+        long token = globalFence.incrementAndGet();
+        Instant expiresAt = now.plus(lease);
+        state.currentToken = token;
+        state.expiresAt = expiresAt;
+        return new LockHandle(key, token, expiresAt);
     }
 
     /**
      * Releases a lock previously acquired via {@link #tryAcquire(String, Duration, Duration)}.
-     *
-     * <p>Best-effort and idempotent: if the handle does not match current ownership/token,
-     * release is ignored.</p>
      */
     public void release(LockHandle handle) {
         if (handle == null) return;
@@ -130,9 +124,10 @@ public final class ResourceLock {
         if (state.currentToken != handle.getFencingToken()) return;
         if (!state.lock.isHeldByCurrentThread()) return;
 
-        state.ownerThreadId = 0;
-        state.expiresAt = Instant.EPOCH;
-        state.currentToken = 0;
+        if (state.lock.getHoldCount() == 1) {
+            state.expiresAt = Instant.EPOCH;
+            state.currentToken = 0;
+        }
 
         state.lock.unlock();
 
@@ -161,5 +156,47 @@ public final class ResourceLock {
             release(handle);
         }
     }
-}
 
+    /**
+     * Blocking version of withLock. Throws IllegalStateException if lock cannot be acquired.
+     */
+    public void withLock(String key, Duration wait, Duration lease, Runnable action) {
+        if (!tryWithLock(key, wait, lease, action)) {
+            throw new IllegalStateException("Failed to acquire lock for: " + key);
+        }
+    }
+
+    /**
+     * Blocking version of withLock. Throws IllegalStateException if lock cannot be acquired.
+     */
+    public <T> T withLock(String key, Duration wait, Duration lease, Supplier<T> action) {
+        LockHandle handle = tryAcquire(key, wait, lease);
+        if (handle == null) {
+            throw new IllegalStateException("Failed to acquire lock for: " + key);
+        }
+        try {
+            return action.get();
+        } finally {
+            release(handle);
+        }
+    }
+
+    /**
+     * Manual lock acquisition. Throws IllegalStateException if lock cannot be acquired.
+     * Must be paired with {@link #unlock(LockHandle)}.
+     */
+    public LockHandle lock(String key, Duration wait, Duration lease) {
+        LockHandle handle = tryAcquire(key, wait, lease);
+        if (handle == null) {
+            throw new IllegalStateException("Failed to acquire lock for: " + key);
+        }
+        return handle;
+    }
+
+    /**
+     * Manual lock release by handle.
+     */
+    public void unlock(LockHandle handle) {
+        release(handle);
+    }
+}

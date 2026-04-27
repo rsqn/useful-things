@@ -315,5 +315,41 @@ public class ResourceLockTest {
         lock.release(h);
         Assert.assertFalse(lock.isTrackedForTests(key));
     }
+
+    @Test
+    public void failedAcquireDoesNotLeaveInternalTracking() throws Exception {
+        ResourceLock lock = new ResourceLock();
+        String key = "failed-acquire-cleanup-key";
+
+        Assert.assertFalse(lock.isTrackedForTests(key));
+
+        CountDownLatch acquired = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+
+        Thread holder = new Thread(() -> {
+            LockHandle h = lock.tryAcquire(key, Duration.ofSeconds(1), Duration.ofSeconds(5));
+            Assert.assertNotNull(h);
+            acquired.countDown();
+            try {
+                Assert.assertTrue(release.await(2, TimeUnit.SECONDS));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                lock.release(h);
+            }
+        });
+        holder.start();
+
+        Assert.assertTrue(acquired.await(1, TimeUnit.SECONDS));
+        Assert.assertTrue(lock.isTrackedForTests(key));
+
+        // This must fail to acquire, and should not leave a stale LockState around after the holder releases.
+        Assert.assertNull(lock.tryAcquire(key, Duration.ofMillis(25), Duration.ofSeconds(1)));
+
+        release.countDown();
+        holder.join();
+
+        Assert.assertFalse(lock.isTrackedForTests(key));
+    }
 }
 
