@@ -35,6 +35,7 @@ public abstract class LedgerTestBase {
     public void tearDown() throws Exception {
         if (ledger != null) {
             ledger.close();
+            ledger = null;
         }
         if (Files.exists(tempDir)) {
             Files.walk(tempDir)

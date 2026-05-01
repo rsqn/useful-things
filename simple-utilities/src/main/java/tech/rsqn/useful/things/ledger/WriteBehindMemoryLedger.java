@@ -47,7 +47,9 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
         memorySize.incrementAndGet();
 
         // Queue for persistence
-        if (!writeQueue.offer(record)) {
+        if (writeQueue.offer(record)) {
+            incrementCachedSizeAfterLogicalWrite();
+        } else {
             LOG.log(Level.SEVERE, "ERROR: Ledger write queue full for " + recordType.getValue() + ". Record " + sequenceId + " may be lost from disk.");
         }
 

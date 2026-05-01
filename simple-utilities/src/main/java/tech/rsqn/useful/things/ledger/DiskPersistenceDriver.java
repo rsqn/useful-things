@@ -21,6 +21,9 @@ import java.util.NoSuchElementException;
  */
 public class DiskPersistenceDriver<T extends Record> implements PersistenceDriver<T> {
     private static final Logger LOG = Logger.getLogger(DiskPersistenceDriver.class.getName());
+
+    /** Buffer size for {@link #count()} newline scanning (single-byte delimiters, JSONL lines). */
+    private static final int COUNT_SCAN_BUFFER_SIZE = 32 * 1024;
     private final Path ledgerFile;
     private final Gson gson;
     private final Object fileLock = new Object();
@@ -218,13 +221,28 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
         if (!Files.exists(ledgerFile)) {
             return 0;
         }
-        try (BufferedReader reader = new BufferedReader(new FileReader(ledgerFile.toFile()))) {
-            long count = 0;
-            while (reader.readLine() != null) {
-                count++;
+        try (InputStream in = Files.newInputStream(ledgerFile)) {
+            byte[] buf = new byte[COUNT_SCAN_BUFFER_SIZE];
+            long newlineCount = 0;
+            int lastByte = -1;
+            int n;
+            while ((n = in.read(buf)) != -1) {
+                for (int i = 0; i < n; i++) {
+                    if (buf[i] == '\n') {
+                        newlineCount++;
+                    }
+                }
+                lastByte = buf[n - 1] & 0xFF;
             }
-            return count;
+            if (lastByte == -1) {
+                return 0;
+            }
+            if (lastByte != '\n') {
+                newlineCount++;
+            }
+            return newlineCount;
         } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Error counting ledger lines", e);
             return -1;
         }
     }

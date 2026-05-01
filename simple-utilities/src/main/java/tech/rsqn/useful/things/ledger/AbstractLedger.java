@@ -124,10 +124,18 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
         });
     }
 
+    /**
+     * Hook invoked after {@link #flush()} and before {@link PersistenceDriver#close()} during {@link #close()}.
+     * Subclasses with asynchronous persistence may join background writers here.
+     */
+    protected void beforeDriverClose() throws Exception {
+    }
+
     @Override
     public void close() throws Exception {
         keepRunning.stopRunning();
         flush();
+        beforeDriverClose();
         driver.close();
         ExecutorService exec = notificationExecutor;
         if (exec != null && !exec.isShutdown()) {

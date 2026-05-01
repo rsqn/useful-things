@@ -12,7 +12,10 @@ import java.util.logging.Logger;
  * Disk-only ledger implementation.
  * Reads and writes directly to the persistence driver. No in-memory cache.
  * Reads ALL records from disk on each read/readReverse call.
- * Size is established on first size() call (line count) and then maintained on writes.
+ * <p>
+ * Logical JSONL line count is loaded once in the constructor (fast newline scan via
+ * {@link PersistenceDriver#count()}) and then updated on each {@link #write}; {@link #size()}
+ * reads the cached value.
  *
  * @param <T> The type of record stored.
  */
@@ -24,6 +27,18 @@ public class DiskLedger<T extends Record> extends AbstractLedger<T> {
 
     public DiskLedger(RecordType recordType, PersistenceDriver<T> driver) {
         super(recordType, driver);
+        long lineCount = driver.count();
+        if (lineCount >= 0) {
+            cachedSize.set(lineCount);
+        }
+    }
+
+    /**
+     * Cached logical line count on disk (JSONL rows), or {@code -1} if initial {@link PersistenceDriver#count()} failed.
+     * For {@link MemoryLedger}, {@link MemoryLedger#size()} is the in-memory (possibly filtered) count instead.
+     */
+    protected long getDiskLogicalLineCount() {
+        return cachedSize.get();
     }
 
     @Override
@@ -39,14 +54,22 @@ public class DiskLedger<T extends Record> extends AbstractLedger<T> {
             LOG.log(Level.SEVERE, "Error writing to disk ledger", e);
         }
 
+        incrementCachedSizeAfterLogicalWrite();
+
+        notifySubscribers(record);
+        return sequenceId;
+    }
+
+    /**
+     * Increments the cached logical size when it is already initialised (non-negative).
+     * Used by synchronous {@link #write} and by {@link WriteBehindDiskLedger} after a record is accepted into the queue.
+     */
+    protected void incrementCachedSizeAfterLogicalWrite() {
         synchronized (sizeLock) {
             if (cachedSize.get() >= 0) {
                 cachedSize.incrementAndGet();
             }
         }
-
-        notifySubscribers(record);
-        return sequenceId;
     }
 
     @Override

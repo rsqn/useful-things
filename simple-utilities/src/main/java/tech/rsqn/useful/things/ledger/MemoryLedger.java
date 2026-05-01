@@ -15,6 +15,11 @@ import java.util.logging.Logger;
  * Memory-first ledger implementation extending DiskLedger.
  * Hydrates from disk on startup, then serves reads from memory only.
  * Writes go to both memory and disk (via super).
+ * <p>
+ * {@link #size()} returns the number of records currently held in memory (after optional
+ * {@link #retentionFilter} during {@link #hydrate()}), not the raw JSONL line count on disk.
+ * The cached disk line count is available as {@code healthCheck().get("diskLineCount")} (see
+ * {@link DiskLedger#getDiskLogicalLineCount()}).
  *
  * @param <T> The type of record stored.
  */
@@ -89,6 +94,8 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
             LOG.log(Level.SEVERE, "Error writing to persistence driver", e); // Log error but continue
             // We do NOT rollback memory here (FAST requirement)
         }
+
+        incrementCachedSizeAfterLogicalWrite();
 
         notifySubscribers(record);
 
@@ -173,6 +180,9 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
         }
     }
     
+    /**
+     * @return records currently in memory (may differ from JSONL lines on disk when {@link #retentionFilter} drops rows).
+     */
     @Override
     public long size() {
         return memorySize.get();
@@ -182,6 +192,7 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
     public Map<String, Object> healthCheck() {
         Map<String, Object> status = super.healthCheck();
         status.put("memorySize", memorySize.get());
+        status.put("diskLineCount", getDiskLogicalLineCount());
         status.put("preferredMaxSize", preferredMaxSize);
         status.put("alarmSize", alarmSize);
         return status;

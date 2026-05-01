@@ -40,10 +40,11 @@ public interface PersistenceDriver<T extends Record> extends AutoCloseable {
     void flush() throws IOException;
 
     /**
-     * Returns the number of records in the persistence layer.
+     * Returns the number of logical lines (e.g. JSONL rows) in the persistence layer.
+     * Implementations may use a fast newline scan rather than parsing records.
      * Default -1 if not supported.
      *
-     * @return record count, or -1 if not supported
+     * @return line count, or -1 if not supported / on error
      */
     default long count() {
         return -1L;
