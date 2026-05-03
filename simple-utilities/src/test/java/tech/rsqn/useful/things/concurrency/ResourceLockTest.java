@@ -317,6 +317,31 @@ public class ResourceLockTest {
     }
 
     @Test
+    public void tryWithLock_withZeroWait_acquiresWhenFree() {
+        ResourceLock lock = new ResourceLock();
+        boolean ok = lock.tryWithLock("res1", Duration.ZERO, Duration.ofSeconds(5), () -> {
+            // Should be able to acquire
+        });
+        Assert.assertTrue(ok, "Should have acquired lock with zero wait when free");
+    }
+
+    @Test
+    public void tryWithLock_withZeroWait_returnsFalseWhenHeld() throws Exception {
+        ResourceLock lock = new ResourceLock();
+        LockHandle h1 = lock.tryAcquire("res1", Duration.ofSeconds(1), Duration.ofSeconds(5));
+        Assert.assertNotNull(h1);
+
+        try {
+            boolean ok = lock.tryWithLock("res1", Duration.ZERO, Duration.ofSeconds(5), () -> {
+                // Should NOT be able to acquire
+            });
+            Assert.assertFalse(ok, "Should NOT have acquired lock with zero wait when held");
+        } finally {
+            lock.release(h1);
+        }
+    }
+
+    @Test
     public void failedAcquireDoesNotLeaveInternalTracking() throws Exception {
         ResourceLock lock = new ResourceLock();
         String key = "failed-acquire-cleanup-key";
@@ -352,4 +377,3 @@ public class ResourceLockTest {
         Assert.assertFalse(lock.isTrackedForTests(key));
     }
 }
-

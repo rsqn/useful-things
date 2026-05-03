@@ -78,11 +78,7 @@ public final class ResourceLock {
             return null;
         }
 
-        long remainingNs = deadlineNs - System.nanoTime();
-        if (remainingNs < 0) {
-            maybeRemoveReleasedState(key, state);
-            return null;
-        }
+        long remainingNs = Math.max(0, deadlineNs - System.nanoTime());
 
         boolean acquired;
         try {

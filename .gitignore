@@ -17,4 +17,8 @@ AwsCredentials.properties
 *.iml
 .idea
 target
-release.properties
+release.properties.forge
+.gemini
+
+.forge
+.gemini
