@@ -82,7 +82,14 @@ public final class ResourceLock {
 
         boolean acquired;
         try {
-            acquired = state.lock.tryLock(remainingNs, TimeUnit.NANOSECONDS);
+            if (remainingNs == 0) {
+                // Non-timed tryLock() for zero-wait: virtual threads park on
+                // tryLock(0, ns) and immediately time out even for uncontested locks,
+                // whereas the no-arg variant is a non-blocking CAS.
+                acquired = state.lock.tryLock();
+            } else {
+                acquired = state.lock.tryLock(remainingNs, TimeUnit.NANOSECONDS);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             maybeRemoveReleasedState(key, state);
