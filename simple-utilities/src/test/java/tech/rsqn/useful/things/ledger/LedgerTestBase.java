@@ -84,6 +84,7 @@ public abstract class LedgerTestBase {
             throw new RuntimeException(e);
         }
         WriteBehindMemoryLedger<TestRecord> ledger = new WriteBehindMemoryLedger<>(TestRecord.TYPE, driver, null);
+        ledger.setWriteQueueCapacity(1_000_000);
         ledger.setPreferredMaxSize(ledgerRegistry.getDefaultPreferredMaxSize());
         ledger.setAlarmSize(ledgerRegistry.getDefaultAlarmSize());
         ledger.init();

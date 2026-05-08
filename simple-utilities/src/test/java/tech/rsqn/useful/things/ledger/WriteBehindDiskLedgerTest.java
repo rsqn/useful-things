@@ -113,6 +113,35 @@ public class WriteBehindDiskLedgerTest extends LedgerTestBase {
         Assert.assertNotNull(hc.get("writeQueueRemainingCapacity"));
     }
 
+    @Test
+    public void readReverseReadsNewestFirst() throws Exception {
+        ledgerRegistry.setDefaultAutoFlush(false);
+        ledgerRegistry.setDefaultFlushIntervalWrites(10_000);
+        ledgerRegistry.setDefaultFlushIntervalSeconds(100.0);
+
+        DiskPersistenceDriver<TestRecord> driver = createDriver();
+        WriteBehindDiskLedger<TestRecord> wb = new WriteBehindDiskLedger<>(TestRecord.TYPE, driver);
+        wb.setWriteQueueCapacity(50);
+        wb.init();
+        this.ledger = wb;
+
+        wb.write(createRecord("a", 1));
+        wb.write(createRecord("b", 2));
+        wb.write(createRecord("c", 3));
+        wb.flush();
+
+        List<Integer> values = new ArrayList<>();
+        wb.readReverse(-1, null, r -> {
+            values.add(r.getValue());
+            return true;
+        });
+
+        Assert.assertEquals(values.size(), 3);
+        Assert.assertEquals(values.get(0).intValue(), 3, "reverse read must return newest first");
+        Assert.assertEquals(values.get(1).intValue(), 2);
+        Assert.assertEquals(values.get(2).intValue(), 1);
+    }
+
     private DiskPersistenceDriver<TestRecord> createDriver() {
         DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
         driver.setAutoFlush(ledgerRegistry.isDefaultAutoFlush());

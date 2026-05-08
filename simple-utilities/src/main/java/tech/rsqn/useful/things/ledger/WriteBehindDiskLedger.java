@@ -158,12 +158,14 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
     }
 
     private void dispatchDataOrFlush(QueueItem item) {
-        if (item instanceof FlushItem flushItem) {
+        if (item instanceof FlushItem) {
+            FlushItem flushItem = (FlushItem) item;
             flushDriverQuietly();
             flushItem.done.countDown();
             return;
         }
-        if (item instanceof DataItem dataItem) {
+        if (item instanceof DataItem) {
+            DataItem dataItem = (DataItem) item;
             try {
                 @SuppressWarnings("unchecked")
                 T toWrite = (T) dataItem.record;
@@ -273,7 +275,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
         if (queue != null) {
             flush();
         }
-        super.read(fromSequence, filter, callback);
+        super.readReverse(fromSequence, filter, callback);
     }
 
     @Override

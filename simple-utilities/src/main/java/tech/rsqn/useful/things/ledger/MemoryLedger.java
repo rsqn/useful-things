@@ -122,6 +122,11 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
 
     @Override
     public void readReverse(long fromSequence, Predicate<T> filter, ReadCallback<T> callback) {
+        // Memory-first: read from memory without touching disk.
+        // If the memory cache does not hold the full history (e.g. housekeeping/retention),
+        // continue from disk in reverse, flushing first so disk reads see buffered writes.
+        long minEmittedSeq = Long.MAX_VALUE;
+
         Iterator<T> iterator = memory.descendingIterator();
         while (iterator.hasNext()) {
             T record = iterator.next();
@@ -132,10 +137,38 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
 
             if (filter == null || filter.test(record)) {
                 if (!callback.onRecord(record)) {
-                    break;
+                    return;
+                }
+                if (record.getSequenceId() != null) {
+                    minEmittedSeq = Math.min(minEmittedSeq, record.getSequenceId());
                 }
             }
         }
+
+        // Determine whether disk may contain older records not present in memory.
+        // If the disk count is known and <= memory size, memory likely has everything (no need to hit disk).
+        long diskLineCount = getDiskLogicalLineCount();
+        if (diskLineCount >= 0 && diskLineCount <= memorySize.get()) {
+            return;
+        }
+
+        // Continue from disk only when we might need older records.
+        // Use the last emitted sequence as the continuation point to avoid duplicates.
+        long diskFrom;
+        if (minEmittedSeq != Long.MAX_VALUE) {
+            diskFrom = minEmittedSeq;
+        } else {
+            diskFrom = fromSequence;
+        }
+
+        flush();
+
+        driver.readReverse(diskFrom, record -> {
+            if (filter != null && !filter.test(record)) {
+                return true;
+            }
+            return callback.onRecord(record);
+        });
     }
 
     @Override

@@ -90,4 +90,34 @@ public class LedgerMemoryCacheTest extends LedgerTestBase {
         Assert.assertEquals(events.size(), 1);
         Assert.assertEquals(events.get(0).getValue(), 2); // Oldest removed
     }
+
+    @Test
+    public void testReadReverseFallsBackToDiskAfterHousekeeping() throws IOException {
+        // Configure for small memory and buffered disk (so disk may not reflect recent writes until flush).
+        ledgerRegistry.setDefaultPreferredMaxSize(1);
+        ledgerRegistry.setDefaultAutoFlush(false);
+        ledgerRegistry.setDefaultFlushIntervalWrites(10_000);
+        ledgerRegistry.setDefaultFlushIntervalSeconds(100.0);
+
+        ledger = createLedger();
+
+        ledger.write(createRecord("val", 1));
+        ledger.write(createRecord("val", 2));
+        ledger.write(createRecord("val", 3));
+
+        // Trim memory down to the newest record only.
+        ((MemoryLedger<TestRecord>) ledger).housekeeping();
+
+        List<Integer> values = new ArrayList<>();
+        ledger.readReverse(-1, null, r -> {
+            values.add(r.getValue());
+            return true;
+        });
+
+        // Expect reverse read to return the in-memory newest, then continue from disk for older.
+        Assert.assertEquals(values.size(), 3);
+        Assert.assertEquals(values.get(0).intValue(), 3);
+        Assert.assertEquals(values.get(1).intValue(), 2);
+        Assert.assertEquals(values.get(2).intValue(), 1);
+    }
 }
