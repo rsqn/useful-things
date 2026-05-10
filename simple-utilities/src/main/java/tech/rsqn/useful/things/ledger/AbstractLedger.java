@@ -21,6 +21,16 @@ import java.util.logging.Logger;
 
 /**
  * Abstract base class for ledgers.
+ * <p>
+ * Notification uses a bounded {@link ThreadPoolExecutor}. When the pool and queue are saturated,
+ * the default {@code AbortPolicy} would drop work with {@link java.util.concurrent.RejectedExecutionException};
+ * this type installs a handler that {@linkplain java.util.concurrent.BlockingQueue#put blocks on enqueue}
+ * instead, so producers wait for capacity while subscribers still run only on pool threads (never
+ * {@code CallerRunsPolicy} on the writer).
+ * <p>
+ * For each written record, the ledger enqueues <strong>one</strong> notification task that invokes
+ * every matching subscriber <strong>serially</strong> in snapshot (subscription) order on a single
+ * pool thread. Different records may still be processed concurrently across pool threads.
  *
  * @param <T> The type of record stored.
  */
@@ -52,6 +62,8 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
 
     private final Object subscriberLock = new Object();
     private final List<SubscriberRecord<T>> subscribers = new ArrayList<>();
+    /** Immutable snapshot for lock-free reads on the notify path; rebuilt on {@link #subscribe}. */
+    private volatile List<SubscriberRecord<T>> subscriberSnapshot = List.of();
     private final Object executorLock = new Object();
 
     protected volatile boolean started = false;
@@ -105,7 +117,17 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
                             notificationKeepAliveSeconds,
                             TimeUnit.SECONDS,
                             queue,
-                            threadFactory);
+                            threadFactory,
+                            (r, ex) -> {
+                                if (ex.isShutdown()) {
+                                    return;
+                                }
+                                try {
+                                    ex.getQueue().put(r);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            });
                     executor.allowCoreThreadTimeOut(true);
                     this.notificationExecutor = executor;
                 }
@@ -143,32 +165,53 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Thread-safe: updates the published subscriber snapshot used by {@link #notifySubscribers}.
+     */
     @Override
     public void subscribe(Predicate<T> filter, Consumer<T> subscriber) {
         synchronized (subscriberLock) {
             subscribers.add(new SubscriberRecord<>(subscriber, filter));
+            subscriberSnapshot = List.copyOf(subscribers);
         }
     }
 
+    /**
+     * Notifies subscribers for {@code record} using one {@link ExecutorService#execute} per record
+     * when at least one subscriber matches. Matching subscribers run serially on a pool thread in
+     * snapshot order; exceptions in one subscriber do not skip later subscribers.
+     */
     protected void notifySubscribers(T record) {
-        List<SubscriberRecord<T>> snapshot;
-        synchronized (subscriberLock) {
-            snapshot = new ArrayList<>(subscribers);
+        List<SubscriberRecord<T>> snapshot = subscriberSnapshot;
+        if (snapshot.isEmpty()) {
+            return;
         }
-
-        if (snapshot.isEmpty()) return;
-
-        ExecutorService executor = getOrCreateNotificationExecutor();
+        boolean anyMatch = false;
         for (SubscriberRecord<T> sub : snapshot) {
             if (sub.filter == null || sub.filter.test(record)) {
-                SubscriberRecord<T> subRef = sub;
-                executor.submit(() -> {
-                    try {
-                        subRef.subscriber.accept(record);
-                    } catch (Exception e) {
-                        LOG.log(Level.WARNING, "Error notifying subscriber", e);
-                    }
-                });
+                anyMatch = true;
+                break;
+            }
+        }
+        if (!anyMatch) {
+            return;
+        }
+
+        ExecutorService executor = getOrCreateNotificationExecutor();
+        T recordRef = record;
+        executor.execute(() -> dispatchNotifySubscribers(recordRef, snapshot));
+    }
+
+    private void dispatchNotifySubscribers(T record, List<SubscriberRecord<T>> snapshot) {
+        for (SubscriberRecord<T> sub : snapshot) {
+            if (sub.filter == null || sub.filter.test(record)) {
+                try {
+                    sub.subscriber.accept(record);
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Error notifying subscriber", e);
+                }
             }
         }
     }

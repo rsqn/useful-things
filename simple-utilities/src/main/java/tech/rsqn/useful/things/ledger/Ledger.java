@@ -38,6 +38,13 @@ public interface Ledger<T extends Record> extends AutoCloseable {
 
     /**
      * Subscribes to new records.
+     * <p>
+     * Notifications are delivered asynchronously on a bounded executor. For a given record,
+     * matching subscribers are invoked serially in subscription order on one pool thread (not in
+     * parallel with each other for that record). If {@code subscribe} runs concurrently with
+     * dispatch for a given record, that subscriber may <strong>not</strong> receive that
+     * specific record; it will receive subsequent writes. Snapshots of the subscriber list are
+     * published when subscriptions change.
      *
      * @param filter     Optional filter (null means receive all records).
      * @param subscriber The subscriber to notify.
