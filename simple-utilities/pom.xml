@@ -4,12 +4,12 @@
     <parent>
         <groupId>tech.rsqn</groupId>
         <artifactId>useful-things</artifactId>
-        <version>1.0.93-SNAPSHOT</version>
+        <version>1.0.94-SNAPSHOT</version>
     </parent>
 
     <groupId>tech.rsqn.useful-things</groupId>
     <artifactId>simple-utilities</artifactId>
-    <version>1.0.93-SNAPSHOT</version>
+    <version>1.0.94-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>simple-utilities</name>
@@ -60,20 +60,13 @@
         </dependency>
 
         <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>1.12.2</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!--Compile Dependencies-->
-
-
 
         <dependency>
             <groupId>org.springframework</groupId>

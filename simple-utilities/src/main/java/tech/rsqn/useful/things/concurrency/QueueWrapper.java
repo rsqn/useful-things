@@ -1,8 +1,7 @@
 package tech.rsqn.useful.things.concurrency;
 
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Timer;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.rsqn.useful.things.metrics.Metrics;
@@ -25,7 +24,7 @@ public class QueueWrapper<T> {
     public QueueWrapper(String id) {
         this.keepRunning = true;
         this.id = id;
-        this.q = new ArrayBlockingQueue(50000, true); // normally 2000. pushed it up to 50 to do max speed tests and queue can buffer on refresh or resort.
+        this.q = new ArrayBlockingQueue(50000, true);
 
         enqueueCtr = Metrics.counter(getClass(), id + "-EQ");
         dequeueCtr = Metrics.counter(getClass(), id + "-DQ");
@@ -36,7 +35,7 @@ public class QueueWrapper<T> {
 
     public void enqueue(T v) {
         q.add(v);
-        enqueueCtr.inc();
+        enqueueCtr.increment();
     }
 
     public void cancel() {
@@ -49,10 +48,10 @@ public class QueueWrapper<T> {
         try {
             ret = (T) q.poll(waitMs, TimeUnit.MILLISECONDS);
             if (ret != null) {
-                dequeueCtr.inc();
+                dequeueCtr.increment();
             }
         } catch (InterruptedException e) {
-            errorsCtr.inc();
+            errorsCtr.increment();
             LOG.warn(e.getMessage(), e);
         }
         return ret;
@@ -67,21 +66,21 @@ public class QueueWrapper<T> {
                     while (keepRunning) {
                         T item = deQueue(5000);
                         if (item != null && keepRunning) {
-                            Timer.Context ctx = notifyTimer.time();
+                            Timer.Sample sample = Timer.start(Metrics.getRegistry());
                             try {
                                 l.onItem(item);
-                                notifyCtr.inc();
+                                notifyCtr.increment();
                             } catch (Exception e) {
                                 LOG.warn("Error notifying queue listener " + id + " " + e.getMessage(), e);
-                                errorsCtr.inc();
+                                errorsCtr.increment();
                             } finally {
-                                ctx.stop();
+                                sample.stop(notifyTimer);
                             }
                         }
                     }
                     LOG.info("QueueListener {} exiting",id);
                 } catch (Exception e) {
-                    errorsCtr.inc();
+                    errorsCtr.increment();
                     LOG.warn("Exception in queueWrapper " + id + " " + e.getMessage(), e);
                 }
             }
