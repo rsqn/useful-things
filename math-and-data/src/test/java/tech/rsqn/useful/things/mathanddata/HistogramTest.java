@@ -188,6 +188,22 @@ public class HistogramTest {
     }
 
     @Test
+    public void reset_clearsBinsAndMax() {
+        double[] boundaries = {0.0, 1.0, 2.0, 3.0};
+        Histogram hist = new Histogram(boundaries);
+        hist.submit(0.5);
+        hist.submit(1.5);
+        hist.reset();
+        double[] counts = hist.toDoubleArray();
+        for (double count : counts) {
+            Assert.assertEquals(count, 0.0);
+        }
+        // verify further submits still work correctly after reset
+        hist.submit(2.5);
+        Assert.assertEquals(hist.toDoubleArray()[2], 1.0);
+    }
+
+    @Test
     public void fromDoubleArray_roundtrip_preservesCounts() {
         double[] boundaries = {0.0, 1.0, 2.0, 3.0};
         Histogram orig = new Histogram(boundaries);

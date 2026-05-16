@@ -170,6 +170,14 @@ public class Histogram {
     }
 
 
+    /**
+     * Resets all bin counts to zero and resets max. Boundaries/range are preserved.
+     */
+    public void reset() {
+        Arrays.fill(bins, 0, numBins, 0.0);
+        max = 0;
+    }
+
     public void normalize() {
         double v;
         double r = 1.0d / max;
