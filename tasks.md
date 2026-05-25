@@ -4,6 +4,7 @@
 
 - [x] Abstract ledger notification hot-path: [`plans/01-abstract-ledger-notification-hot-path.md`](plans/01-abstract-ledger-notification-hot-path.md)
 - [x] Ledger notification fan-in (`execute`, one task per record): [`plans/02-ledger-notification-fan-in-dispatch.md`](plans/02-ledger-notification-fan-in-dispatch.md)
+- [ ] Histogram custom boundaries, serialization & snapshot: [`plans/03-histogram-custom-boundaries.md`](plans/03-histogram-custom-boundaries.md)
 
 ## Ledger: metrics (Micrometer vs Dropwizard)
 

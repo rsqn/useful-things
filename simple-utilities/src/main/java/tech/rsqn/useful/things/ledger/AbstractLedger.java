@@ -111,8 +111,16 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, "Error in notification consumer", e);
                 }
+                // Batch drain — process all available before parking
+                while ((task = notificationQueue.poll()) != null) {
+                    try {
+                        task.run();
+                    } catch (Exception e) {
+                        LOG.log(Level.WARNING, "Error in notification consumer", e);
+                    }
+                }
             } else {
-                LockSupport.parkNanos(100_000L); // 100µs
+                LockSupport.parkNanos(1_000L); // 1µs — busy-spin tradeoff for throughput
             }
         }
         // Drain remaining on shutdown

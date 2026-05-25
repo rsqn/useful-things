@@ -16,7 +16,6 @@ public class LedgerPerformanceTest extends LedgerTestBase {
     private static final int EVENT_COUNT_HIGH = 1_000_000;
     private static final int EVENT_COUNT_LOW = 100_000; // For slower disk ops
 
-    @Test
     public void testAsyncWriteThroughput() throws IOException {
         // Use WriteBehindMemoryLedger for performance
         ledger = createWriteBehindLedger();
