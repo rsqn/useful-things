@@ -40,30 +40,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
     public DiskPersistenceDriver(Path ledgerFile, LedgerRegistry ledgerRegistry) {
         this.ledgerFile = ledgerFile;
         this.ledgerRegistry = ledgerRegistry;
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(RecordType.class, new TypeAdapter<RecordType>() {
-                    @Override
-                    public void write(JsonWriter out, RecordType value) throws IOException {
-                        out.value(value.getValue());
-                    }
-
-                    @Override
-                    public RecordType read(JsonReader in) throws IOException {
-                        return RecordType.of(in.nextString());
-                    }
-                })
-                .registerTypeAdapter(java.time.Instant.class, new TypeAdapter<java.time.Instant>() {
-                    @Override
-                    public void write(JsonWriter out, java.time.Instant value) throws IOException {
-                        out.value(value.toString());
-                    }
-
-                    @Override
-                    public java.time.Instant read(JsonReader in) throws IOException {
-                        return java.time.Instant.parse(in.nextString());
-                    }
-                })
-                .create();
+        this.gson = LedgerGson.create();
     }
 
     public void setAutoFlush(boolean autoFlush) {

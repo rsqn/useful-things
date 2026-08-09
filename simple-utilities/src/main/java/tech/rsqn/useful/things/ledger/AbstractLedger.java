@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
@@ -55,6 +56,8 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
     private volatile List<SubscriberRecord<T>> subscriberSnapshot = List.of();
 
     private final ConcurrentLinkedQueue<Runnable> notificationQueue = new ConcurrentLinkedQueue<>();
+    private final LinkedBlockingQueue<Runnable> blockingNotificationQueue = new LinkedBlockingQueue<>();
+    private volatile ConsumerMode consumerMode = ConsumerMode.SPIN;
     private volatile Thread[] consumerThreads;
     private volatile boolean consumersRunning = false;
     private final Object consumerInitLock = new Object();
@@ -84,6 +87,32 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
         this.notificationKeepAliveSeconds = notificationKeepAliveSeconds;
     }
 
+    /**
+     * Sets the consumer loop strategy. Must be called <b>before</b> the first {@code subscribe()} call.
+     *
+     * <ul>
+     *   <li>{@link ConsumerMode#SPIN} — 1µs parkNanos busy-wait (default, backtest throughput).</li>
+     *   <li>{@link ConsumerMode#BLOCK} — {@code LinkedBlockingQueue.take()} (zero CPU, live/paper).</li>
+     * </ul>
+     *
+     * @param mode the consumer mode
+     * @throws IllegalStateException if consumer threads have already been started
+     */
+    public void setConsumerMode(ConsumerMode mode) {
+        if (consumerThreads != null) {
+            throw new IllegalStateException(
+                    "Cannot change consumer mode after consumers have started (ledger: " + recordType.getValue() + ")");
+        }
+        this.consumerMode = mode;
+    }
+
+    /**
+     * Returns the current consumer mode.
+     */
+    public ConsumerMode getConsumerMode() {
+        return consumerMode;
+    }
+
     private void ensureConsumersStarted() {
         if (consumerThreads == null) {
             synchronized (consumerInitLock) {
@@ -103,6 +132,15 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
     }
 
     private void consumerLoop() {
+        if (consumerMode == ConsumerMode.BLOCK) {
+            consumerLoopBlock();
+        } else {
+            consumerLoopSpin();
+        }
+    }
+
+    /** SPIN mode: ConcurrentLinkedQueue + parkNanos(1µs). Unchanged from original. */
+    private void consumerLoopSpin() {
         while (consumersRunning) {
             Runnable task = notificationQueue.poll();
             if (task != null) {
@@ -134,6 +172,42 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
         }
     }
 
+    /** BLOCK mode: LinkedBlockingQueue.take(). Zero CPU when idle, instant wake on offer(). */
+    private void consumerLoopBlock() {
+        while (consumersRunning) {
+            Runnable task;
+            try {
+                task = blockingNotificationQueue.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                if (!consumersRunning) break;
+                continue;
+            }
+            try {
+                task.run();
+            } catch (Exception e) {
+                LOG.log(Level.WARNING, "Error in notification consumer", e);
+            }
+            // Batch drain — process all available before blocking again
+            while ((task = blockingNotificationQueue.poll()) != null) {
+                try {
+                    task.run();
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Error in notification consumer", e);
+                }
+            }
+        }
+        // Drain remaining on shutdown
+        Runnable task;
+        while ((task = blockingNotificationQueue.poll()) != null) {
+            try {
+                task.run();
+            } catch (Exception e) {
+                LOG.log(Level.WARNING, "Error in notification consumer during shutdown", e);
+            }
+        }
+    }
+
     private void recoverSequenceId() {
         driver.readReverse(-1, record -> {
             if (record != null && record.getSequenceId() != null) {
@@ -157,7 +231,11 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
         if (threads != null) {
             for (Thread t : threads) {
                 if (t != null) {
-                    LockSupport.unpark(t);
+                    if (consumerMode == ConsumerMode.BLOCK) {
+                        t.interrupt(); // Unblock take()
+                    } else {
+                        LockSupport.unpark(t);
+                    }
                     t.join(5000);
                 }
             }
@@ -188,9 +266,18 @@ public abstract class AbstractLedger<T extends Record> implements Ledger<T> {
             return;
         }
 
+        if (Boolean.getBoolean("pysol.ledger.sync-notifications") || Boolean.getBoolean("tech.rsqn.useful.things.ledger.sync")) {
+            dispatchNotifySubscribers(record, snapshot);
+            return;
+        }
+
         ensureConsumersStarted();
         T recordRef = record;
-        notificationQueue.offer(() -> dispatchNotifySubscribers(recordRef, snapshot));
+        if (consumerMode == ConsumerMode.BLOCK) {
+            blockingNotificationQueue.offer(() -> dispatchNotifySubscribers(recordRef, snapshot));
+        } else {
+            notificationQueue.offer(() -> dispatchNotifySubscribers(recordRef, snapshot));
+        }
     }
 
     private void dispatchNotifySubscribers(T record, List<SubscriberRecord<T>> snapshot) {
