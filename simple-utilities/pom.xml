@@ -81,6 +81,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Optional: required at runtime only when DiskPersistenceDriver uses LedgerCompression.ZSTD -->
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+            <version>1.5.7-13</version>
+            <optional>true</optional>
+        </dependency>
+
         <!--Test Dependencies-->
         <dependency>
             <groupId>org.testng</groupId>
