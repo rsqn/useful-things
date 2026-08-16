@@ -6,6 +6,7 @@
 - [x] Ledger notification fan-in (`execute`, one task per record): [`plans/02-ledger-notification-fan-in-dispatch.md`](plans/02-ledger-notification-fan-in-dispatch.md)
 - [ ] Histogram custom boundaries, serialization & snapshot: [`plans/03-histogram-custom-boundaries.md`](plans/03-histogram-custom-boundaries.md)
 - [ ] Disk ledger optional streaming Zstd compression: [`plans/04-disk-ledger-zstd-compression.md`](plans/04-disk-ledger-zstd-compression.md)
+- [x] Ledger performance bench report (Round 1 4KiB + Round 2 1024B/256B NONE): [`plans/05-ledger-performance-bench-report.md`](plans/05-ledger-performance-bench-report.md)
 
 ## Ledger: metrics (Micrometer vs Dropwizard)
 
