@@ -104,6 +104,12 @@
 
     </dependencies>
 
+    <properties>
+        <!-- Default: skip TestNG group "integration". Use -Pintegration to run only those. -->
+        <surefire.groups></surefire.groups>
+        <surefire.excludedGroups>integration</surefire.excludedGroups>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -111,9 +117,21 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <forkCount>0</forkCount>
+                    <groups>${surefire.groups}</groups>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <properties>
+                <surefire.groups>integration</surefire.groups>
+                <surefire.excludedGroups></surefire.excludedGroups>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
