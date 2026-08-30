@@ -2,7 +2,10 @@ package tech.rsqn.useful.things.ledger;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
@@ -80,8 +83,7 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
     public long write(T record) {
         if (!keepRunning.shouldKeepRunning()) return -1;
 
-        long sequenceId = sequenceCounter.incrementAndGet();
-        record.setSequenceId(sequenceId);
+        long sequenceId = assignSequenceId(record);
 
         // Add to memory
         memory.addLast(record);
@@ -94,11 +96,64 @@ public class MemoryLedger<T extends Record> extends DiskLedger<T> {
             LOG.log(Level.SEVERE, "Error writing to persistence driver", e); // Log error but continue
             // We do NOT rollback memory here (FAST requirement)
         }
+        releaseReservedSequenceId(sequenceId);
 
         incrementCachedSizeAfterLogicalWrite();
 
         notifySubscribers(record);
 
+        return sequenceId;
+    }
+
+    /**
+     * Synchronously persists a batch while adding all records to the memory
+     * cache first. Records remain individually scannable JSONL rows.
+     *
+     * @param records records to append; must not be null or contain null
+     * @return assigned sequence IDs in record order
+     */
+    @Override
+    public List<Long> writeBatch(List<T> records) {
+        if (records == null) {
+            throw new IllegalArgumentException("records must not be null");
+        }
+        if (records.isEmpty()) {
+            return List.of();
+        }
+        if (!keepRunning.shouldKeepRunning()) {
+            throw new IllegalStateException("Memory ledger is no longer accepting writes");
+        }
+
+        List<Long> sequenceIds = new ArrayList<>(records.size());
+        for (T record : records) {
+            if (record == null) {
+                throw new IllegalArgumentException("records must not contain null");
+            }
+            long sequenceId = record.getSequenceId() == null
+                    ? assignSequenceId(record)
+                    : reservedSequenceId(record);
+            memory.addLast(record);
+            memorySize.incrementAndGet();
+            sequenceIds.add(sequenceId);
+        }
+
+        try {
+            driver.writeBatch(records);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to write memory ledger batch", e);
+        }
+        releaseReservedSequenceIds(sequenceIds);
+
+        for (T record : records) {
+            incrementCachedSizeAfterLogicalWrite();
+            notifySubscribers(record);
+        }
+        return sequenceIds;
+    }
+
+    private long reservedSequenceId(T record) {
+        long sequenceId = record.getSequenceId();
+        requireReservedSequenceId(sequenceId);
         return sequenceId;
     }
 

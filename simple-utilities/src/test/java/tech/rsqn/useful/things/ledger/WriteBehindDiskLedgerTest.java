@@ -48,6 +48,31 @@ public class WriteBehindDiskLedgerTest extends LedgerTestBase {
     }
 
     @Test
+    public void writeBatch_flushPersistsAllRecordsInOrder() throws Exception {
+        ledgerRegistry.setDefaultAutoFlush(false);
+        ledgerRegistry.setDefaultFlushIntervalWrites(10_000);
+        ledgerRegistry.setDefaultFlushIntervalSeconds(100.0);
+
+        DiskPersistenceDriver<TestRecord> driver = createDriver();
+        WriteBehindDiskLedger<TestRecord> wb = new WriteBehindDiskLedger<>(TestRecord.TYPE, driver);
+        wb.setWriteQueueCapacity(50);
+        wb.init();
+        this.ledger = wb;
+
+        Assert.assertEquals(wb.writeBatch(List.of(
+                createRecord("a", 1),
+                createRecord("b", 2),
+                createRecord("c", 3))), List.of(1L, 2L, 3L));
+        wb.flush();
+
+        List<String> lines = Files.readAllLines(ledgerFile);
+        Assert.assertEquals(lines.size(), 3);
+        Assert.assertTrue(lines.get(0).contains("\"data\":\"a\""));
+        Assert.assertTrue(lines.get(1).contains("\"data\":\"b\""));
+        Assert.assertTrue(lines.get(2).contains("\"data\":\"c\""));
+    }
+
+    @Test
     public void closeDrainsQueueToDisk() throws Exception {
         ledgerRegistry.setDefaultAutoFlush(true);
 

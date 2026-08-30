@@ -7,7 +7,11 @@
 - [ ] Histogram custom boundaries, serialization & snapshot: [`plans/03-histogram-custom-boundaries.md`](plans/03-histogram-custom-boundaries.md)
 - [ ] Disk ledger optional streaming Zstd compression: [`plans/04-disk-ledger-zstd-compression.md`](plans/04-disk-ledger-zstd-compression.md)
 - [x] Ledger performance bench report (Round 1 4KiB + Round 2 1024B/256B NONE): [`plans/05-ledger-performance-bench-report.md`](plans/05-ledger-performance-bench-report.md)
-- [ ] Backtest replay harness + 33K/s analysis (pysol): [`../pysol/plans/183-backtest-33k-bottleneck-analysis.md`](../pysol/plans/183-backtest-33k-bottleneck-analysis.md) — run `mvn -pl simple-utilities test -Pintegration`
+- [ ] Backtest ~33k/s — **canonical verdict (ledger WRITE / sync notify):** [`../pysol/plans/187-backtest-33k-ledger-disk-verdict.md`](../pysol/plans/187-backtest-33k-ledger-disk-verdict.md)
+  - Stale “not disk / it’s metrics” doc: [`../pysol/plans/183-backtest-33k-bottleneck-analysis.md`](../pysol/plans/183-backtest-33k-bottleneck-analysis.md) — do not cite for agents.
+  - Harness (keep): `mvn -pl simple-utilities test -Pintegration` → `BacktestReplayDispatchIntegrationTest`
+  - **Do not** reopen Gson / Micrometer / `advanceTo` as the ceiling without new data beating plan 187.
+- [ ] [FOCUS] Ledger write-path staircase (Disk → WB-Disk → WB-Memory @ 4M): [`../pysol/plans/188-focus-ledger-write-path-staircase.md`](../pysol/plans/188-focus-ledger-write-path-staircase.md)
 
 ## Ledger: metrics (Micrometer vs Dropwizard)
 

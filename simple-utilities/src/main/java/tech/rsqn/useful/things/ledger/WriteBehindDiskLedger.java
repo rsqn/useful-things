@@ -1,6 +1,8 @@
 package tech.rsqn.useful.things.ledger;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -41,6 +43,15 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
 
         private DataItem(Record record) {
             this.record = record;
+        }
+    }
+
+    /** Ordered records waiting for one persistence-driver batch append. */
+    private static final class BatchItem implements QueueItem {
+        private final List<Record> records;
+
+        private BatchItem(List<Record> records) {
+            this.records = records;
         }
     }
 
@@ -113,8 +124,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
             return -1;
         }
 
-        long sequenceId = sequenceCounter.incrementAndGet();
-        record.setSequenceId(sequenceId);
+        long sequenceId = assignSequenceId(record);
 
         ensureInitialised();
         try {
@@ -122,12 +132,63 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             sequenceCounter.decrementAndGet();
+            releaseReservedSequenceId(sequenceId);
             return -1;
         }
+        releaseReservedSequenceId(sequenceId);
 
         incrementCachedSizeAfterLogicalWrite();
         notifySubscribers(record);
         return sequenceId;
+    }
+
+    /**
+     * Accepts and notifies an ordered batch immediately, while persisting the
+     * batch asynchronously through the driver's batch API.
+     *
+     * @param records records to enqueue; must not be null or contain null
+     * @return assigned sequence IDs in record order
+     */
+    @Override
+    public List<Long> writeBatch(List<T> records) {
+        if (records == null) {
+            throw new IllegalArgumentException("records must not be null");
+        }
+        if (records.isEmpty()) {
+            return List.of();
+        }
+        if (!keepRunning.shouldKeepRunning()) {
+            throw new IllegalStateException("Write-behind disk ledger is no longer accepting writes");
+        }
+
+        List<Long> sequenceIds = new ArrayList<>(records.size());
+        for (T record : records) {
+            if (record == null) {
+                throw new IllegalArgumentException("records must not contain null");
+            }
+            if (record.getSequenceId() == null) {
+                sequenceIds.add(assignSequenceId(record));
+            } else {
+                long sequenceId = record.getSequenceId();
+                requireReservedSequenceId(sequenceId);
+                sequenceIds.add(sequenceId);
+            }
+        }
+
+        ensureInitialised();
+        try {
+            queue.put(new BatchItem(new ArrayList<>(records)));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while enqueueing disk ledger batch", e);
+        }
+        releaseReservedSequenceIds(sequenceIds);
+
+        for (T record : records) {
+            incrementCachedSizeAfterLogicalWrite();
+            notifySubscribers(record);
+        }
+        return sequenceIds;
     }
 
     private void writerLoop() {
@@ -172,6 +233,17 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
                 driver.write(toWrite);
             } catch (IOException e) {
                 LOG.log(Level.SEVERE, "Error writing to disk ledger (write-behind)", e);
+            }
+            return;
+        }
+        if (item instanceof BatchItem) {
+            BatchItem batchItem = (BatchItem) item;
+            try {
+                @SuppressWarnings("unchecked")
+                List<T> toWrite = (List<T>) (List<?>) batchItem.records;
+                driver.writeBatch(toWrite);
+            } catch (IOException e) {
+                LOG.log(Level.SEVERE, "Error writing disk ledger batch (write-behind)", e);
             }
         }
     }

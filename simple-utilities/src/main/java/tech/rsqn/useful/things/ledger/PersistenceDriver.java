@@ -1,6 +1,7 @@
 package tech.rsqn.useful.things.ledger;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Interface for persistence drivers.
@@ -15,6 +16,24 @@ public interface PersistenceDriver<T extends Record> extends AutoCloseable {
      * @throws IOException If the write fails.
      */
     void write(T record) throws IOException;
+
+    /**
+     * Writes a batch of records in order.
+     * <p>
+     * Implementations may optimize the physical append. The default preserves
+     * correctness for drivers that only support single-record writes.
+     *
+     * @param records records to write in sequence order
+     * @throws IOException if any write fails
+     */
+    default void writeBatch(List<T> records) throws IOException {
+        if (records == null) {
+            throw new IllegalArgumentException("records must not be null");
+        }
+        for (T record : records) {
+            write(record);
+        }
+    }
 
     /**
      * Reads records from the persistence layer forward.

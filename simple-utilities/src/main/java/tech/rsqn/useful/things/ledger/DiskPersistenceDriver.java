@@ -32,6 +32,16 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
 
     /** Buffer size for {@link #count()} newline scanning (single-byte delimiters, JSONL lines). */
     private static final int COUNT_SCAN_BUFFER_SIZE = 32 * 1024;
+    /** Default {@link BufferedWriter} char buffer — matches JDK {@code BufferedWriter} default. */
+    static final int DEFAULT_WRITE_BUFFER_CHARS = 8192;
+    /** Default {@link BufferedReader} char buffer — matches JDK {@code BufferedReader} default. */
+    static final int DEFAULT_READ_BUFFER_CHARS = 8192;
+    /** System property for write buffer size in chars: {@value #WRITE_BUFFER_CHARS_PROP}. */
+    public static final String WRITE_BUFFER_CHARS_PROP =
+            "tech.rsqn.useful.things.ledger.write-buffer-chars";
+    /** System property for read buffer size in chars: {@value #READ_BUFFER_CHARS_PROP}. */
+    public static final String READ_BUFFER_CHARS_PROP =
+            "tech.rsqn.useful.things.ledger.read-buffer-chars";
     static final int ZSTD_MAGIC = 0xFD2FB528;
     static final int DEFAULT_ZSTD_LEVEL = 3;
     static final int DEFAULT_ZSTD_FRAME_FLUSH_BYTES = 1_048_576;
@@ -49,6 +59,8 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
     private long lastFlushTime = System.nanoTime();
     private int flushIntervalWrites = 5000;
     private long flushIntervalNanos = 5_000_000_000L;
+    private int writeBufferChars = resolveDefaultWriteBufferChars();
+    private int readBufferChars = resolveDefaultReadBufferChars();
     private final LedgerRegistry ledgerRegistry;
 
     private LedgerCompression compression = LedgerCompression.NONE;
@@ -75,6 +87,82 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
 
     public void setFlushIntervalSeconds(double seconds) {
         this.flushIntervalNanos = (long) (seconds * 1_000_000_000L);
+    }
+
+    /**
+     * {@link BufferedWriter} char buffer size for plain JSONL append. Default
+     * {@value #DEFAULT_WRITE_BUFFER_CHARS}. Override at runtime via
+     * {@link #WRITE_BUFFER_CHARS_PROP}. Must be called before {@link #start()}.
+     *
+     * @param chars positive buffer size in chars (not bytes)
+     */
+    public void setWriteBufferChars(int chars) {
+        if (chars <= 0) {
+            throw new IllegalArgumentException("writeBufferChars must be > 0");
+        }
+        synchronized (fileLock) {
+            if (started) {
+                throw new IllegalStateException("Cannot change writeBufferChars after start()");
+            }
+            this.writeBufferChars = chars;
+        }
+    }
+
+    public int getWriteBufferChars() {
+        return writeBufferChars;
+    }
+
+    /**
+     * {@link BufferedReader} char buffer size for forward JSONL / zstd-line reads. Default
+     * {@value #DEFAULT_READ_BUFFER_CHARS}. Override at runtime via {@link #READ_BUFFER_CHARS_PROP}.
+     *
+     * @param chars positive buffer size in chars (not bytes)
+     */
+    public void setReadBufferChars(int chars) {
+        if (chars <= 0) {
+            throw new IllegalArgumentException("readBufferChars must be > 0");
+        }
+        this.readBufferChars = chars;
+    }
+
+    public int getReadBufferChars() {
+        return readBufferChars;
+    }
+
+    private static int resolveDefaultWriteBufferChars() {
+        return resolvePositiveIntProp(WRITE_BUFFER_CHARS_PROP, DEFAULT_WRITE_BUFFER_CHARS);
+    }
+
+    private static int resolveDefaultReadBufferChars() {
+        return resolvePositiveIntProp(READ_BUFFER_CHARS_PROP, DEFAULT_READ_BUFFER_CHARS);
+    }
+
+    private static int resolvePositiveIntProp(String prop, int defaultValue) {
+        String raw = System.getProperty(prop);
+        if (raw == null || raw.isBlank()) {
+            return defaultValue;
+        }
+        try {
+            int v = Integer.parseInt(raw.trim());
+            if (v <= 0) {
+                throw new IllegalArgumentException(prop + " must be > 0, got " + v);
+            }
+            return v;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(prop + " must be an integer, got '" + raw + "'", e);
+        }
+    }
+
+    private BufferedWriter newAppendBufferedWriter() throws IOException {
+        return new BufferedWriter(new FileWriter(ledgerFile.toFile(), true), writeBufferChars);
+    }
+
+    private BufferedReader newPlainBufferedReader() throws IOException {
+        return new BufferedReader(new FileReader(ledgerFile.toFile()), readBufferChars);
+    }
+
+    private BufferedReader newZstdLineBufferedReader(InputStream zin) {
+        return new BufferedReader(new InputStreamReader(zin, StandardCharsets.UTF_8), readBufferChars);
     }
 
     /**
@@ -169,7 +257,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                 reconcileZstdIndexOnStart();
                 openZstdAppendWriter();
             } else {
-                this.fileWriter = new BufferedWriter(new FileWriter(ledgerFile.toFile(), true));
+                this.fileWriter = newAppendBufferedWriter();
             }
             this.started = true;
         }
@@ -326,7 +414,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                 if (ledgerFile.getParent() != null) {
                     Files.createDirectories(ledgerFile.getParent());
                 }
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(ledgerFile.toFile(), true))) {
+                try (BufferedWriter writer = newAppendBufferedWriter()) {
                     writer.write(json);
                     writer.newLine();
                 }
@@ -340,6 +428,56 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                 fileWriter.newLine();
                 dirty = true;
                 writeCountSinceFlush++;
+                maybeFlushUnlocked();
+            }
+        }
+    }
+
+    /**
+     * Appends multiple records as one contiguous JSONL payload.
+     * <p>
+     * Each record remains one JSON line, so forward and reverse scans retain
+     * their existing format and ordering. The configured flush policy is
+     * applied once after the complete batch.
+     */
+    @Override
+    public void writeBatch(List<T> records) throws IOException {
+        if (records == null) {
+            throw new IllegalArgumentException("records must not be null");
+        }
+        if (records.isEmpty()) {
+            return;
+        }
+
+        StringBuilder payload = new StringBuilder();
+        for (T record : records) {
+            payload.append(gson.toJson(record)).append(System.lineSeparator());
+        }
+
+        synchronized (fileLock) {
+            if (!started) {
+                if (compression == LedgerCompression.ZSTD) {
+                    throw new IllegalStateException(
+                            "Cannot write with LedgerCompression.ZSTD before start(); "
+                                    + "refusing one-shot uncompressed append into a compressed ledger");
+                }
+                if (ledgerFile.getParent() != null) {
+                    Files.createDirectories(ledgerFile.getParent());
+                }
+                try (BufferedWriter writer = newAppendBufferedWriter()) {
+                    writer.write(payload.toString());
+                }
+                return;
+            }
+
+            if (compression == LedgerCompression.ZSTD) {
+                for (T record : records) {
+                    writeZstdRecord(gson.toJson(record));
+                }
+            } else if (fileWriter != null) {
+                fileWriter.write(payload.toString());
+                dirty = true;
+                writeCountSinceFlush += records.size();
                 maybeFlushUnlocked();
             }
         }
@@ -412,7 +550,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
             if (shouldReadAsZstd()) {
                 readZstdForward(fromSequence, callback);
             } else {
-                try (BufferedReader reader = new BufferedReader(new FileReader(ledgerFile.toFile()))) {
+                try (BufferedReader reader = newPlainBufferedReader()) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (!dispatchParsed(line, fromSequence, callback)) {
@@ -440,7 +578,7 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
     private void readZstdForward(long fromSequence, ReadCallback<T> callback) throws IOException {
         try (InputStream fin = Files.newInputStream(ledgerFile);
              InputStream zin = ZstdNativeSupport.wrappingDecompressor(fin);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(zin, StandardCharsets.UTF_8))) {
+             BufferedReader reader = newZstdLineBufferedReader(zin)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (!dispatchParsed(line, fromSequence, callback)) {

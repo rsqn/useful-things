@@ -2,6 +2,8 @@ package tech.rsqn.useful.things.ledger;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,6 +24,8 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
 
     /** Default capacity for the write-behind queue to avoid unbounded memory growth. */
     public static final int DEFAULT_WRITE_QUEUE_CAPACITY = 1_000_000;
+    /** Maximum number of queued records combined into one driver append. */
+    private static final int MAX_PERSIST_BATCH_SIZE = 256;
 
     private int writeQueueCapacity = DEFAULT_WRITE_QUEUE_CAPACITY;
     private volatile BlockingQueue<T> writeQueue;
@@ -83,8 +87,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
     public long write(T record) {
         if (!keepRunning.shouldKeepRunning()) return -1;
 
-        long sequenceId = sequenceCounter.incrementAndGet();
-        record.setSequenceId(sequenceId);
+        long sequenceId = assignSequenceId(record);
 
         // Add to memory immediately (FAST)
         memory.addLast(record);
@@ -98,13 +101,73 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             sequenceCounter.decrementAndGet();
+            releaseReservedSequenceId(sequenceId);
             return -1;
         }
         lastEnqueuedSeq.set(sequenceId);
+        releaseReservedSequenceId(sequenceId);
         incrementCachedSizeAfterLogicalWrite();
 
         notifySubscribers(record);
 
+        return sequenceId;
+    }
+
+    /**
+     * Adds a batch to memory immediately and enqueues each record with
+     * backpressure. The writer thread combines queued records into driver
+     * batch appends when it can do so.
+     *
+     * @param records records to enqueue; must not be null or contain null
+     * @return assigned sequence IDs in record order
+     */
+    @Override
+    public List<Long> writeBatch(List<T> records) {
+        if (records == null) {
+            throw new IllegalArgumentException("records must not be null");
+        }
+        if (records.isEmpty()) {
+            return List.of();
+        }
+        if (!keepRunning.shouldKeepRunning()) {
+            throw new IllegalStateException("Write-behind memory ledger is no longer accepting writes");
+        }
+
+        List<Long> sequenceIds = new ArrayList<>(records.size());
+        for (T record : records) {
+            if (record == null) {
+                throw new IllegalArgumentException("records must not contain null");
+            }
+            long sequenceId = record.getSequenceId() == null
+                    ? assignSequenceId(record)
+                    : reservedSequenceId(record);
+            memory.addLast(record);
+            memorySize.incrementAndGet();
+            sequenceIds.add(sequenceId);
+        }
+
+        ensureInitialised();
+        try {
+            for (T record : records) {
+                writeQueue.put(record);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while enqueueing memory ledger batch", e);
+        }
+        lastEnqueuedSeq.set(sequenceIds.get(sequenceIds.size() - 1));
+        releaseReservedSequenceIds(sequenceIds);
+
+        for (T record : records) {
+            incrementCachedSizeAfterLogicalWrite();
+            notifySubscribers(record);
+        }
+        return sequenceIds;
+    }
+
+    private long reservedSequenceId(T record) {
+        long sequenceId = record.getSequenceId();
+        requireReservedSequenceId(sequenceId);
         return sequenceId;
     }
 
@@ -150,18 +213,21 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
             }
         }
         
-        // Drain remaining records
+        // Drain remaining records in bounded persistence batches
         BlockingQueue<T> q = writeQueue;
-        while (q != null && !q.isEmpty()) {
-            T record = q.poll();
-            if (record != null) {
+        if (q != null && !q.isEmpty()) {
+            List<T> records = new ArrayList<>(MAX_PERSIST_BATCH_SIZE);
+            while (q.drainTo(records, MAX_PERSIST_BATCH_SIZE) > 0) {
                 try {
-                    driver.write(record);
-                    if (record.getSequenceId() != null) {
-                        lastPersistedSeq.updateAndGet(cur -> Math.max(cur, record.getSequenceId()));
+                    driver.writeBatch(records);
+                    if (!records.isEmpty() && records.get(records.size() - 1).getSequenceId() != null) {
+                        lastPersistedSeq.updateAndGet(
+                                cur -> Math.max(cur, records.get(records.size() - 1).getSequenceId()));
                     }
                 } catch (IOException e) {
                     LOG.log(Level.SEVERE, "Error draining write queue", e);
+                } finally {
+                    records.clear();
                 }
             }
         }
@@ -179,10 +245,14 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
                 }
                 T record = q.poll(1, TimeUnit.SECONDS);
                 if (record != null) {
+                    List<T> records = new ArrayList<>();
+                    records.add(record);
+                    q.drainTo(records, MAX_PERSIST_BATCH_SIZE - 1);
                     try {
-                        driver.write(record);
-                        if (record.getSequenceId() != null) {
-                            lastPersistedSeq.updateAndGet(cur -> Math.max(cur, record.getSequenceId()));
+                        driver.writeBatch(records);
+                        T last = records.get(records.size() - 1);
+                        if (last.getSequenceId() != null) {
+                            lastPersistedSeq.updateAndGet(cur -> Math.max(cur, last.getSequenceId()));
                         }
                         synchronized (persistedLock) {
                             persistedLock.notifyAll();
