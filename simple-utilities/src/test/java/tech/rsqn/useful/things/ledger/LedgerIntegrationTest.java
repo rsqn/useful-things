@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +53,7 @@ public class LedgerIntegrationTest {
 
         // 1. Subscribe
         CountDownLatch latch = new CountDownLatch(2);
-        List<TestRecord> received = new ArrayList<>();
+        List<TestRecord> received = Collections.synchronizedList(new ArrayList<>());
         ledger.subscribe(null, event -> {
             received.add(event);
             latch.countDown();

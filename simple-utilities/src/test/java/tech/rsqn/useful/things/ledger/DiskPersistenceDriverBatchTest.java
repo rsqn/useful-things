@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DiskPersistenceDriverBatchTest extends LedgerTestBase {
@@ -31,5 +32,12 @@ public class DiskPersistenceDriverBatchTest extends LedgerTestBase {
         Assert.assertTrue(lines.get(0).contains("\"data\":\"a\""));
         Assert.assertTrue(lines.get(1).contains("\"data\":\"b\""));
         Assert.assertTrue(lines.get(2).contains("\"data\":\"c\""));
+
+        List<Integer> reverse = new ArrayList<>();
+        driver.readReverse(-1, record -> {
+            reverse.add(record.getValue());
+            return true;
+        });
+        Assert.assertEquals(reverse, List.of(3, 2, 1));
     }
 }

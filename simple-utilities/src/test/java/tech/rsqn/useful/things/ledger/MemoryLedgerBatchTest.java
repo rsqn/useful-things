@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MemoryLedgerBatchTest extends LedgerTestBase {
@@ -27,10 +28,17 @@ public class MemoryLedgerBatchTest extends LedgerTestBase {
         Assert.assertEquals(memoryLedger.size(), 3L);
         memoryLedger.flush();
         Assert.assertEquals(Files.readAllLines(ledgerFile).size(), 3);
+
+        List<Integer> reverse = new ArrayList<>();
+        memoryLedger.readReverse(-1, null, record -> {
+            reverse.add(record.getValue());
+            return true;
+        });
+        Assert.assertEquals(reverse, List.of(3, 2, 1));
     }
 
     @Test
-    public void writeBehindBatch_persistsAllRecords() throws Exception {
+    public void writeBehindBatch_reverseScanReadsNewestFirst() throws Exception {
         DiskPersistenceDriver<TestRecord> driver = new DiskPersistenceDriver<>(ledgerFile, ledgerRegistry);
         driver.init();
         driver.start();
@@ -47,5 +55,12 @@ public class MemoryLedgerBatchTest extends LedgerTestBase {
         memoryLedger.flush();
 
         Assert.assertEquals(Files.readAllLines(ledgerFile).size(), 3);
+
+        List<Integer> reverse = new ArrayList<>();
+        memoryLedger.readReverse(-1, null, record -> {
+            reverse.add(record.getValue());
+            return true;
+        });
+        Assert.assertEquals(reverse, List.of(3, 2, 1));
     }
 }

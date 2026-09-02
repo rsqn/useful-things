@@ -25,7 +25,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
     /** Default capacity for the write-behind queue to avoid unbounded memory growth. */
     public static final int DEFAULT_WRITE_QUEUE_CAPACITY = 1_000_000;
     /** Maximum number of queued records combined into one driver append. */
-    private static final int MAX_PERSIST_BATCH_SIZE = 256;
+    private final int persistBatchSize = LedgerPersistBatch.resolveBatchSize();
 
     private int writeQueueCapacity = DEFAULT_WRITE_QUEUE_CAPACITY;
     private volatile BlockingQueue<T> writeQueue;
@@ -216,8 +216,8 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
         // Drain remaining records in bounded persistence batches
         BlockingQueue<T> q = writeQueue;
         if (q != null && !q.isEmpty()) {
-            List<T> records = new ArrayList<>(MAX_PERSIST_BATCH_SIZE);
-            while (q.drainTo(records, MAX_PERSIST_BATCH_SIZE) > 0) {
+            List<T> records = new ArrayList<>(persistBatchSize);
+            while (q.drainTo(records, persistBatchSize) > 0) {
                 try {
                     driver.writeBatch(records);
                     if (!records.isEmpty() && records.get(records.size() - 1).getSequenceId() != null) {
@@ -247,7 +247,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
                 if (record != null) {
                     List<T> records = new ArrayList<>();
                     records.add(record);
-                    q.drainTo(records, MAX_PERSIST_BATCH_SIZE - 1);
+                    q.drainTo(records, persistBatchSize - 1);
                     try {
                         driver.writeBatch(records);
                         T last = records.get(records.size() - 1);
@@ -279,6 +279,7 @@ public class WriteBehindMemoryLedger<T extends Record> extends MemoryLedger<T> {
         }
         status.put("lastEnqueuedSeq", lastEnqueuedSeq.get());
         status.put("lastPersistedSeq", lastPersistedSeq.get());
+        status.put("persistBatchSize", persistBatchSize);
         return status;
     }
 }

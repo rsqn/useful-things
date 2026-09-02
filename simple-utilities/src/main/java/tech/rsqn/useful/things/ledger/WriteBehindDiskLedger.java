@@ -32,6 +32,8 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
     /** Default capacity of the bounded queue between caller and the writer thread. */
     public static final int DEFAULT_WRITE_QUEUE_CAPACITY = 100_000;
 
+    private final int persistBatchSize = LedgerPersistBatch.resolveBatchSize();
+
     private interface QueueItem {
     }
 
@@ -72,6 +74,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
     private int writeQueueCapacity = DEFAULT_WRITE_QUEUE_CAPACITY;
     private volatile BlockingQueue<QueueItem> queue;
     private volatile Thread writerThread;
+    private volatile LedgerPersistException terminalFailure;
     private final Object initLock = new Object();
 
     public WriteBehindDiskLedger(RecordType recordType, PersistenceDriver<T> driver) {
@@ -116,11 +119,41 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
         if (queue == null) {
             throw new IllegalStateException("WriteBehindDiskLedger.init() must be called before use");
         }
+        ensureAcceptingWrites();
+    }
+
+    private void ensureAcceptingWrites() {
+        LedgerPersistException failure = terminalFailure;
+        if (failure != null) {
+            throw failure;
+        }
+        if (!keepRunning.shouldKeepRunning()) {
+            throw new IllegalStateException("Write-behind disk ledger is no longer accepting writes");
+        }
+    }
+
+    private void reportPersistFailure(IOException cause) {
+        LedgerPersistException failure = new LedgerPersistException(
+                "Write-behind disk persistence failed for ledger " + recordType.getValue(),
+                cause);
+        if (terminalFailure == null) {
+            terminalFailure = failure;
+        }
+        keepRunning.stopRunning();
+        LOG.log(Level.SEVERE, failure.getMessage(), cause);
+    }
+
+    private void rethrowTerminalFailure() {
+        LedgerPersistException failure = terminalFailure;
+        if (failure != null) {
+            throw failure;
+        }
     }
 
     @Override
     public long write(T record) {
         if (!keepRunning.shouldKeepRunning()) {
+            rethrowTerminalFailure();
             return -1;
         }
 
@@ -158,6 +191,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
             return List.of();
         }
         if (!keepRunning.shouldKeepRunning()) {
+            rethrowTerminalFailure();
             throw new IllegalStateException("Write-behind disk ledger is no longer accepting writes");
         }
 
@@ -198,11 +232,29 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
                 if (handleQueueItem(item)) {
                     return;
                 }
+                if (terminalFailure != null) {
+                    releaseBlockedFlushWaiters();
+                    return;
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            releaseBlockedFlushWaiters();
             // If take() was interrupted, a FlushItem may still be queued — drain so flush() cannot hang.
             drainQueueFullyOnWriter();
+        }
+    }
+
+    private void releaseBlockedFlushWaiters() {
+        BlockingQueue<QueueItem> q = queue;
+        if (q == null) {
+            return;
+        }
+        QueueItem pending;
+        while ((pending = q.poll()) != null) {
+            if (pending instanceof FlushItem flushItem) {
+                flushItem.done.countDown();
+            }
         }
     }
 
@@ -226,14 +278,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
             return;
         }
         if (item instanceof DataItem) {
-            DataItem dataItem = (DataItem) item;
-            try {
-                @SuppressWarnings("unchecked")
-                T toWrite = (T) dataItem.record;
-                driver.write(toWrite);
-            } catch (IOException e) {
-                LOG.log(Level.SEVERE, "Error writing to disk ledger (write-behind)", e);
-            }
+            persistCoalescedDataItems((DataItem) item);
             return;
         }
         if (item instanceof BatchItem) {
@@ -243,14 +288,35 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
                 List<T> toWrite = (List<T>) (List<?>) batchItem.records;
                 driver.writeBatch(toWrite);
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "Error writing disk ledger batch (write-behind)", e);
+                reportPersistFailure(e);
             }
         }
     }
 
     /**
-     * After a shutdown marker was taken, persist any trailing items (and honour flush barriers).
+     * Combines consecutive single-record queue items into one driver batch append.
+     * Flush, shutdown, and explicit {@link BatchItem} entries remain ordered barriers.
      */
+    private void persistCoalescedDataItems(DataItem first) {
+        List<T> batch = new ArrayList<>(persistBatchSize);
+        batch.add(castRecord(first.record));
+        QueueItem peek;
+        while (batch.size() < persistBatchSize && (peek = queue.peek()) instanceof DataItem) {
+            queue.poll();
+            batch.add(castRecord(((DataItem) peek).record));
+        }
+        try {
+            driver.writeBatch(batch);
+        } catch (IOException e) {
+            reportPersistFailure(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private T castRecord(Record record) {
+        return (T) record;
+    }
+
     private void drainTailAfterShutdown() {
         QueueItem p;
         while ((p = queue.poll()) != null) {
@@ -276,7 +342,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
         try {
             driver.flush();
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Error flushing disk ledger (write-behind)", e);
+            reportPersistFailure(e);
         }
     }
 
@@ -307,6 +373,7 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
             Thread.currentThread().interrupt();
             return;
         }
+        rethrowTerminalFailure();
         super.flush();
     }
 
@@ -366,6 +433,10 @@ public class WriteBehindDiskLedger<T extends Record> extends DiskLedger<T> {
             status.put("writeQueueSize", q.size());
             status.put("writeQueueRemainingCapacity", q.remainingCapacity());
             status.put("writeQueueCapacity", writeQueueCapacity);
+            status.put("persistBatchSize", persistBatchSize);
+            if (terminalFailure != null) {
+                status.put("terminalFailure", terminalFailure.getMessage());
+            }
         }
         return status;
     }

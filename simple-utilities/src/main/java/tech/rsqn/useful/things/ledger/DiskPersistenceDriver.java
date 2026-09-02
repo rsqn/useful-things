@@ -257,9 +257,81 @@ public class DiskPersistenceDriver<T extends Record> implements PersistenceDrive
                 reconcileZstdIndexOnStart();
                 openZstdAppendWriter();
             } else {
+                validatePlainJsonlOnStart();
                 this.fileWriter = newAppendBufferedWriter();
             }
             this.started = true;
+        }
+    }
+
+    /**
+     * Rejects plain JSONL ledgers whose last byte is not {@code \\n} or whose final
+     * line is not valid JSON for this registry. ZSTD ledgers use
+     * {@link #reconcileZstdIndexOnStart()} instead.
+     */
+    private void validatePlainJsonlOnStart() throws IOException {
+        if (!Files.exists(ledgerFile)) {
+            return;
+        }
+        long size = Files.size(ledgerFile);
+        if (size == 0) {
+            return;
+        }
+        try (RandomAccessFile raf = new RandomAccessFile(ledgerFile.toFile(), "r")) {
+            raf.seek(size - 1);
+            if (raf.read() != '\n') {
+                throw new IOException(
+                        "Incomplete final JSONL line in " + ledgerFile
+                                + " (size=" + size + ", trailing newline missing at offset " + (size - 1) + ")");
+            }
+        }
+        LastJsonlLine lastLine = readLastJsonlLine();
+        if (lastLine == null || lastLine.line.isBlank()) {
+            throw new IOException("Empty final JSONL line in " + ledgerFile);
+        }
+        try {
+            JsonParser.parseString(lastLine.line).getAsJsonObject();
+        } catch (Exception e) {
+            throw new IOException(
+                    "Malformed final JSONL line in " + ledgerFile
+                            + " at offset " + lastLine.offset + ": " + e.getMessage(),
+                    e);
+        }
+        if (parseRecord(lastLine.line) == null) {
+            throw new IOException(
+                    "Unparseable final JSONL record in " + ledgerFile
+                            + " at offset " + lastLine.offset);
+        }
+    }
+
+    private record LastJsonlLine(long offset, String line) {
+    }
+
+    private LastJsonlLine readLastJsonlLine() throws IOException {
+        long size = Files.size(ledgerFile);
+        if (size <= 1) {
+            return null;
+        }
+        try (RandomAccessFile raf = new RandomAccessFile(ledgerFile.toFile(), "r")) {
+            long pos = size - 2;
+            ByteArrayOutputStream reversed = new ByteArrayOutputStream();
+            while (pos >= 0) {
+                raf.seek(pos);
+                int b = raf.read();
+                if (b == '\n') {
+                    break;
+                }
+                reversed.write(b);
+                pos--;
+            }
+            long lineStart = pos + 1;
+            byte[] bytes = reversed.toByteArray();
+            for (int i = 0; i < bytes.length / 2; i++) {
+                byte temp = bytes[i];
+                bytes[i] = bytes[bytes.length - 1 - i];
+                bytes[bytes.length - 1 - i] = temp;
+            }
+            return new LastJsonlLine(lineStart, new String(bytes, StandardCharsets.UTF_8));
         }
     }
 
